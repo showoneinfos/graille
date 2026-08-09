@@ -332,6 +332,8 @@
   <div class="divider"></div>
   <div class="filter-label"><span class="ttl">Protéine</span></div>
   <div class="chips base" id="chipsBase"></div>
+  <div class="filter-label"><span class="ttl">Féculent</span></div>
+  <div class="chips base" id="chipsFec"></div>
   <div class="sortbar">
     <label for="sort">Trier</label>
     <select id="sort">
@@ -367,8 +369,11 @@ const ICON_PLATE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const grid=document.getElementById('grid');
 const chipsCat=document.getElementById('chipsCat');
 const chipsBase=document.getElementById('chipsBase');
+const chipsFec=document.getElementById('chipsFec');
 const sortSel=document.getElementById('sort');
-let activeCat="Tous", activeBase="Toutes";
+let activeCat="Tous", activeBase="Toutes", activeFec="Tous";
+const FEC_ORDER=["Riz","Pâtes","Pommes de terre","Patate douce","Quinoa","Semoule","Boulgour","Nouilles","Avoine","Lentilles","Pois chiches","Pain"];
+const FEC_KW={"Riz":["riz"],"Pâtes":["pates","macaroni"],"Pommes de terre":["pomme de terre"],"Patate douce":["patate douce","patate"],"Quinoa":["quinoa"],"Semoule":["semoule"],"Boulgour":["boulgour"],"Nouilles":["nouille"],"Avoine":["avoine"],"Lentilles":["lentille"],"Pois chiches":["pois chiche"],"Pain":["pain","bagel","panini"]};
 
 function fmtQty(n){const r=Math.round(n*10)/10;return Number.isInteger(r)?String(r):String(r).replace('.',',');}
 function roundQty(v,unite){
@@ -396,7 +401,22 @@ function buildCatChips(){
     activeCat=el.dataset.cat;
     const avail=basesFor(activeCat);
     if(activeBase!=="Toutes" && !avail.includes(activeBase)) activeBase="Toutes";
-    buildCatChips(); buildBaseChips(); update();
+    const availF=fecsFor(activeCat);
+    if(activeFec!=="Tous" && !availF.includes(activeFec)) activeFec="Tous";
+    buildCatChips(); buildBaseChips(); buildFecChips(); update();
+  }));
+}
+function recipeHasStarch(r,kws){ return (r.ingredients||[]).some(i=>{const n=frNorm(i.nom||"");return kws.some(k=>frWm(n,k));}); }
+function fecsFor(sel){ const pool=poolFor(sel); return FEC_ORDER.filter(f=>pool.some(r=>recipeHasStarch(r,FEC_KW[f]))); }
+function buildFecChips(){
+  const avail=fecsFor(activeCat);
+  const all=["Tous",...FEC_ORDER];
+  chipsFec.innerHTML=all.map(f=>{
+    const off=(f!=="Tous" && !avail.includes(f));
+    return `<button class="chip-f${off?' off':''}" aria-pressed="${f===activeFec}" data-fec="${f}"${off?' disabled':''}>${f}</button>`;
+  }).join('');
+  chipsFec.querySelectorAll('.chip-f:not(.off)').forEach(el=>el.addEventListener('click',()=>{
+    activeFec=el.dataset.fec; buildFecChips(); update();
   }));
 }
 function poolFor(sel){
@@ -422,7 +442,7 @@ function buildBaseChips(){
 }
 
 function currentList(){
-  let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase));
+  let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase)&&(activeFec==="Tous"||recipeHasStarch(r,FEC_KW[activeFec])));
   if(fridgeMode){
     list=list.filter(r=>recipeMissing(r).length<=fridgeTol);
     list.sort((a,b)=>(recipeMissing(a).length-recipeMissing(b).length) || (fridgeUsed(b)-fridgeUsed(a)));
@@ -437,7 +457,7 @@ function currentList(){
 function render(list){
   if(!list.length){
     grid.innerHTML=`<div class="empty">Aucune recette pour cette combinaison.<br><button id="reset">Réinitialiser les filtres</button></div>`;
-    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";fridgeMode=false;renderFridgeActive();buildCatChips();buildBaseChips();update();});
+    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;renderFridgeActive();buildCatChips();buildBaseChips();buildFecChips();update();});
   } else {
     grid.innerHTML=list.map(r=>`
       <button class="card" data-i="${RECETTES.indexOf(r)}" aria-label="Voir ${r.nom}">
@@ -800,7 +820,7 @@ async function chargerRecettes(){
   }
   document.getElementById('stat-recettes').textContent = RECETTES.length;
   document.getElementById('stat-cats').textContent = MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m))).length;
-  buildCatChips(); buildBaseChips(); update();
+  buildCatChips(); buildBaseChips(); buildFecChips(); update();
 }
 
 /* init */
