@@ -49,6 +49,12 @@
   .filter-label .count{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink2)}
   .filter-label .count b{font-family:'Fraunces',serif;font-weight:600;color:var(--rust)}
   .chips{display:flex;gap:8px;overflow-x:auto;padding:9px 18px 6px;scrollbar-width:none}
+  .filter-rows{padding:6px 0 10px}
+  .frow{display:flex;align-items:center;gap:12px;min-height:38px}
+  .frow .flabel{flex:0 0 74px;padding-left:16px;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2);font-weight:700;position:relative}
+  .frow .flabel::before{content:"";position:absolute;left:7px;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--rust)}
+  .frow .chips{flex:1;min-width:0;padding:5px 16px 5px 0}
+  @media(max-width:600px){ .frow .flabel{flex:0 0 60px;font-size:9px;letter-spacing:.8px} .frow{gap:6px} }
   .chips::-webkit-scrollbar{display:none}
   .chips.base{padding-bottom:12px}
   .chip-f{flex:0 0 auto;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;white-space:nowrap;transition:all .18s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 2px rgba(35,32,22,.03)}
@@ -345,15 +351,12 @@
     <span class="rcount"><b id="count">20</b> recettes</span>
   </div>
   <div class="fridge-active" id="fridgeActive"></div>
-  <div class="filter-label"><span class="ttl">Moment de la journée</span></div>
-  <div class="chips cat" id="chipsCat"></div>
-  <div class="filter-label"><span class="ttl">Catégorie</span></div>
-  <div class="chips cat" id="chipsSpecial"></div>
-  <div class="divider"></div>
-  <div class="filter-label"><span class="ttl">Protéine</span></div>
-  <div class="chips base" id="chipsBase"></div>
-  <div class="filter-label"><span class="ttl">Féculent</span></div>
-  <div class="chips base" id="chipsFec"></div>
+  <div class="filter-rows">
+    <div class="frow"><span class="flabel">Moment</span><div class="chips cat" id="chipsCat"></div></div>
+    <div class="frow"><span class="flabel">Catégorie</span><div class="chips cat" id="chipsSpecial"></div></div>
+    <div class="frow"><span class="flabel">Protéine</span><div class="chips base" id="chipsBase"></div></div>
+    <div class="frow"><span class="flabel">Féculent</span><div class="chips base" id="chipsFec"></div></div>
+  </div>
 </div>
 
 <main><div class="perso" id="perso"></div><div class="grid" id="grid"></div></main>
