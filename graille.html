@@ -28,7 +28,9 @@
   /* TOOLBAR */
   .toolbar{background:var(--paper);border-bottom:1px solid var(--line)}
   .filterbar{display:flex;align-items:center;gap:8px;padding:11px 16px}
-  .filterbar .fridge-cta{width:auto;margin:0;padding:9px 14px;font-size:13px;flex:0 0 auto}
+  .filterbar .fridge-cta{width:auto;margin:0;padding:9px 15px;font-size:13px;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;box-shadow:0 3px 10px rgba(87,104,63,.22)}
+  .filterbar .fridge-cta:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(87,104,63,.28)}
+  .filterbar .fridge-cta svg{opacity:.9}
   .filters-toggle{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-family:inherit;font-weight:700;font-size:13px;color:var(--ink);cursor:pointer}
   .filters-toggle:hover{border-color:var(--rust);color:var(--rust)}
   .filters-toggle[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -42,15 +44,16 @@
   .filters-panel.open{display:block}
   @media(max-width:560px){ .rcount{display:none} }
   .filter-label{display:flex;align-items:center;gap:8px;padding:13px 18px 0}
-  .filter-label .ttl{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700}
+  .filter-label .ttl{position:relative;padding-left:13px;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700}
+  .filter-label .ttl::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--rust)}
   .filter-label .count{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink2)}
   .filter-label .count b{font-family:'Fraunces',serif;font-weight:600;color:var(--rust)}
   .chips{display:flex;gap:8px;overflow-x:auto;padding:9px 18px 6px;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
   .chips.base{padding-bottom:12px}
-  .chip-f{flex:0 0 auto;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;white-space:nowrap;transition:all .15s ease}
-  .chip-f[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-  .chip-f:hover:not([aria-pressed="true"]){border-color:var(--rust);color:var(--rust)}
+  .chip-f{flex:0 0 auto;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;white-space:nowrap;transition:all .18s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 2px rgba(35,32,22,.03)}
+  .chip-f[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink);box-shadow:0 4px 12px rgba(35,32,22,.16)}
+  .chip-f:hover:not([aria-pressed="true"]){border-color:var(--rust);color:var(--rust);transform:translateY(-1px);box-shadow:0 3px 8px rgba(187,80,40,.12)}
   .chip-f:active{transform:scale(.97)}
   .chip-f.off{opacity:.32;cursor:default;pointer-events:none}
   .chip-f.off:hover{border-color:var(--line);color:var(--ink)}
@@ -219,7 +222,7 @@
   .ob-permeal{font-family:'Fraunces',serif;font-style:italic;font-size:14.5px;color:var(--ink2)}
   .ob-link{width:100%;background:none;border:none;color:var(--ink2);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;margin-top:12px;padding:8px}
   .ob-link:hover{color:var(--rust)}
-  .fridge-cta{display:block;width:100%;margin-bottom:14px;padding:14px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:14.5px;letter-spacing:.2px;cursor:pointer;transition:background .15s}
+  .fridge-cta{display:block;width:100%;margin-bottom:14px;padding:14px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:14.5px;letter-spacing:.2px;cursor:pointer;transition:all .18s cubic-bezier(.4,0,.2,1)}
   .fridge-cta:hover{background:#455531}
   .fridge-active{display:none;align-items:center;gap:10px;font-size:13px;color:var(--ink2);margin-bottom:14px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--olive);border-radius:12px;padding:11px 15px}
   .fridge-active.show{display:flex}
@@ -330,7 +333,7 @@
 
 <div class="toolbar">
   <div class="filterbar">
-    <button class="fridge-cta" id="openFridge">Mon frigo</button>
+    <button class="fridge-cta" id="openFridge"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Mon frigo</button>
     <div class="sort-inline">
       <select id="sort">
         <option value="default">Trier</option>
