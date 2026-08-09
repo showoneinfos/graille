@@ -32,6 +32,20 @@
   .stats .l{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink2);font-weight:700;margin-top:5px}
   /* TOOLBAR */
   .toolbar{position:sticky;top:0;z-index:30;background:rgba(245,241,232,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .filterbar{display:flex;align-items:center;gap:8px;padding:11px 16px}
+  .filterbar .fridge-cta{width:auto;margin:0;padding:9px 14px;font-size:13px;flex:0 0 auto}
+  .filters-toggle{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-family:inherit;font-weight:700;font-size:13px;color:var(--ink);cursor:pointer}
+  .filters-toggle:hover{border-color:var(--rust);color:var(--rust)}
+  .filters-toggle[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .filters-toggle .fcount{display:none;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--rust);color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center}
+  .filters-toggle .fcount.show{display:inline-flex}
+  .sort-inline{margin-left:auto;flex:0 0 auto}
+  .sort-inline select{padding:8px 28px 8px 13px;font-size:12.5px}
+  .rcount{flex:0 0 auto;font-size:12px;font-weight:600;color:var(--ink2);white-space:nowrap}
+  .rcount b{font-family:'Fraunces',serif;font-weight:600;color:var(--rust)}
+  .filters-panel{display:none;border-top:1px solid var(--line2);padding-bottom:6px}
+  .filters-panel.open{display:block}
+  @media(max-width:560px){ .rcount{display:none} }
   .filter-label{display:flex;align-items:center;gap:8px;padding:13px 18px 0}
   .filter-label .ttl{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700}
   .filter-label .count{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink2)}
@@ -325,25 +339,30 @@
 </header>
 
 <div class="toolbar">
-  <button class="fridge-cta" id="openFridge">Cuisiner avec mon frigo</button>
+  <div class="filterbar">
+    <button class="fridge-cta" id="openFridge">Mon frigo</button>
+    <button class="filters-toggle" id="filtersToggle" aria-expanded="false">Filtres<span class="fcount" id="filtersCount"></span></button>
+    <div class="sort-inline">
+      <select id="sort">
+        <option value="default">Trier</option>
+        <option value="prot">Plus de protéines</option>
+        <option value="kcal">Moins de calories</option>
+        <option value="temps">Plus rapide</option>
+      </select>
+    </div>
+    <span class="rcount"><b id="count">20</b> recettes</span>
+  </div>
   <div class="fridge-active" id="fridgeActive"></div>
-  <div class="filter-label"><span class="ttl">Moment de la journée</span><span class="count"><b id="count">20</b> recettes</span></div>
-  <div class="chips cat" id="chipsCat"></div>
-  <div class="filter-label"><span class="ttl">Spécial</span></div>
-  <div class="chips cat" id="chipsSpecial"></div>
-  <div class="divider"></div>
-  <div class="filter-label"><span class="ttl">Protéine</span></div>
-  <div class="chips base" id="chipsBase"></div>
-  <div class="filter-label"><span class="ttl">Féculent</span></div>
-  <div class="chips base" id="chipsFec"></div>
-  <div class="sortbar">
-    <label for="sort">Trier</label>
-    <select id="sort">
-      <option value="default">Par défaut</option>
-      <option value="prot">Plus de protéines</option>
-      <option value="kcal">Moins de calories</option>
-      <option value="temps">Plus rapide</option>
-    </select>
+  <div class="filters-panel" id="filtersPanel">
+    <div class="filter-label"><span class="ttl">Moment de la journée</span></div>
+    <div class="chips cat" id="chipsCat"></div>
+    <div class="filter-label"><span class="ttl">Spécial</span></div>
+    <div class="chips cat" id="chipsSpecial"></div>
+    <div class="divider"></div>
+    <div class="filter-label"><span class="ttl">Protéine</span></div>
+    <div class="chips base" id="chipsBase"></div>
+    <div class="filter-label"><span class="ttl">Féculent</span></div>
+    <div class="chips base" id="chipsFec"></div>
   </div>
 </div>
 
@@ -501,7 +520,21 @@ function render(list){
   }
   document.getElementById('count').textContent=list.length;
 }
-function update(){render(currentList());}
+const filtersPanel=document.getElementById('filtersPanel');
+const filtersToggle=document.getElementById('filtersToggle');
+filtersToggle.addEventListener('click',()=>{
+  const open=filtersPanel.classList.toggle('open');
+  filtersToggle.setAttribute('aria-expanded', open);
+});
+function updateFiltersCount(){
+  let n=0;
+  if(activeCat!=="Tous") n++;
+  if(activeBase!=="Toutes") n++;
+  if(activeFec!=="Tous") n++;
+  const el=document.getElementById('filtersCount');
+  el.textContent=n||''; el.classList.toggle('show', n>0);
+}
+function update(){ updateFiltersCount(); render(currentList()); }
 sortSel.addEventListener('change',update);
 
 /* MODAL */
