@@ -272,14 +272,14 @@
   <p class="subtag">Des recettes gourmandes et faciles, calibrées pour ta sèche. Choisis, ajuste tes calories, compose ton menu.</p>
   <div class="stats">
     <div class="s"><span class="n" id="stat-recettes">20</span><span class="l">Recettes</span></div>
-    <div class="s"><span class="n" id="stat-cats">5</span><span class="l">Catégories</span></div>
+    <div class="s"><span class="n" id="stat-cats">6</span><span class="l">Moments</span></div>
     <div class="s"><span class="n">100%</span><span class="l">Faciles</span></div>
   </div>
   <button class="hdr-cta" id="openCalc">Mes calories</button>
 </header>
 
 <div class="toolbar">
-  <div class="filter-label"><span class="ttl">Catégorie</span><span class="count"><b id="count">20</b> recettes</span></div>
+  <div class="filter-label"><span class="ttl">Moment de la journée</span><span class="count"><b id="count">20</b> recettes</span></div>
   <div class="chips cat" id="chipsCat"></div>
   <div class="divider"></div>
   <div class="filter-label"><span class="ttl">Protéine</span></div>
@@ -306,7 +306,8 @@
 <script>
 let RECETTES = [];
 
-const CATS_ORDER = ["Fast food","Bowls","Végé","Légumes","Dessert"];
+const CATS_ORDER = ["Fast food","Bowls","Végé","Légumes","Dessert","Petit-déj","Encas"];
+const MOMENTS_ORDER = ["Petit-déj","Encas 10h","Déjeuner","Post-training","Encas 16h","Dîner"];
 const CAT_TINT = {"Fast food":["#ECE0C9","#E2D2B2"],"Bowls":["#DEE4D2","#CED8BC"],"Végé":["#DAE2D0","#C8D5B6"],"Légumes":["#DCE3CF","#CCD8B8"],"Dessert":["#EBDACD","#DFC9B6"]};
 const BASES_ORDER = ["Poulet","Dinde","Bœuf","Saumon","Poisson","Sans"];
 const BASE_LABEL = {"Poulet":"Poulet","Dinde":"Dinde","Bœuf":"Bœuf","Saumon":"Saumon","Poisson":"Poisson","Sans":"Végétarien"};
@@ -339,7 +340,7 @@ function thumbHTML(r){
 }
 
 function buildCatChips(){
-  const present=CATS_ORDER.filter(c=>RECETTES.some(r=>r.categorie===c));
+  const present=MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m)));
   const all=["Tous",...present];
   chipsCat.innerHTML=all.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
   chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>{
@@ -349,8 +350,8 @@ function buildCatChips(){
     buildCatChips(); buildBaseChips(); update();
   }));
 }
-function basesFor(cat){
-  const pool=cat==="Tous"?RECETTES:RECETTES.filter(r=>r.categorie===cat);
+function basesFor(moment){
+  const pool=moment==="Tous"?RECETTES:RECETTES.filter(r=>(r.moment||[]).includes(moment));
   return BASES_ORDER.filter(b=>pool.some(r=>r.base===b));
 }
 function buildBaseChips(){
@@ -366,7 +367,7 @@ function buildBaseChips(){
 }
 
 function currentList(){
-  let list=RECETTES.filter(r=>(activeCat==="Tous"||r.categorie===activeCat)&&(activeBase==="Toutes"||r.base===activeBase));
+  let list=RECETTES.filter(r=>(activeCat==="Tous"||(r.moment||[]).includes(activeCat))&&(activeBase==="Toutes"||r.base===activeBase));
   const v=sortSel.value;
   if(v==='prot')list.sort((a,b)=>b.proteines-a.proteines);
   else if(v==='kcal')list.sort((a,b)=>a.calories-b.calories);
@@ -647,7 +648,7 @@ async function chargerRecettes(){
     return;
   }
   document.getElementById('stat-recettes').textContent = RECETTES.length;
-  document.getElementById('stat-cats').textContent = CATS_ORDER.filter(c=>RECETTES.some(r=>r.categorie===c)).length;
+  document.getElementById('stat-cats').textContent = MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m))).length;
   buildCatChips(); buildBaseChips(); update();
 }
 
