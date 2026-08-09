@@ -329,6 +329,8 @@
   <div class="fridge-active" id="fridgeActive"></div>
   <div class="filter-label"><span class="ttl">Moment de la journée</span><span class="count"><b id="count">20</b> recettes</span></div>
   <div class="chips cat" id="chipsCat"></div>
+  <div class="filter-label"><span class="ttl">Spécial</span></div>
+  <div class="chips cat" id="chipsSpecial"></div>
   <div class="divider"></div>
   <div class="filter-label"><span class="ttl">Protéine</span></div>
   <div class="chips base" id="chipsBase"></div>
@@ -368,6 +370,7 @@ const ICON_PLATE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 
 const grid=document.getElementById('grid');
 const chipsCat=document.getElementById('chipsCat');
+const chipsSpecial=document.getElementById('chipsSpecial');
 const chipsBase=document.getElementById('chipsBase');
 const chipsFec=document.getElementById('chipsFec');
 const sortSel=document.getElementById('sort');
@@ -392,20 +395,29 @@ function thumbHTML(r){
   return `<div class="ph" style="background:linear-gradient(140deg,${t[0]},${t[1]})">${ICON_PLATE}<span>Photo à venir</span></div>`;
 }
 
+const MEAL_MOMENTS = ["Petit-déj","Déjeuner","Post-training","Dîner"];
+function onPrimaryClick(val){
+  activeCat=val;
+  const avail=basesFor(activeCat);
+  if(activeBase!=="Toutes" && !avail.includes(activeBase)) activeBase="Toutes";
+  const availF=fecsFor(activeCat);
+  if(activeFec!=="Tous" && !availF.includes(activeFec)) activeFec="Tous";
+  buildPrimary(); buildBaseChips(); buildFecChips(); update();
+}
+function buildPrimary(){ buildCatChips(); buildSpecialChips(); }
 function buildCatChips(){
-  const present=MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m)));
-  const hasSalade=RECETTES.some(r=>r.categorie==="Salade");
-  const hasSauce=RECETTES.some(r=>r.categorie==="Sauce");
-  const all=["Tous",...present,...(hasSalade?["Salades"]:[]),...(hasSauce?["Sauces"]:[])];
+  const present=MEAL_MOMENTS.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m)));
+  const all=["Tous",...present];
   chipsCat.innerHTML=all.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
-  chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>{
-    activeCat=el.dataset.cat;
-    const avail=basesFor(activeCat);
-    if(activeBase!=="Toutes" && !avail.includes(activeBase)) activeBase="Toutes";
-    const availF=fecsFor(activeCat);
-    if(activeFec!=="Tous" && !availF.includes(activeFec)) activeFec="Tous";
-    buildCatChips(); buildBaseChips(); buildFecChips(); update();
-  }));
+  chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>onPrimaryClick(el.dataset.cat)));
+}
+function buildSpecialChips(){
+  const sp=[];
+  if(RECETTES.some(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"))) sp.push("Snacking");
+  if(RECETTES.some(r=>r.categorie==="Salade")) sp.push("Salades");
+  if(RECETTES.some(r=>r.categorie==="Sauce")) sp.push("Sauces");
+  chipsSpecial.innerHTML=sp.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
+  chipsSpecial.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>onPrimaryClick(el.dataset.cat)));
 }
 function recipeHasStarch(r,kws){ return (r.ingredients||[]).some(i=>{const n=frNorm(i.nom||"");return kws.some(k=>frWm(n,k));}); }
 function fecsFor(sel){ const pool=poolFor(sel); return FEC_ORDER.filter(f=>pool.some(r=>recipeHasStarch(r,FEC_KW[f]))); }
@@ -424,6 +436,7 @@ function poolFor(sel){
   if(sel==="Tous") return RECETTES.filter(r=>r.categorie!=="Sauce");
   if(sel==="Sauces") return RECETTES.filter(r=>r.categorie==="Sauce");
   if(sel==="Salades") return RECETTES.filter(r=>r.categorie==="Salade");
+  if(sel==="Snacking") return RECETTES.filter(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
   return RECETTES.filter(r=>(r.moment||[]).includes(sel));
 }
 function basesFor(sel){
@@ -459,7 +472,7 @@ function currentList(){
 function render(list){
   if(!list.length){
     grid.innerHTML=`<div class="empty">Aucune recette pour cette combinaison.<br><button id="reset">Réinitialiser les filtres</button></div>`;
-    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;renderFridgeActive();buildCatChips();buildBaseChips();buildFecChips();update();});
+    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
   } else {
     grid.innerHTML=list.map(r=>`
       <button class="card" data-i="${RECETTES.indexOf(r)}" aria-label="Voir ${r.nom}">
@@ -822,7 +835,7 @@ async function chargerRecettes(){
   }
   document.getElementById('stat-recettes').textContent = RECETTES.length;
   document.getElementById('stat-cats').textContent = MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m))).length;
-  buildCatChips(); buildBaseChips(); buildFecChips(); update();
+  buildPrimary(); buildBaseChips(); buildFecChips(); update();
 }
 
 /* init */
