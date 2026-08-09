@@ -43,6 +43,8 @@
   .chip-f[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
   .chip-f:hover:not([aria-pressed="true"]){border-color:var(--rust);color:var(--rust)}
   .chip-f:active{transform:scale(.97)}
+  .chip-f.off{opacity:.32;cursor:default;pointer-events:none}
+  .chip-f.off:hover{border-color:var(--line);color:var(--ink)}
   .chip-f:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
   .divider{height:1px;background:var(--line2);margin:2px 18px 0}
   .sortbar{display:flex;align-items:center;gap:8px;padding:10px 18px 13px}
@@ -361,13 +363,14 @@ function basesFor(sel){
   return BASES_ORDER.filter(b=>pool.some(r=>r.base===b));
 }
 function buildBaseChips(){
-  const present=basesFor(activeCat);
-  const all=["Toutes",...present];
+  const avail=basesFor(activeCat);
+  const all=["Toutes",...BASES_ORDER];
   chipsBase.innerHTML=all.map(b=>{
     const lbl=b==="Toutes"?"Toutes":BASE_LABEL[b];
-    return `<button class="chip-f" aria-pressed="${b===activeBase}" data-base="${b}">${lbl}</button>`;
+    const off=(b!=="Toutes" && !avail.includes(b));
+    return `<button class="chip-f${off?' off':''}" aria-pressed="${b===activeBase}" data-base="${b}"${off?' disabled':''}>${lbl}</button>`;
   }).join('');
-  chipsBase.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>{
+  chipsBase.querySelectorAll('.chip-f:not(.off)').forEach(el=>el.addEventListener('click',()=>{
     activeBase=el.dataset.base; buildBaseChips(); update();
   }));
 }
