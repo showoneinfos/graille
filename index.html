@@ -424,7 +424,7 @@ function currentList(){
   let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase));
   if(fridgeMode){
     list=list.filter(r=>recipeMissing(r).length<=fridgeTol);
-    list.sort((a,b)=>recipeMissing(a).length-recipeMissing(b).length);
+    list.sort((a,b)=>(recipeMissing(a).length-recipeMissing(b).length) || (fridgeUsed(b)-fridgeUsed(a)));
     return list;
   }
   const v=sortSel.value;
@@ -691,10 +691,10 @@ const FR_GROUPS=[
  ["Sauces & condiments",[["Sauce soja",["sauce soja","soja"]],["Sauce tomate",["sauce tomate"]],["Sauce BBQ",["bbq","barbecue"]],["Ketchup",["ketchup"]],["Sauce piquante",["piquante","sriracha","gochujang","harissa","franks","buffalo","pate de curry"]],["Sauce asiatique",["teriyaki","tonkatsu","hoisin"]],["Salsa",["salsa"]],["Guacamole",["guacamole"]],["Houmous",["houmous"]],["Pesto",["pesto"]],["Tahini",["tahini"]],["Chocolat",["chocolat"]],["Granola",["granola"]],["Chia",["chia"]],["Noix & amandes",["amande","noix","noisette","pignon","fruits secs"]],["Noix de coco",["noix de coco","coco rapee"]]]],
 ];
 const FR_LABEL_KW={}; FR_GROUPS.forEach(([g,items])=>items.forEach(([l,kw])=>FR_LABEL_KW[l]=kw));
-let fridgeSel=new Set(), fridgeMode=false, fridgeTol=0;
+let fridgeSel=new Set(), fridgeMode=false, fridgeTol=1;
 
 function frNorm(s){return s.toLowerCase().replace(/œ/g,'oe').replace(/æ/g,'ae').normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
-function frWm(n,k){return new RegExp("(^|[^a-z])"+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(n);}
+function frWm(n,k){return new RegExp("(^|[^a-z])"+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+"s?([^a-z]|$)").test(n);}
 function frCovered(n,kws){
   for(const s of FR_STAPLES){ if(frWm(n,s)) return true; }
   for(const k of kws){ if(frWm(n,k)) return true; }
@@ -709,6 +709,11 @@ function recipeMissing(r){
   const kws=selectedKw(); const miss=[];
   (r.ingredients||[]).forEach(i=>{ if(!frCovered(frNorm(i.nom||""), kws)) miss.push(i.nom); });
   return miss;
+}
+function fridgeUsed(r){
+  let c=0;
+  fridgeSel.forEach(l=>{ const kw=FR_LABEL_KW[l]||[]; if((r.ingredients||[]).some(i=>{const n=frNorm(i.nom||"");return kw.some(k=>frWm(n,k));})) c++; });
+  return c;
 }
 function fridgeNote(r){
   const miss=recipeMissing(r);
