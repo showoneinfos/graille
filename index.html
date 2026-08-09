@@ -73,6 +73,8 @@
   .cardbody{padding:16px 16px 18px;display:flex;flex-direction:column;gap:12px;flex:1}
   .cardtitle{font-family:'Fraunces',serif;font-weight:600;font-size:20px;line-height:1.12;letter-spacing:-.2px;color:var(--ink)}
   .carddesc{font-size:13px;color:var(--ink2);flex:1}
+  .carddesc.fr-ok{color:var(--olive);font-weight:700}
+  .carddesc.fr-miss{color:var(--rust);font-weight:600}
   .macros{display:grid;grid-template-columns:repeat(4,1fr);border-radius:12px;overflow:hidden;border:1px solid var(--line2)}
   .macro{padding:9px 4px;text-align:center;background:var(--paper);border-right:1px solid var(--line2)}
   .macro:last-child{border-right:none}
@@ -417,7 +419,11 @@ function buildBaseChips(){
 
 function currentList(){
   let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase));
-  if(fridgeMode) list=list.filter(recipeMakeable);
+  if(fridgeMode){
+    list=list.filter(r=>recipeMissing(r).length<=FRIDGE_TOL);
+    list.sort((a,b)=>recipeMissing(a).length-recipeMissing(b).length);
+    return list;
+  }
   const v=sortSel.value;
   if(v==='prot')list.sort((a,b)=>b.proteines-a.proteines);
   else if(v==='kcal')list.sort((a,b)=>a.calories-b.calories);
@@ -438,7 +444,7 @@ function render(list){
         </div>
         <div class="cardbody">
           <div class="cardtitle">${r.nom}</div>
-          <p class="carddesc">${r.description}</p>
+          ${fridgeMode ? fridgeNote(r) : `<p class="carddesc">${r.description}</p>`}
           <div class="macros">
             <div class="macro kcal"><div class="val">${r.calories}</div><div class="lbl">kcal</div></div>
             <div class="macro prot"><div class="val">${r.proteines}</div><div class="lbl">Prot.</div></div>
@@ -683,6 +689,7 @@ const FR_GROUPS=[
 ];
 const FR_LABEL_KW={}; FR_GROUPS.forEach(([g,items])=>items.forEach(([l,kw])=>FR_LABEL_KW[l]=kw));
 let fridgeSel=new Set(), fridgeMode=false;
+const FRIDGE_TOL=2; // nb d'ingrédients manquants tolérés
 
 function frNorm(s){return s.toLowerCase().replace(/œ/g,'oe').replace(/æ/g,'ae').normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 function frWm(n,k){return new RegExp("(^|[^a-z])"+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(n);}
@@ -695,6 +702,16 @@ function selectedKw(){ let a=[]; fridgeSel.forEach(l=>{a=a.concat(FR_LABEL_KW[l]
 function recipeMakeable(r){
   const kws=selectedKw();
   return (r.ingredients||[]).every(i=>frCovered(frNorm(i.nom||""), kws));
+}
+function recipeMissing(r){
+  const kws=selectedKw(); const miss=[];
+  (r.ingredients||[]).forEach(i=>{ if(!frCovered(frNorm(i.nom||""), kws)) miss.push(i.nom); });
+  return miss;
+}
+function fridgeNote(r){
+  const miss=recipeMissing(r);
+  if(!miss.length) return `<p class="carddesc fr-ok">Tu as tout ce qu'il faut !</p>`;
+  return `<p class="carddesc fr-miss">Il te manque : ${miss.join(', ')}</p>`;
 }
 
 function buildFridgeGroups(){
@@ -713,7 +730,7 @@ function buildFridgeGroups(){
   updateFridgeCount();
 }
 function updateFridgeCount(){
-  const n=RECETTES.filter(r=>r.categorie!=="Sauce" && recipeMakeable(r)).length;
+  const n=RECETTES.filter(r=>r.categorie!=="Sauce" && recipeMissing(r).length<=FRIDGE_TOL).length;
   const go=document.getElementById('frGo');
   go.textContent = fridgeSel.size ? `Voir les recettes (${n})` : "Voir les recettes";
 }
