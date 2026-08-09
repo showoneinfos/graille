@@ -147,8 +147,16 @@
   .trk-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--rust));transition:width .35s ease}
   .trk-sub{font-size:12.5px;color:var(--ink2);display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center}
   .trk-sub b{color:var(--ink);font-weight:700}
-  .trk-reset{background:none;border:none;color:var(--ink2);font-size:12px;font-weight:700;text-decoration:underline;cursor:pointer;font-family:inherit;margin-left:auto;padding:0}
-  .trk-reset:hover{color:var(--rust)}
+  .trk-list-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--ink2);margin-top:16px;margin-bottom:6px}
+  .trk-list{display:flex;flex-direction:column}
+  .trk-item{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line2);font-size:13.5px}
+  .trk-item:last-child{border-bottom:none}
+  .trk-item .nm{flex:1;color:var(--ink);font-weight:600}
+  .trk-item .k{color:var(--rust);font-weight:700;font-size:12.5px;white-space:nowrap}
+  .trk-item .trk-rm{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .trk-item .trk-rm:hover{border-color:var(--rust);color:var(--rust)}
+  .trk-reset{display:inline-block;margin-top:14px;background:none;border:1px solid var(--line);border-radius:999px;padding:8px 16px;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .trk-reset:hover{border-color:var(--rust);color:var(--rust)}
   .trk-empty{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13.5px;color:var(--ink2)}
   .trk-empty .trk-cta{background:var(--rust);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-weight:700;cursor:pointer;font-family:inherit;margin-left:auto;white-space:nowrap}
   .add-day{width:100%;padding:15px;border:none;border-radius:14px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer;margin-top:14px;transition:background .15s}
@@ -565,6 +573,7 @@ let JOURNAL = loadJournal();
 function consumed(){return JOURNAL.items.reduce((s,i)=>s+i.kcal,0);}
 function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal(JOURNAL);renderTracker();}
 function resetJournal(){JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);renderTracker();}
+function removeFromJournal(i){JOURNAL.items.splice(i,1);saveJournal(JOURNAL);renderTracker();}
 
 function renderTracker(){
   const el=document.getElementById('perso');
@@ -579,6 +588,10 @@ function renderTracker(){
   const reste=p.calories-cons;
   const pct=Math.max(0,Math.min(100,Math.round(cons/p.calories*100)));
   const over=reste<0;
+  const n=JOURNAL.items.length;
+  const liste = n ? `<div class="trk-list-title">Mes recettes du jour</div>`+
+    `<div class="trk-list">`+JOURNAL.items.map((it,i)=>`<div class="trk-item"><span class="nm">${it.nom}</span><span class="k">${it.kcal} kcal</span><button class="trk-rm" data-i="${i}" aria-label="Retirer">×</button></div>`).join('')+`</div>`+
+    `<button class="trk-reset" id="trkReset">Vider mes recettes du jour</button>` : '';
   el.innerHTML=`<div class="trk">
     <div class="trk-top">
       <span class="obj">${OBJ_LABEL[p.objectif]}</span>
@@ -592,12 +605,13 @@ function renderTracker(){
     <div class="trk-sub">
       <span>Objectif <b>${p.calories}</b></span>
       <span>Consommé <b>${cons}</b></span>
-      <span><b>${JOURNAL.items.length}</b> repas</span>
-      ${JOURNAL.items.length?`<button class="trk-reset" id="trkReset">Réinitialiser ma journée</button>`:''}
+      <span><b>${n}</b> recette${n>1?'s':''}</span>
     </div>
+    ${liste}
   </div>`;
   document.getElementById('trkEdit').addEventListener('click',openOnboard);
   const rb=document.getElementById('trkReset'); if(rb) rb.addEventListener('click',resetJournal);
+  el.querySelectorAll('.trk-rm').forEach(b=>b.addEventListener('click',()=>removeFromJournal(+b.dataset.i)));
 }
 
 function initProfile(){
