@@ -19,17 +19,12 @@
   body{font-family:'DM Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   ::selection{background:var(--rust);color:#fff}
   /* HERO éditorial */
-  header{position:relative;padding:44px 22px 30px;border-bottom:1px solid var(--line);overflow:hidden;
+  header{position:relative;padding:18px 20px 14px;border-bottom:1px solid var(--line);overflow:hidden;
     background:radial-gradient(120% 80% at 100% 0%, rgba(187,80,40,.07), transparent 60%),var(--paper)}
-  .eyebrow{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--rust);margin-bottom:14px}
-  .logo{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(52px,16vw,86px);line-height:.86;letter-spacing:-1px;color:var(--ink)}
+  .brandrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .logo{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(30px,8vw,42px);line-height:.9;letter-spacing:-.5px;color:var(--ink)}
   .logo b{color:var(--rust);font-weight:900}
-  .tagline{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:clamp(19px,5.2vw,26px);line-height:1.25;color:var(--ink);margin-top:18px;max-width:20ch}
-  .subtag{margin-top:12px;max-width:40ch;font-size:14.5px;color:var(--ink2)}
-  .stats{display:flex;margin-top:26px;gap:26px}
-  .stats .s{display:flex;flex-direction:column}
-  .stats .n{font-family:'Fraunces',serif;font-weight:600;font-size:24px;line-height:1;color:var(--ink)}
-  .stats .l{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink2);font-weight:700;margin-top:5px}
+  .tagline{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:clamp(14px,3.6vw,17px);line-height:1.25;color:var(--ink2);margin-top:6px}
   /* TOOLBAR */
   .toolbar{position:sticky;top:0;z-index:30;background:rgba(245,241,232,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   .filterbar{display:flex;align-items:center;gap:8px;padding:11px 16px}
@@ -148,7 +143,7 @@
   .cuisson-strip .sep{width:1px;background:var(--line);margin:0 8px}
   footer{text-align:center;padding:34px 20px 48px;color:var(--ink2);font-size:12px;font-family:'Fraunces',serif;font-style:italic}
   /* ---------- Bouton header + bannière perso ---------- */
-  .hdr-cta{position:absolute;top:24px;right:20px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust);background:var(--card);border:1.5px solid var(--rust);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:inherit}
+  .hdr-cta{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust);background:var(--card);border:1.5px solid var(--rust);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:inherit}
   .hdr-cta:hover{background:var(--rust);color:#fff}
   #perso{display:none;margin-bottom:20px}
   #perso.show{display:block}
@@ -326,16 +321,11 @@
 </div>
 
 <header>
-  <div class="eyebrow">Nutrition · Perte de poids</div>
-  <div class="logo">GRAI<b>LL</b>E</div>
-  <p class="tagline">Mange ce que tu aimes, atteins ton objectif.</p>
-  <p class="subtag">Des recettes gourmandes et faciles, calibrées pour ta sèche. Choisis, ajuste tes calories, compose ton menu.</p>
-  <div class="stats">
-    <div class="s"><span class="n" id="stat-recettes">20</span><span class="l">Recettes</span></div>
-    <div class="s"><span class="n" id="stat-cats">6</span><span class="l">Moments</span></div>
-    <div class="s"><span class="n">100%</span><span class="l">Faciles</span></div>
+  <div class="brandrow">
+    <div class="logo">GRAI<b>LL</b>E</div>
+    <button class="hdr-cta" id="openCalc">Mes calories</button>
   </div>
-  <button class="hdr-cta" id="openCalc">Mes calories</button>
+  <p class="tagline">Mange ce que tu aimes, atteins ton objectif.</p>
 </header>
 
 <div class="toolbar">
@@ -353,11 +343,11 @@
     <span class="rcount"><b id="count">20</b> recettes</span>
   </div>
   <div class="fridge-active" id="fridgeActive"></div>
+  <div class="filter-label"><span class="ttl">Moment de la journée</span></div>
+  <div class="chips cat" id="chipsCat"></div>
+  <div class="filter-label"><span class="ttl">Spécial</span></div>
+  <div class="chips cat" id="chipsSpecial"></div>
   <div class="filters-panel" id="filtersPanel">
-    <div class="filter-label"><span class="ttl">Moment de la journée</span></div>
-    <div class="chips cat" id="chipsCat"></div>
-    <div class="filter-label"><span class="ttl">Spécial</span></div>
-    <div class="chips cat" id="chipsSpecial"></div>
     <div class="divider"></div>
     <div class="filter-label"><span class="ttl">Protéine</span></div>
     <div class="chips base" id="chipsBase"></div>
@@ -528,7 +518,6 @@ filtersToggle.addEventListener('click',()=>{
 });
 function updateFiltersCount(){
   let n=0;
-  if(activeCat!=="Tous") n++;
   if(activeBase!=="Toutes") n++;
   if(activeFec!=="Tous") n++;
   const el=document.getElementById('filtersCount');
@@ -866,8 +855,8 @@ async function chargerRecettes(){
     grid.innerHTML = `<div class="empty">Impossible de charger les recettes pour le moment.<br><button onclick="location.reload()">Réessayer</button></div>`;
     return;
   }
-  document.getElementById('stat-recettes').textContent = RECETTES.length;
-  document.getElementById('stat-cats').textContent = MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m))).length;
+  const sr=document.getElementById('stat-recettes'); if(sr) sr.textContent = RECETTES.length;
+  const sc=document.getElementById('stat-cats'); if(sc) sc.textContent = MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m))).length;
   buildPrimary(); buildBaseChips(); buildFecChips(); update();
 }
 
