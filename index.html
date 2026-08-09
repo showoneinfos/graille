@@ -159,6 +159,7 @@
   .trk{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
   .trk-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
   .trk-top .obj{background:var(--rust);color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:4px 11px;border-radius:999px}
+  .trk-top .trk-kg{font-size:12px;font-weight:700;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
   .trk-edit{margin-left:auto;background:none;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit}
   .trk-edit:hover{border-color:var(--rust);color:var(--rust)}
   .trk-remain{display:flex;align-items:baseline;gap:9px;margin-bottom:12px}
@@ -723,6 +724,7 @@ function renderTracker(){
   el.innerHTML=`<div class="trk">
     <div class="trk-top">
       <span class="obj">${OBJ_LABEL[p.objectif]}</span>
+      <span class="trk-kg">${p.poids} kg</span>
       <button class="trk-edit" id="trkEdit">Modifier</button>
     </div>
     <div class="trk-remain ${over?'over':''}">
