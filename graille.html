@@ -394,8 +394,9 @@ function thumbHTML(r){
 
 function buildCatChips(){
   const present=MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m)));
+  const hasSalade=RECETTES.some(r=>r.categorie==="Salade");
   const hasSauce=RECETTES.some(r=>r.categorie==="Sauce");
-  const all=["Tous",...present,...(hasSauce?["Sauces"]:[])];
+  const all=["Tous",...present,...(hasSalade?["Salades"]:[]),...(hasSauce?["Sauces"]:[])];
   chipsCat.innerHTML=all.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
   chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>{
     activeCat=el.dataset.cat;
@@ -422,6 +423,7 @@ function buildFecChips(){
 function poolFor(sel){
   if(sel==="Tous") return RECETTES.filter(r=>r.categorie!=="Sauce");
   if(sel==="Sauces") return RECETTES.filter(r=>r.categorie==="Sauce");
+  if(sel==="Salades") return RECETTES.filter(r=>r.categorie==="Salade");
   return RECETTES.filter(r=>(r.moment||[]).includes(sel));
 }
 function basesFor(sel){
