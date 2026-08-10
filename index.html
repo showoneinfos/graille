@@ -214,6 +214,13 @@
   .ob-seg button{padding:13px 8px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font-family:inherit;font-weight:700;font-size:13.5px;color:var(--ink);transition:all .15s}
   .ob-seg button:hover{border-color:var(--rust)}
   .ob-seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .ob-rythme button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;line-height:1.15}
+  .ob-rythme button b{font-size:13px}
+  .ob-rythme button small{font-size:10px;font-weight:600;opacity:.65}
+  .ob-sublabel{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink2);font-size:11px}
+  .ob-opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink2);font-size:11px}
+  .ob-estimate{background:rgba(87,104,63,.1);border:1px solid var(--olive);border-radius:14px;padding:13px 16px;text-align:center;font-size:14px;color:var(--ink);margin-bottom:16px;font-family:'Fraunces',serif}
+  .ob-estimate b{color:var(--olive-deep,var(--olive))}
   .ob-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:22px}
   .ob-field label{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);margin-bottom:7px}
   .ob-field input{width:100%;padding:13px 10px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--ink);text-align:center;-moz-appearance:textfield}
@@ -304,6 +311,13 @@
           <button type="button" data-val="tres">Très actif</button>
         </div>
       </div>
+      <div class="ob-block" id="obRythmeBlock" style="display:none">
+        <label>Rythme <span class="ob-sublabel" id="obRythmeSub"></span></label>
+        <div class="ob-seg ob-seg3 ob-rythme" id="obRythme"></div>
+      </div>
+      <div class="ob-block" id="obCibleBlock" style="display:none">
+        <div class="ob-field"><label>Poids objectif (kg) <span class="ob-opt">· optionnel</span></label><input id="obCible" type="number" inputmode="numeric" placeholder="ex : 72"></div>
+      </div>
       <button class="ob-cta" id="obCalc">Calcule mes calories</button>
       <p class="ob-err" id="obErr"></p>
     </div>
@@ -318,6 +332,7 @@
         </div>
         <div class="ob-permeal">Soit environ <b id="obPer">0</b> kcal par repas</div>
       </div>
+      <div class="ob-estimate" id="obEstimate" style="display:none"></div>
       <button class="ob-cta" id="obGo">Voir mes recettes →</button>
       <button class="ob-link" id="obEdit">← Modifier mes infos</button>
     </div>
@@ -670,11 +685,31 @@ const onboard = document.getElementById('onboard');
 function setSeg(groupId,val){
   document.querySelectorAll('#'+groupId+' [data-val]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.val===val?'true':'false'));
 }
+const RATES = {
+  perte: {sub:"— vitesse de perte", opts:[["Doux","0,25 kg/sem",0.25],["Modéré","0,5 kg/sem",0.5],["Soutenu","0,75 kg/sem",0.75]], def:1},
+  seche: {sub:"— sèche (lent = muscle préservé)", opts:[["Doux","0,25 kg/sem",0.25],["Modéré","0,4 kg/sem",0.4],["Max","0,5 kg/sem",0.5]], def:1},
+  masse: {sub:"— prise (lent = plus propre)", opts:[["Lean","+0,25 kg/sem",0.25],["Modéré","+0,4 kg/sem",0.4],["Max","+0,5 kg/sem",0.5]], def:0},
+};
+function updateRythmeUI(){
+  const o=OB.objectif, block=document.getElementById('obRythmeBlock'), cible=document.getElementById('obCibleBlock');
+  if(!o || o==='maintien'){ block.style.display='none'; cible.style.display='none'; return; }
+  const cfg=RATES[o];
+  block.style.display=''; cible.style.display='';
+  document.getElementById('obRythmeSub').textContent=cfg.sub;
+  if(OB.rythme==null || OB.rythme>=cfg.opts.length) OB.rythme=cfg.def;
+  const seg=document.getElementById('obRythme');
+  seg.innerHTML=cfg.opts.map((op,i)=>`<button type="button" data-idx="${i}" aria-pressed="${i===OB.rythme?'true':'false'}"><b>${op[0]}</b><small>${op[1]}</small></button>`).join('');
+  seg.querySelectorAll('[data-idx]').forEach(b=>b.addEventListener('click',()=>{
+    OB.rythme=+b.dataset.idx;
+    seg.querySelectorAll('[data-idx]').forEach(x=>x.setAttribute('aria-pressed', x.dataset.idx===b.dataset.idx?'true':'false'));
+  }));
+}
 ['obObjectif','obSexe','obActivite'].forEach(gid=>{
   document.getElementById(gid).addEventListener('click',e=>{
     const btn=e.target.closest('[data-val]'); if(!btn) return;
     const key = gid==='obObjectif'?'objectif':(gid==='obSexe'?'sexe':'activite');
     OB[key]=btn.dataset.val; setSeg(gid,btn.dataset.val);
+    if(key==='objectif'){ OB.rythme = RATES[btn.dataset.val] ? RATES[btn.dataset.val].def : null; updateRythmeUI(); }
   });
 });
 
@@ -683,12 +718,14 @@ function showObResult(){document.getElementById('obForm').style.display='none';d
 function openOnboard(){
   const p=loadProfile(); showObForm();
   if(p){
-    OB.objectif=p.objectif; OB.sexe=p.sexe; OB.activite=p.activite;
+    OB.objectif=p.objectif; OB.sexe=p.sexe; OB.activite=p.activite; OB.rythme=(p.rythme!=null?p.rythme:null);
     setSeg('obObjectif',p.objectif); setSeg('obSexe',p.sexe); setSeg('obActivite',p.activite);
     document.getElementById('obAge').value=p.age;
     document.getElementById('obPoids').value=p.poids;
     document.getElementById('obTaille').value=p.taille;
+    document.getElementById('obCible').value=p.poidsCible||'';
   }
+  updateRythmeUI();
   onboard.classList.add('open'); document.body.style.overflow='hidden';
 }
 function closeOnboard(){onboard.classList.remove('open'); document.body.style.overflow='';}
@@ -696,8 +733,21 @@ function closeOnboard(){onboard.classList.remove('open'); document.body.style.ov
 function calcProfile(p){
   const bmr = 10*p.poids + 6.25*p.taille - 5*p.age + (p.sexe==='homme'?5:-161); // Mifflin-St Jeor
   const act = {sedentaire:1.2, actif:1.55, tres:1.725}[p.activite];
-  const objMult = {perte:0.8, seche:0.78, maintien:1.0, masse:1.15}[p.objectif];
-  const cal = Math.round((bmr*act*objMult)/10)*10;
+  const tdee = bmr*act;
+  let cal;
+  if(p.objectif==='maintien'){
+    cal = tdee;
+  } else {
+    const cfg=RATES[p.objectif];
+    const rate = (p.rate!=null ? p.rate : cfg.opts[cfg.def][2]);
+    const daily = rate*7700/7; // ~7700 kcal par kg
+    cal = (p.objectif==='masse') ? tdee + daily : tdee - daily;
+    if(p.objectif!=='masse'){ // garde-fou santé : jamais sous ~110% du métabolisme de base ni sous un plancher
+      const floor = Math.max(bmr*1.1, p.sexe==='homme'?1500:1200);
+      if(cal<floor) cal=floor;
+    }
+  }
+  cal = Math.round(cal/10)*10;
   const prot = Math.round(p.poids*({perte:2.0, seche:2.4, maintien:1.8, masse:2.0}[p.objectif]));
   const lip = Math.round(p.poids*({perte:0.9, seche:0.8, maintien:0.9, masse:1.0}[p.objectif]));
   let gluc = Math.round((cal - prot*4 - lip*9)/4); if(gluc<0) gluc=0;
@@ -716,7 +766,10 @@ document.getElementById('obCalc').addEventListener('click',()=>{
   if(!poids||poids<30||poids>300){err.textContent='Indique un poids valide (30–300 kg).';return;}
   if(!taille||taille<100||taille>250){err.textContent='Indique une taille valide (100–250 cm).';return;}
   if(!OB.activite){err.textContent="Choisis ton niveau d'activité.";return;}
-  const prof=calcProfile({objectif:OB.objectif,sexe:OB.sexe,age,poids,taille,activite:OB.activite});
+  const cfg=RATES[OB.objectif];
+  const rate = cfg ? cfg.opts[(OB.rythme!=null?OB.rythme:cfg.def)][2] : null;
+  const cible = +document.getElementById('obCible').value || null;
+  const prof=calcProfile({objectif:OB.objectif,sexe:OB.sexe,age,poids,taille,activite:OB.activite,rate,rythme:OB.rythme,poidsCible:cible});
   window._tmpProfile=prof;
   document.getElementById('obGoalLabel').textContent='Objectif : '+OBJ_LABEL[prof.objectif];
   document.getElementById('obCalNum').textContent=prof.calories;
@@ -724,6 +777,17 @@ document.getElementById('obCalc').addEventListener('click',()=>{
   document.getElementById('obGluc').textContent=prof.gluc;
   document.getElementById('obLip').textContent=prof.lip;
   document.getElementById('obPer').textContent=prof.parRepas;
+  const est=document.getElementById('obEstimate');
+  let msg='';
+  if(cible && rate && OB.objectif!=='maintien'){
+    const losing = OB.objectif!=='masse';
+    const diff = losing ? (poids - cible) : (cible - poids);
+    if(diff>0.3){
+      const weeks=Math.ceil(diff/rate);
+      msg=`🎯 À ce rythme, tu atteins <b>${cible} kg</b> en <b>~${weeks} semaine${weeks>1?'s':''}</b>.`;
+    }
+  }
+  if(msg){ est.innerHTML=msg; est.style.display=''; } else { est.style.display='none'; }
   showObResult();
 });
 document.getElementById('obGo').addEventListener('click',()=>{
