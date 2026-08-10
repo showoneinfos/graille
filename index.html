@@ -272,6 +272,7 @@
         <label>Ton objectif</label>
         <div class="ob-objectifs" id="obObjectif">
           <button type="button" class="ob-obj" data-val="perte"><span class="emo">🔥</span>Perte de poids</button>
+          <button type="button" class="ob-obj" data-val="seche"><span class="emo">⚡</span>Sèche</button>
           <button type="button" class="ob-obj" data-val="maintien"><span class="emo">⚖️</span>Maintien</button>
           <button type="button" class="ob-obj" data-val="masse"><span class="emo">💪</span>Prise de masse</button>
         </div>
@@ -620,7 +621,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.c
 /* ---------- Bilan calories (onboarding) ---------- */
 let userMealTarget = null;
 const OB = {objectif:null, sexe:null, activite:null};
-const OBJ_LABEL = {perte:'Perte de poids', maintien:'Maintien', masse:'Prise de masse'};
+const OBJ_LABEL = {perte:'Perte de poids', seche:'Sèche', maintien:'Maintien', masse:'Prise de masse'};
 const onboard = document.getElementById('onboard');
 
 function setSeg(groupId,val){
@@ -652,10 +653,10 @@ function closeOnboard(){onboard.classList.remove('open'); document.body.style.ov
 function calcProfile(p){
   const bmr = 10*p.poids + 6.25*p.taille - 5*p.age + (p.sexe==='homme'?5:-161); // Mifflin-St Jeor
   const act = {sedentaire:1.2, actif:1.55, tres:1.725}[p.activite];
-  const objMult = {perte:0.8, maintien:1.0, masse:1.15}[p.objectif];
+  const objMult = {perte:0.8, seche:0.78, maintien:1.0, masse:1.15}[p.objectif];
   const cal = Math.round((bmr*act*objMult)/10)*10;
-  const prot = Math.round(p.poids*({perte:2.0, maintien:1.8, masse:2.0}[p.objectif]));
-  const lip = Math.round(p.poids*0.9);
+  const prot = Math.round(p.poids*({perte:2.0, seche:2.4, maintien:1.8, masse:2.0}[p.objectif]));
+  const lip = Math.round(p.poids*({perte:0.9, seche:0.8, maintien:0.9, masse:1.0}[p.objectif]));
   let gluc = Math.round((cal - prot*4 - lip*9)/4); if(gluc<0) gluc=0;
   const parRepas = Math.min(CAL_MAX, Math.round((cal/3)/10)*10);
   return {...p, calories:cal, prot, gluc, lip, parRepas};
