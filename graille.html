@@ -137,6 +137,13 @@
   .cal-adjust input[type=range]:focus-visible{outline:2px solid var(--rust);outline-offset:4px}
   .cal-scale{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--ink2);margin-top:6px}
   .cal-hint{text-align:center;font-size:12px;color:var(--ink2);margin-top:11px;font-style:italic;font-family:'Fraunces',serif}
+  .macro-adjust{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px 16px;margin-bottom:6px}
+  .macro-adjust input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:999px;background:linear-gradient(90deg,var(--olive),var(--gold),var(--rust));outline:none;margin:4px 0;cursor:pointer}
+  .macro-adjust input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:0 3px 8px rgba(35,32,22,.3);cursor:pointer}
+  .macro-adjust input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:0 3px 8px rgba(35,32,22,.3);cursor:pointer}
+  .macro-adjust input[type=range]:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+  .macro-scale{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--ink2);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+  .macro-scale span:nth-child(2){color:var(--ink)}
   .serve-note{font-family:'Fraunces',serif;font-style:italic;font-size:12.5px;color:var(--ink2);margin:-8px 0 12px}
   ul.ingredients{list-style:none;display:flex;flex-direction:column}
   ul.ingredients li{display:flex;justify-content:space-between;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line2);font-size:14.5px;color:var(--ink)}
@@ -541,9 +548,26 @@ sortSel.addEventListener('change',update);
 /* MODAL */
 const overlay=document.getElementById('overlay');
 const sheet=document.getElementById('sheet');
-let activeRecipe=null, activeTarget=0;
+let activeRecipe=null, activeTarget=0, macroBias=0;
 const CAL_MIN=100,CAL_MAX=1200,CAL_STEP=5;
-function openSheet(r,forced){activeRecipe=r;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
+const PROT_KW=(FR_GROUPS.find(g=>g[0]==="Protéines")||[null,[]])[1].flatMap(it=>it[1]);
+const CARB_KW=Object.values(FEC_KW).flat();
+function isProtIng(n){return PROT_KW.some(k=>frWm(n,k));}
+function isCarbIng(n){return CARB_KW.some(k=>frWm(n,k));}
+function recipeHasMacroToggle(r){
+  if(!(r.proteines>0 && r.glucides>0)) return false;
+  const hasP=(r.ingredients||[]).some(i=>isProtIng(frNorm(i.nom||"")));
+  const hasC=(r.ingredients||[]).some(i=>isCarbIng(frNorm(i.nom||"")));
+  return hasP && hasC;
+}
+function macroState(){
+  const r=activeRecipe, f=activeTarget/r.calories;
+  const P0=r.proteines*f, C0=r.glucides*f, F0=r.lipides*f;
+  const delta = macroBias>=0 ? macroBias*0.4*C0 : macroBias*0.3*P0; // échange P<->C à calories constantes
+  const newP=P0+delta, newC=C0-delta;
+  return {P:newP, C:newC, F:F0, f, fProt:(P0>0?f*newP/P0:f), fCarb:(C0>0?f*newC/C0:f)};
+}
+function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
 function closeSheet(){overlay.classList.remove('open');document.body.style.overflow='';}
 function factorFor(r){return activeTarget/r.calories;}
 function heroHTML(r){
@@ -553,11 +577,25 @@ function heroHTML(r){
 }
 function drawSheet(){
   const r=activeRecipe,f=factorFor(r);
-  const ingList=r.ingredients.map(ing=>{const base=ing.quantite/r.portions;return `<li><span>${ing.nom}</span><span class="qty" data-base="${base}" data-unite="${ing.unite}">${displayQty(base*f,ing.unite)} ${ing.unite}</span></li>`;}).join('');
+  const ms=macroState();
+  const ingList=r.ingredients.map(ing=>{
+    const base=ing.quantite/r.portions;
+    const n=frNorm(ing.nom||"");
+    const cat=isProtIng(n)?'prot':(isCarbIng(n)?'carb':'other');
+    const fac=cat==='prot'?ms.fProt:(cat==='carb'?ms.fCarb:ms.f);
+    return `<li><span>${ing.nom}</span><span class="qty" data-base="${base}" data-unite="${ing.unite}" data-cat="${cat}">${displayQty(base*fac,ing.unite)} ${ing.unite}</span></li>`;
+  }).join('');
   const steps=r.etapes.map(s=>`<li>${s}</li>`).join('');
   const modeChip = (r.mode_cuisson==='Airfryer'&&r.temperature_airfryer)
     ? `<div class="chip"><span class="k">Airfryer</span><span class="v">${r.temperature_airfryer}°C</span></div>`
     : `<div class="chip"><span class="k">Cuisson</span><span class="v">${r.mode_cuisson}</span></div>`;
+  const macroBlock = recipeHasMacroToggle(r) ? `
+      <div class="block-title">Équilibre protéines / glucides</div>
+      <div class="macro-adjust">
+        <input type="range" id="macroSlider" min="-100" max="100" step="5" value="${Math.round(macroBias*100)}" aria-label="Équilibre protéines glucides">
+        <div class="macro-scale"><span>+ Glucides</span><span>Équilibré</span><span>+ Protéines</span></div>
+        <div class="cal-hint">Glisse pour plus de protéines et moins de glucides (ou l'inverse), à calories constantes.</div>
+      </div>` : '';
   sheet.innerHTML=`
     <div class="sheet-hero">
       <button class="closebtn" id="closeBtn" aria-label="Fermer">✕</button>
@@ -569,9 +607,9 @@ function drawSheet(){
       <p class="desc">${r.description}</p>
       <div class="macros sheet-macros">
         <div class="macro kcal"><div class="val" id="mKcal">${activeTarget}</div><div class="lbl">kcal</div></div>
-        <div class="macro prot"><div class="val" id="mProt">${Math.round(r.proteines*f)}</div><div class="lbl">Prot.</div></div>
-        <div class="macro"><div class="val" id="mGluc">${Math.round(r.glucides*f)}</div><div class="lbl">Gluc.</div></div>
-        <div class="macro"><div class="val" id="mLip">${Math.round(r.lipides*f)}</div><div class="lbl">Lip.</div></div>
+        <div class="macro prot"><div class="val" id="mProt">${Math.round(ms.P)}</div><div class="lbl">Prot.</div></div>
+        <div class="macro"><div class="val" id="mGluc">${Math.round(ms.C)}</div><div class="lbl">Gluc.</div></div>
+        <div class="macro"><div class="val" id="mLip">${Math.round(ms.F)}</div><div class="lbl">Lip.</div></div>
       </div>
       <div class="block-title">Ajuste tes calories</div>
       <div class="cal-adjust">
@@ -580,9 +618,10 @@ function drawSheet(){
         <div class="cal-scale"><span>${CAL_MIN}</span><span>${CAL_MAX} kcal</span></div>
         <div class="cal-hint">Les quantités et les macros s'ajustent automatiquement.</div>
       </div>
+      ${macroBlock}
       <button class="add-day" id="addDay">Ajouter à ma journée · +<span id="addKcal">${activeTarget}</span> kcal</button>
       <div class="block-title">Ingrédients</div>
-      <div class="serve-note">Quantités pour 1 personne · ajustées à tes calories</div>
+      <div class="serve-note">Quantités pour 1 personne · ajustées à tes réglages</div>
       <ul class="ingredients">${ingList}</ul>
       <div class="block-title">Préparation</div>
       <ol class="steps">${steps}</ol>
@@ -597,6 +636,8 @@ function drawSheet(){
   document.getElementById('closeBtn').addEventListener('click',closeSheet);
   const slider=document.getElementById('calSlider');
   slider.addEventListener('input',()=>{activeTarget=+slider.value;updateValues();});
+  const mslider=document.getElementById('macroSlider');
+  if(mslider) mslider.addEventListener('input',()=>{macroBias=(+mslider.value)/100;updateValues();});
   const addBtn=document.getElementById('addDay');
   addBtn.addEventListener('click',()=>{
     if(!loadProfile()){ closeSheet(); openOnboard(); return; }
@@ -606,13 +647,18 @@ function drawSheet(){
   });
 }
 function updateValues(){
-  const r=activeRecipe,f=factorFor(r);
+  const r=activeRecipe, ms=macroState();
   document.getElementById('calNum').textContent=activeTarget;
   document.getElementById('mKcal').textContent=activeTarget;
-  document.getElementById('mProt').textContent=Math.round(r.proteines*f);
-  document.getElementById('mGluc').textContent=Math.round(r.glucides*f);
-  document.getElementById('mLip').textContent=Math.round(r.lipides*f);
-  document.querySelectorAll('.ingredients .qty').forEach(el=>{const base=parseFloat(el.dataset.base);el.textContent=`${displayQty(base*f,el.dataset.unite)} ${el.dataset.unite}`;});
+  document.getElementById('mProt').textContent=Math.round(ms.P);
+  document.getElementById('mGluc').textContent=Math.round(ms.C);
+  document.getElementById('mLip').textContent=Math.round(ms.F);
+  document.querySelectorAll('.ingredients .qty').forEach(el=>{
+    const base=parseFloat(el.dataset.base);
+    const cat=el.dataset.cat;
+    const fac=cat==='prot'?ms.fProt:(cat==='carb'?ms.fCarb:ms.f);
+    el.textContent=`${displayQty(base*fac,el.dataset.unite)} ${el.dataset.unite}`;
+  });
   const ak=document.getElementById('addKcal'); if(ak) ak.textContent=activeTarget;
 }
 overlay.addEventListener('click',e=>{if(e.target===overlay)closeSheet();});
