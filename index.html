@@ -550,7 +550,7 @@ const overlay=document.getElementById('overlay');
 const sheet=document.getElementById('sheet');
 let activeRecipe=null, activeTarget=0, macroBias=0;
 const CAL_MIN=100,CAL_MAX=1200,CAL_STEP=5;
-const PROT_KW=(FR_GROUPS.find(g=>g[0]==="Protéines")||[null,[]])[1].flatMap(it=>it[1]);
+const PROT_KW=["poulet","dinde","boeuf","saumon","thon","cabillaud","colin","crevette","oeuf","tofu","halloumi","jambon","bacon de dinde","whey","saucisse","falafel","chorizo"];
 const CARB_KW=Object.values(FEC_KW).flat();
 function isProtIng(n){return PROT_KW.some(k=>frWm(n,k));}
 function isCarbIng(n){return CARB_KW.some(k=>frWm(n,k));}
