@@ -159,6 +159,7 @@
   .trk{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
   .trk-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
   .trk-top .obj{background:var(--rust);color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:4px 11px;border-radius:999px}
+  .trk-top .trk-kg{font-size:12px;font-weight:700;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
   .trk-edit{margin-left:auto;background:none;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit}
   .trk-edit:hover{border-color:var(--rust);color:var(--rust)}
   .trk-remain{display:flex;align-items:baseline;gap:9px;margin-bottom:12px}
@@ -271,6 +272,7 @@
         <label>Ton objectif</label>
         <div class="ob-objectifs" id="obObjectif">
           <button type="button" class="ob-obj" data-val="perte"><span class="emo">🔥</span>Perte de poids</button>
+          <button type="button" class="ob-obj" data-val="seche"><span class="emo">⚡</span>Sèche</button>
           <button type="button" class="ob-obj" data-val="maintien"><span class="emo">⚖️</span>Maintien</button>
           <button type="button" class="ob-obj" data-val="masse"><span class="emo">💪</span>Prise de masse</button>
         </div>
@@ -388,7 +390,7 @@ const chipsFec=document.getElementById('chipsFec');
 const sortSel=document.getElementById('sort');
 let activeCat="Tous", activeBase="Toutes", activeFec="Tous";
 const FEC_ORDER=["Riz","Pâtes","Pommes de terre","Patate douce","Quinoa","Semoule","Boulgour","Nouilles","Avoine","Lentilles","Pois chiches","Pain"];
-const FEC_KW={"Riz":["riz"],"Pâtes":["pates","macaroni"],"Pommes de terre":["pomme de terre"],"Patate douce":["patate douce","patate"],"Quinoa":["quinoa"],"Semoule":["semoule"],"Boulgour":["boulgour"],"Nouilles":["nouille"],"Avoine":["avoine"],"Lentilles":["lentille"],"Pois chiches":["pois chiche"],"Pain":["pain","bagel","panini"]};
+const FEC_KW={"Riz":["riz"],"Pâtes":["pates","macaroni"],"Pommes de terre":["pomme de terre","pommes de terre"],"Patate douce":["patate douce","patate"],"Quinoa":["quinoa"],"Semoule":["semoule"],"Boulgour":["boulgour"],"Nouilles":["nouille"],"Avoine":["avoine"],"Lentilles":["lentille"],"Pois chiches":["pois chiche"],"Pain":["pain","bagel","panini"]};
 
 function fmtQty(n){const r=Math.round(n*10)/10;return Number.isInteger(r)?String(r):String(r).replace('.',',');}
 function roundQty(v,unite){
@@ -619,7 +621,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.c
 /* ---------- Bilan calories (onboarding) ---------- */
 let userMealTarget = null;
 const OB = {objectif:null, sexe:null, activite:null};
-const OBJ_LABEL = {perte:'Perte de poids', maintien:'Maintien', masse:'Prise de masse'};
+const OBJ_LABEL = {perte:'Perte de poids', seche:'Sèche', maintien:'Maintien', masse:'Prise de masse'};
 const onboard = document.getElementById('onboard');
 
 function setSeg(groupId,val){
@@ -651,10 +653,10 @@ function closeOnboard(){onboard.classList.remove('open'); document.body.style.ov
 function calcProfile(p){
   const bmr = 10*p.poids + 6.25*p.taille - 5*p.age + (p.sexe==='homme'?5:-161); // Mifflin-St Jeor
   const act = {sedentaire:1.2, actif:1.55, tres:1.725}[p.activite];
-  const objMult = {perte:0.8, maintien:1.0, masse:1.15}[p.objectif];
+  const objMult = {perte:0.8, seche:0.78, maintien:1.0, masse:1.15}[p.objectif];
   const cal = Math.round((bmr*act*objMult)/10)*10;
-  const prot = Math.round(p.poids*({perte:2.0, maintien:1.8, masse:2.0}[p.objectif]));
-  const lip = Math.round(p.poids*0.9);
+  const prot = Math.round(p.poids*({perte:2.0, seche:2.4, maintien:1.8, masse:2.0}[p.objectif]));
+  const lip = Math.round(p.poids*({perte:0.9, seche:0.8, maintien:0.9, masse:1.0}[p.objectif]));
   let gluc = Math.round((cal - prot*4 - lip*9)/4); if(gluc<0) gluc=0;
   const parRepas = Math.min(CAL_MAX, Math.round((cal/3)/10)*10);
   return {...p, calories:cal, prot, gluc, lip, parRepas};
@@ -723,6 +725,7 @@ function renderTracker(){
   el.innerHTML=`<div class="trk">
     <div class="trk-top">
       <span class="obj">${OBJ_LABEL[p.objectif]}</span>
+      <span class="trk-kg">${p.poids} kg</span>
       <button class="trk-edit" id="trkEdit">Modifier</button>
     </div>
     <div class="trk-remain ${over?'over':''}">
@@ -755,7 +758,7 @@ function initProfile(){
 /* ---------- Mon frigo (filtre par ingrédients) ---------- */
 const FR_STAPLES=["sel","poivre","huile","ail","oignon","farine","levure","maizena","vinaigre","eau","sucre","miel","cannelle","cumin","paprika","curry","curcuma","muscade","herbes","thym","origan","basilic","persil","menthe","coriandre","ciboulette","aneth","gingembre","piment","cinq-epices","ras el hanout","cacao","sesame","citron","vanille","bouillon","cafe","glacons","agar-agar","moutarde","capres","cornichons","olives","concentre de tomate","nuoc-mam","miso","ponzu","beurre","bechamel","celeri","cajun","epices"];
 const FR_GROUPS=[
- ["Féculents & bases",[["Riz",["riz"]],["Pâtes",["pates","macaroni"]],["Quinoa",["quinoa"]],["Boulgour",["boulgour"]],["Semoule",["semoule"]],["Nouilles",["nouille"]],["Avoine",["flocons d'avoine","avoine"]],["Pain",["pain","bagel","panini"]],["Tortilla",["tortilla","coques a tacos"]],["Pomme de terre",["pomme de terre"]],["Patate douce",["patate douce","patate"]],["Lentilles",["lentille"]],["Pois chiches",["pois chiche"]],["Haricots",["haricots rouge","haricots noir"]],["Maïs",["mais"]],["Chapelure/panko",["chapelure"]],["Galettes de riz",["galettes de riz"]],["Panais",["panais"]]]],
+ ["Féculents & bases",[["Riz",["riz"]],["Pâtes",["pates","macaroni"]],["Quinoa",["quinoa"]],["Boulgour",["boulgour"]],["Semoule",["semoule"]],["Nouilles",["nouille"]],["Avoine",["flocons d'avoine","avoine"]],["Pain",["pain","bagel","panini"]],["Tortilla",["tortilla","coques a tacos"]],["Pomme de terre",["pomme de terre","pommes de terre"]],["Patate douce",["patate douce","patate"]],["Lentilles",["lentille"]],["Pois chiches",["pois chiche"]],["Haricots",["haricots rouge","haricots noir"]],["Maïs",["mais"]],["Chapelure/panko",["chapelure"]],["Galettes de riz",["galettes de riz"]],["Panais",["panais"]]]],
  ["Protéines",[["Poulet",["poulet"]],["Dinde",["dinde"]],["Bœuf",["boeuf"]],["Saumon",["saumon"]],["Thon",["thon"]],["Poisson blanc",["cabillaud","colin"]],["Crevettes",["crevette"]],["Œufs",["oeuf"]],["Tofu",["tofu"]],["Halloumi",["halloumi"]],["Jambon de dinde",["jambon","bacon de dinde"]],["Whey/protéine",["whey"]],["Saucisse",["saucisse"]],["Falafels",["falafel"]]]],
  ["Légumes",[["Courgette",["courgette"]],["Brocoli",["brocoli"]],["Carotte",["carotte"]],["Poivron",["poivron"]],["Tomate",["tomate"]],["Épinards",["epinard"]],["Champignons",["champignon"]],["Aubergine",["aubergine"]],["Chou / chou-fleur",["chou","choux"]],["Haricots verts",["haricots vert"]],["Asperges",["asperge"]],["Concombre",["concombre"]],["Salade",["salade","romaine"]],["Betterave",["betterave"]],["Courge/butternut",["butternut","courge"]],["Petits pois",["petits pois"]]]],
  ["Laitiers & fromages",[["Yaourt grec",["yaourt"]],["Fromage blanc",["fromage blanc"]],["Skyr",["skyr"]],["Cottage cheese",["cottage"]],["Lait",["lait"]],["Lait de coco",["lait de coco"]],["Crème",["creme"]],["Fromage",["mozzarella","cheddar","feta","parmesan","emmental","chevre","fromage rape","fromage frais"]],["Beurre de cacahuète",["beurre de cacahuete","cacahuete"]]]],
