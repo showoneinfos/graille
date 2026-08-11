@@ -274,6 +274,24 @@
   .fr-go{flex:1;background:var(--rust);color:#fff;border:none;border-radius:12px;padding:14px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
   .fr-go:hover{background:var(--rust-deep)}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .add-shop{display:block;width:100%;margin:-6px 0 22px;padding:13px;border:1.5px solid var(--olive);border-radius:12px;background:var(--card);color:var(--olive);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
+  .add-shop:hover{background:var(--olive);color:#fff}
+  .add-shop.done{background:var(--olive);color:#fff;border-color:var(--olive)}
+  .shop-fab{position:fixed;right:18px;bottom:18px;z-index:55;width:56px;height:56px;border-radius:50%;border:none;background:var(--rust);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(187,80,40,.4);transition:transform .15s,box-shadow .15s}
+  .shop-fab:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 8px 22px rgba(187,80,40,.5)}
+  .shop-badge{position:absolute;top:-3px;right:-3px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--ink);color:#fff;font-size:12px;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--paper)}
+  .shop-badge.show{display:flex}
+  .shop-empty{text-align:center;color:var(--ink2);font-family:'Fraunces',serif;font-style:italic;font-size:15px;padding:40px 10px;line-height:1.6}
+  .shop-group{margin-bottom:20px}
+  .shop-group h3{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--rust);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .shop-item{display:flex;align-items:center;gap:11px;padding:9px 2px}
+  .shop-item.got .shop-nom,.shop-item.got .shop-qty{text-decoration:line-through;opacity:.45}
+  .shop-check{flex:0 0 auto;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:var(--card);color:var(--olive);font-weight:900;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .shop-item.got .shop-check{background:var(--olive);color:#fff;border-color:var(--olive)}
+  .shop-nom{flex:1;font-weight:600;font-size:14px;color:var(--ink)}
+  .shop-qty{font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap}
+  .shop-rm{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:none;background:none;color:var(--ink2);font-size:14px;cursor:pointer}
+  .shop-rm:hover{color:var(--rust)}
 </style>
 </head>
 <body>
@@ -353,6 +371,24 @@
   <div class="fr-bar"><div class="fr-inner">
     <button class="fr-clear" id="frClear">Tout décocher</button>
     <button class="fr-go" id="frGo">Voir les recettes</button>
+  </div></div>
+</div>
+
+<button class="shop-fab" id="shopFab" aria-label="Ma liste de courses">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+  <span class="shop-badge" id="shopBadge"></span>
+</button>
+<div class="fridge" id="shop">
+  <div class="fridge-inner">
+    <button class="fr-skip" id="shopClose">Fermer</button>
+    <div class="ob-eyebrow">Ma liste</div>
+    <h1 class="ob-title">Liste de courses</h1>
+    <p class="ob-sub">Coche ce que tu mets dans le panier, retire ce que tu as déjà chez toi.</p>
+    <div id="shopList"></div>
+  </div>
+  <div class="fr-bar"><div class="fr-inner">
+    <button class="fr-clear" id="shopClear">Vider</button>
+    <button class="fr-go" id="shopDone">Terminé</button>
   </div></div>
 </div>
 
@@ -639,6 +675,7 @@ function drawSheet(){
       </div>
       ${macroBlock}
       <button class="add-day" id="addDay">Ajouter à ma journée · +<span id="addKcal">${activeTarget}</span> kcal</button>
+      <button class="add-shop" id="addShop">🛒 Ajouter à ma liste de courses</button>
       <div class="block-title">Ingrédients</div>
       <div class="serve-note">Quantités pour 1 personne · ajustées à tes réglages</div>
       <ul class="ingredients">${ingList}</ul>
@@ -663,6 +700,12 @@ function drawSheet(){
     addToJournal(activeRecipe.id, activeRecipe.nom, activeTarget);
     addBtn.textContent='Ajouté ✓'; addBtn.classList.add('done');
     setTimeout(closeSheet, 550);
+  });
+  const shopBtn=document.getElementById('addShop');
+  shopBtn.addEventListener('click',()=>{
+    addRecipeToShop(activeRecipe);
+    shopBtn.textContent='Ajouté à ta liste ✓'; shopBtn.classList.add('done');
+    updateShopBadge();
   });
 }
 function updateValues(){
@@ -814,6 +857,63 @@ function today(){return new Date().toISOString().slice(0,10);}
 function loadJournal(){try{const s=localStorage.getItem('graille_journal');const j=s?JSON.parse(s):null;if(!j||j.date!==today())return {date:today(),items:[]};return j;}catch(e){return {date:today(),items:[]};}}
 function saveJournal(j){try{localStorage.setItem('graille_journal',JSON.stringify(j));}catch(e){}}
 let JOURNAL = loadJournal();
+
+/* ---------- Liste de courses ---------- */
+function loadShop(){try{return JSON.parse(localStorage.getItem('graille_shop'))||[];}catch(e){return [];}}
+function saveShop(){try{localStorage.setItem('graille_shop',JSON.stringify(SHOP));}catch(e){}}
+let SHOP=loadShop();
+function mergeShop(nom,qty,unite){
+  const key=frNorm(nom)+'|'+(unite||'');
+  const ex=SHOP.find(i=>frNorm(i.nom)+'|'+(i.unite||'')===key);
+  if(ex){ ex.qty+=qty; ex.got=false; } else { SHOP.push({nom,qty,unite:unite||'',got:false}); }
+}
+function addRecipeToShop(r){
+  const ms=macroState();
+  (r.ingredients||[]).forEach(ing=>{
+    const base=ing.quantite/r.portions;
+    const n=frNorm(ing.nom||"");
+    const cat=isProtIng(n)?'prot':(isCarbIng(n)?'carb':'other');
+    const fac=cat==='prot'?ms.fProt:(cat==='carb'?ms.fCarb:ms.f);
+    mergeShop(ing.nom, base*fac, ing.unite);
+  });
+  saveShop();
+}
+const SHOP_ORDER=["Féculents & bases","Protéines","Légumes","Laitiers & fromages","Fruits","Sauces & condiments","Épicerie & basiques","Autre"];
+function shopGroup(nom){
+  const n=frNorm(nom);
+  for(const [g,items] of FR_GROUPS){ for(const it of items){ if(it[1].some(k=>frWm(n,k))) return g; } }
+  if(FR_STAPLES.some(k=>frWm(n,k))) return "Épicerie & basiques";
+  return "Autre";
+}
+function updateShopBadge(){
+  const n=SHOP.filter(i=>!i.got).length;
+  const b=document.getElementById('shopBadge');
+  if(b){ b.textContent=n||''; b.classList.toggle('show', n>0); }
+}
+function renderShop(){
+  const box=document.getElementById('shopList');
+  if(!SHOP.length){ box.innerHTML='<p class="shop-empty">Ta liste est vide.<br>Ouvre une recette et clique sur « Ajouter à ma liste de courses ».</p>'; return; }
+  const groups={};
+  SHOP.forEach((it,idx)=>{ const g=shopGroup(it.nom); (groups[g]=groups[g]||[]).push({it,idx}); });
+  box.innerHTML=SHOP_ORDER.filter(g=>groups[g]).map(g=>
+    `<div class="shop-group"><h3>${g}</h3>`+
+    groups[g].map(({it,idx})=>`<div class="shop-item${it.got?' got':''}">
+       <button class="shop-check" data-i="${idx}">${it.got?'✓':''}</button>
+       <span class="shop-nom">${it.nom}</span>
+       <span class="shop-qty">${displayQty(it.qty,it.unite)} ${it.unite||''}</span>
+       <button class="shop-rm" data-i="${idx}" aria-label="Retirer">✕</button>
+     </div>`).join('')+`</div>`
+  ).join('');
+  box.querySelectorAll('.shop-check').forEach(b=>b.addEventListener('click',()=>{SHOP[+b.dataset.i].got=!SHOP[+b.dataset.i].got;saveShop();renderShop();updateShopBadge();}));
+  box.querySelectorAll('.shop-rm').forEach(b=>b.addEventListener('click',()=>{SHOP.splice(+b.dataset.i,1);saveShop();renderShop();updateShopBadge();}));
+}
+function openShop(){renderShop();document.getElementById('shop').classList.add('open');document.body.style.overflow='hidden';}
+function closeShop(){document.getElementById('shop').classList.remove('open');document.body.style.overflow='';}
+document.getElementById('shopFab').addEventListener('click',openShop);
+document.getElementById('shopClose').addEventListener('click',closeShop);
+document.getElementById('shopDone').addEventListener('click',closeShop);
+document.getElementById('shopClear').addEventListener('click',()=>{ if(SHOP.length){ SHOP=[]; saveShop(); renderShop(); updateShopBadge(); } });
+updateShopBadge();
 function consumed(){return JOURNAL.items.reduce((s,i)=>s+i.kcal,0);}
 function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal(JOURNAL);renderTracker();}
 function resetJournal(){JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);renderTracker();}
