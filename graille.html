@@ -396,7 +396,7 @@ let RECETTES = [];
 
 const CATS_ORDER = ["Fast food","Bowls","Végé","Légumes","Dessert","Petit-déj","Encas"];
 const MOMENTS_ORDER = ["Petit-déj","Encas 10h","Déjeuner","Post-training","Encas 16h","Dîner"];
-const CAT_TINT = {"Fast food":["#ECE0C9","#E2D2B2"],"Bowls":["#DEE4D2","#CED8BC"],"Végé":["#DAE2D0","#C8D5B6"],"Légumes":["#DCE3CF","#CCD8B8"],"Dessert":["#EBDACD","#DFC9B6"],"Petit-déj":["#EDE3CE","#E1D2B4"],"Encas":["#E7DEC9","#D8CBB0"],"Sauce":["#E6DAC6","#D6C4A6"],"Express":["#E3DEC6","#D3CBA4"],"Salade":["#D9E3CA","#C4D5AC"]};
+const CAT_TINT = {"Fast food":["#ECE0C9","#E2D2B2"],"Bowls":["#DEE4D2","#CED8BC"],"Végé":["#DAE2D0","#C8D5B6"],"Légumes":["#DCE3CF","#CCD8B8"],"Dessert":["#EBDACD","#DFC9B6"],"Petit-déj":["#EDE3CE","#E1D2B4"],"Encas":["#E7DEC9","#D8CBB0"],"Sauce":["#E6DAC6","#D6C4A6"],"Express":["#E3DEC6","#D3CBA4"],"Salade":["#D9E3CA","#C4D5AC"],"Monde":["#E4DAC6","#D3C3A0"]};
 const BASES_ORDER = ["Poulet","Dinde","Bœuf","Saumon","Poisson","Œuf","Sans"];
 const BASE_LABEL = {"Poulet":"Poulet","Dinde":"Dinde","Bœuf":"Bœuf","Saumon":"Saumon","Poisson":"Poisson","Œuf":"Œuf","Sans":"Végétarien"};
 
@@ -447,7 +447,7 @@ function buildCatChips(){
   chipsCat.innerHTML=all.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
   chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>onPrimaryClick(el.dataset.cat)));
 }
-const CAT_TYPES=[["Fast food","Fast food"],["Bowls","Bowls"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Sauces","Sauce"]];
+const CAT_TYPES=[["Fast food","Fast food"],["Bowls","Bowls"],["Monde","Monde"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Sauces","Sauce"]];
 function typePresent(v){
   if(v==="@snack") return RECETTES.some(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
   return RECETTES.some(r=>r.categorie===v);
@@ -476,7 +476,7 @@ function poolFor(sel){
   if(sel==="Salades") return RECETTES.filter(r=>r.categorie==="Salade");
   if(sel==="Desserts") return RECETTES.filter(r=>r.categorie==="Dessert");
   if(sel==="Snacking") return RECETTES.filter(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
-  if(["Fast food","Bowls","Express","Végé","Légumes"].includes(sel)) return RECETTES.filter(r=>r.categorie===sel);
+  if(["Fast food","Bowls","Express","Végé","Légumes","Monde"].includes(sel)) return RECETTES.filter(r=>r.categorie===sel);
   return RECETTES.filter(r=>(r.moment||[]).includes(sel));
 }
 function basesFor(sel){
