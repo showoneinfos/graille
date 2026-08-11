@@ -274,7 +274,24 @@
   .fr-go{flex:1;background:var(--rust);color:#fff;border:none;border-radius:12px;padding:14px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
   .fr-go:hover{background:var(--rust-deep)}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-  .trk-shop{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:var(--rust);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
+  .trk-menu{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
+  .trk-menu:hover{background:#455531;transform:translateY(-1px)}
+  .menu-moments{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .menu-chip{padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-family:inherit;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;transition:all .12s}
+  .menu-chip:hover{border-color:var(--olive)}
+  .menu-chip[aria-pressed="true"]{background:var(--olive);color:#fff;border-color:var(--olive)}
+  .menu-hint{color:var(--ink2);font-style:italic;font-family:'Fraunces',serif;padding:16px 2px}
+  .menu-total{margin:18px 0 12px;font-family:'Fraunces',serif;font-size:17px;color:var(--ink)}
+  .menu-total b{color:var(--rust)}
+  .menu-total span{font-size:13px;color:var(--ink2);font-style:italic}
+  .menu-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .menu-mom{flex:0 0 92px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--rust)}
+  .menu-recipe{flex:1;text-align:left;background:none;border:none;font-family:inherit;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;padding:0}
+  .menu-recipe:hover{color:var(--rust);text-decoration:underline}
+  .menu-kcal{font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap}
+  .menu-swap{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--olive);font-size:15px;cursor:pointer}
+  .menu-swap:hover{border-color:var(--olive);background:var(--olive);color:#fff}
+  .trk-shop{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:13px;border:none;border-radius:12px;background:var(--rust);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .trk-shop:hover{background:var(--rust-deep);transform:translateY(-1px)}
   .add-shop{display:block;width:100%;margin:-6px 0 22px;padding:13px;border:1.5px solid var(--olive);border-radius:12px;background:var(--card);color:var(--olive);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .add-shop:hover{background:var(--olive);color:#fff}
@@ -380,6 +397,21 @@
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
   <span class="shop-badge" id="shopBadge"></span>
 </button>
+<div class="fridge" id="menu">
+  <div class="fridge-inner">
+    <button class="fr-skip" id="menuClose">Fermer</button>
+    <div class="ob-eyebrow">Menu du jour</div>
+    <h1 class="ob-title">Compose ta journée</h1>
+    <p class="ob-sub">Coche les repas que tu veux. GRAILLE te propose un menu équilibré qui vise tes calories — tu n'as rien à choisir.</p>
+    <div class="menu-moments" id="menuMoments"></div>
+    <div id="menuResult"></div>
+  </div>
+  <div class="fr-bar"><div class="fr-inner">
+    <button class="fr-clear" id="menuRegen" style="display:none">Régénérer</button>
+    <button class="fr-go" id="menuGen">Générer mon menu</button>
+  </div></div>
+</div>
+
 <div class="fridge" id="shop">
   <div class="fridge-inner">
     <button class="fr-skip" id="shopClose">Fermer</button>
@@ -864,13 +896,15 @@ function mergeShop(nom,qty,unite){
   const ex=SHOP.find(i=>frNorm(i.nom)+'|'+(i.unite||'')===key);
   if(ex){ ex.qty+=qty; ex.got=false; } else { SHOP.push({nom,qty,unite:unite||'',got:false}); }
 }
-function addRecipeToShop(r){
-  const ms=macroState();
+function addRecipeToShop(r, targetKcal){
+  let fP,fC,fO;
+  if(targetKcal!=null){ const f=targetKcal/r.calories; fP=fC=fO=f; }
+  else { const ms=macroState(); fP=ms.fProt; fC=ms.fCarb; fO=ms.f; }
   (r.ingredients||[]).forEach(ing=>{
     const base=ing.quantite/r.portions;
     const n=frNorm(ing.nom||"");
     const cat=isProtIng(n)?'prot':(isCarbIng(n)?'carb':'other');
-    const fac=cat==='prot'?ms.fProt:(cat==='carb'?ms.fCarb:ms.f);
+    const fac=cat==='prot'?fP:(cat==='carb'?fC:fO);
     mergeShop(ing.nom, base*fac, ing.unite);
   });
   saveShop();
@@ -911,6 +945,80 @@ document.getElementById('shopClose').addEventListener('click',closeShop);
 document.getElementById('shopDone').addEventListener('click',closeShop);
 document.getElementById('shopClear').addEventListener('click',()=>{ if(SHOP.length){ SHOP=[]; saveShop(); renderShop(); updateShopBadge(); } });
 updateShopBadge();
+
+/* ---------- Générateur de menu du jour ---------- */
+const MENU_MOMENTS=["Petit-déj","Encas 10h","Déjeuner","Post-training","Encas 16h","Dîner"];
+const MENU_WEIGHTS={"Petit-déj":25,"Encas 10h":10,"Déjeuner":30,"Post-training":10,"Encas 16h":10,"Dîner":25};
+let menuSel=new Set(["Petit-déj","Déjeuner","Dîner"]);
+let MENU=[]; let menuDone=false;
+function renderMenuMoments(){
+  const box=document.getElementById('menuMoments');
+  box.innerHTML=MENU_MOMENTS.map(m=>`<button class="menu-chip" data-m="${m}" aria-pressed="${menuSel.has(m)}">${m}</button>`).join('');
+  box.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+    const m=b.dataset.m; if(menuSel.has(m)) menuSel.delete(m); else menuSel.add(m);
+    b.setAttribute('aria-pressed', menuSel.has(m));
+  }));
+}
+function generateMenu(){
+  const p=loadProfile(); if(!p){ closeMenu(); openOnboard(); return; }
+  const sel=MENU_MOMENTS.filter(m=>menuSel.has(m));
+  const res=document.getElementById('menuResult');
+  if(!sel.length){ res.innerHTML='<p class="menu-hint">Coche au moins un repas.</p>'; return; }
+  const sumW=sel.reduce((s,m)=>s+MENU_WEIGHTS[m],0);
+  const used=new Set(); MENU=[];
+  sel.forEach(m=>{
+    let alloc=Math.round(p.calories*MENU_WEIGHTS[m]/sumW/10)*10;
+    alloc=Math.max(CAL_MIN, Math.min(CAL_MAX, alloc));
+    let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
+    if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
+    if(!pool.length) return;
+    const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
+    MENU.push({moment:m, recipe:r, kcal:alloc});
+  });
+  menuDone=true;
+  renderMenuResult(p);
+  document.getElementById('menuRegen').style.display='';
+  document.getElementById('menuGen').textContent='Ajouter à ma journée';
+}
+function renderMenuResult(p){
+  const res=document.getElementById('menuResult');
+  if(!MENU.length){ res.innerHTML=''; return; }
+  const total=MENU.reduce((s,it)=>s+it.kcal,0);
+  res.innerHTML=`<div class="menu-total">Menu du jour · <b>${total}</b> kcal <span>(objectif ${p.calories})</span></div>`+
+    MENU.map((it,i)=>`<div class="menu-item">
+      <div class="menu-mom">${it.moment}</div>
+      <button class="menu-recipe" data-i="${i}">${it.recipe.nom}</button>
+      <span class="menu-kcal">${it.kcal} kcal</span>
+      <button class="menu-swap" data-i="${i}" title="Changer cette recette">↻</button>
+    </div>`).join('');
+  res.querySelectorAll('.menu-recipe').forEach(b=>b.addEventListener('click',()=>{
+    const it=MENU[+b.dataset.i]; openSheet(it.recipe, it.kcal);
+  }));
+  res.querySelectorAll('.menu-swap').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.i, it=MENU[i], m=it.moment;
+    const usedIds=new Set(MENU.map(x=>x.recipe.id));
+    let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
+    if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
+    if(pool.length){ MENU[i]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; renderMenuResult(loadProfile()); }
+  }));
+}
+function addMenuToDay(){
+  if(!MENU.length) return;
+  MENU.forEach(it=>{ addToJournal(it.recipe.id, it.recipe.nom, it.kcal); addRecipeToShop(it.recipe, it.kcal); });
+  updateShopBadge(); closeMenu();
+}
+function openMenu(){
+  menuDone=false; MENU=[];
+  renderMenuMoments();
+  document.getElementById('menuResult').innerHTML='';
+  document.getElementById('menuRegen').style.display='none';
+  document.getElementById('menuGen').textContent='Générer mon menu';
+  document.getElementById('menu').classList.add('open'); document.body.style.overflow='hidden';
+}
+function closeMenu(){ document.getElementById('menu').classList.remove('open'); document.body.style.overflow=''; }
+document.getElementById('menuClose').addEventListener('click',closeMenu);
+document.getElementById('menuRegen').addEventListener('click',generateMenu);
+document.getElementById('menuGen').addEventListener('click',()=>{ if(menuDone) addMenuToDay(); else generateMenu(); });
 function consumed(){return JOURNAL.items.reduce((s,i)=>s+i.kcal,0);}
 function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal(JOURNAL);renderTracker();}
 function resetJournal(){JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);renderTracker();}
@@ -950,9 +1058,11 @@ function renderTracker(){
       <span><b>${n}</b> recette${n>1?'s':''}</span>
     </div>
     ${liste}
+    <button class="trk-menu" id="trkMenu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>Composer mon menu du jour</button>
     <button class="trk-shop" id="trkShop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Ma liste de courses${SHOP.length?` · ${SHOP.length}`:''}</button>
   </div>`;
   document.getElementById('trkEdit').addEventListener('click',openOnboard);
+  const mnb=document.getElementById('trkMenu'); if(mnb) mnb.addEventListener('click',openMenu);
   const shb=document.getElementById('trkShop'); if(shb) shb.addEventListener('click',openShop);
   const rb=document.getElementById('trkReset'); if(rb) rb.addEventListener('click',resetJournal);
   el.querySelectorAll('.trk-rm').forEach(b=>b.addEventListener('click',()=>removeFromJournal(+b.dataset.i)));
