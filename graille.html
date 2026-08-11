@@ -677,7 +677,6 @@ function drawSheet(){
       </div>
       ${macroBlock}
       <button class="add-day" id="addDay">Ajouter à ma journée · +<span id="addKcal">${activeTarget}</span> kcal</button>
-      <button class="add-shop" id="addShop">🛒 Ajouter à ma liste de courses</button>
       <div class="block-title">Ingrédients</div>
       <div class="serve-note">Quantités pour 1 personne · ajustées à tes réglages</div>
       <ul class="ingredients">${ingList}</ul>
@@ -704,12 +703,6 @@ function drawSheet(){
     updateShopBadge();
     addBtn.textContent='Ajouté à ta journée + liste ✓'; addBtn.classList.add('done');
     setTimeout(closeSheet, 650);
-  });
-  const shopBtn=document.getElementById('addShop');
-  shopBtn.addEventListener('click',()=>{
-    addRecipeToShop(activeRecipe);
-    shopBtn.textContent='Ajouté à ta liste ✓'; shopBtn.classList.add('done');
-    updateShopBadge();
   });
 }
 function updateValues(){
