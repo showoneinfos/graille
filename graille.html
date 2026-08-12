@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GRAILLE — Mange ce que tu aimes, atteins ton objectif</title>
+<title>GrailleLight — Mange ce que tu aimes, atteins ton objectif</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&display=swap" rel="stylesheet">
@@ -24,6 +24,7 @@
   .brandrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .logo{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(30px,8vw,42px);line-height:.9;letter-spacing:-.5px;color:var(--ink)}
   .logo b{color:var(--rust);font-weight:900}
+  .logo-light{display:inline-block;vertical-align:super;margin-left:6px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:.26em;letter-spacing:3px;color:var(--olive);border:1.5px solid var(--olive);border-radius:6px;padding:3px 6px;transform:translateY(-2px)}
   .tagline{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:clamp(14px,3.6vw,17px);line-height:1.25;color:var(--ink2);margin-top:6px}
   /* TOOLBAR */
   .toolbar{background:var(--paper);border-bottom:1px solid var(--line);max-width:1180px;margin:0 auto}
@@ -384,7 +385,7 @@
     <button class="fr-skip" id="frSkip">Fermer</button>
     <div class="ob-eyebrow">Mon frigo</div>
     <h1 class="ob-title">Cuisine avec ce que tu as</h1>
-    <p class="ob-sub">Coche les ingrédients que tu as sous la main, GRAILLE te montre les recettes que tu peux faire. (Le sel, le poivre, l'huile et les épices sont supposés dans tes placards.)</p>
+    <p class="ob-sub">Coche les ingrédients que tu as sous la main, GrailleLight te montre les recettes que tu peux faire. (Le sel, le poivre, l'huile et les épices sont supposés dans tes placards.)</p>
     <div id="frGroups"></div>
   </div>
   <div class="fr-bar"><div class="fr-inner">
@@ -402,7 +403,7 @@
     <button class="fr-skip" id="menuClose">Fermer</button>
     <div class="ob-eyebrow">Menu du jour</div>
     <h1 class="ob-title">Compose ta journée</h1>
-    <p class="ob-sub">Coche les repas que tu veux. GRAILLE te propose un menu équilibré qui vise tes calories — tu n'as rien à choisir.</p>
+    <p class="ob-sub">Coche les repas que tu veux. GrailleLight te propose un menu équilibré qui vise tes calories — tu n'as rien à choisir.</p>
     <div class="menu-moments" id="menuMoments"></div>
     <div id="menuResult"></div>
   </div>
@@ -428,7 +429,7 @@
 
 <header>
   <div class="brandrow">
-    <div class="logo">GRAI<b>LL</b>E</div>
+    <div class="logo">GRAI<b>LL</b>E<span class="logo-light">LIGHT</span></div>
     <button class="hdr-cta" id="openCalc">Mes calories</button>
   </div>
   <p class="tagline">Mange ce que tu aimes, atteins ton objectif.</p>
@@ -458,7 +459,7 @@
 
 <main><div class="perso" id="perso"></div><div class="grid" id="grid"></div></main>
 
-<footer>GRAILLE — fait avec soin en Corse</footer>
+<footer>GrailleLight — fait avec soin en Corse</footer>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
   <div class="sheet" id="sheet"></div>
