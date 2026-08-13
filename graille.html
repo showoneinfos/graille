@@ -162,6 +162,22 @@
   .cuisson-strip .chip .v{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--ink)}
   .cuisson-strip .sep{width:1px;background:var(--line);margin:0 8px}
   footer{text-align:center;padding:34px 20px 48px;color:var(--ink2);font-size:12px;font-family:'Fraunces',serif;font-style:italic}
+  .contact-link{margin-top:10px;background:none;border:none;font-family:'Fraunces',serif;font-style:italic;font-size:13px;color:var(--rust);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .contact-link:hover{color:var(--rust-deep)}
+  .contact-overlay{position:fixed;inset:0;z-index:70;background:rgba(35,32,22,.5);display:none;align-items:center;justify-content:center;padding:20px}
+  .contact-overlay.open{display:flex}
+  .contact-box{position:relative;background:var(--paper);border-radius:22px;max-width:420px;width:100%;padding:38px 30px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .contact-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;color:var(--ink2);cursor:pointer}
+  .contact-title{font-family:'Fraunces',serif;font-weight:600;font-size:26px;color:var(--ink);margin:6px 0 12px}
+  .contact-sub{font-size:14.5px;color:var(--ink2);line-height:1.55;margin-bottom:22px}
+  .contact-mail{font-family:'DM Sans',sans-serif;font-weight:800;font-size:16px;color:var(--rust);background:var(--card);border:1.5px dashed var(--rust);border-radius:12px;padding:14px;margin-bottom:16px;word-break:break-all}
+  .contact-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .contact-copy,.contact-write{flex:1;min-width:140px;padding:13px;border-radius:12px;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+  .contact-copy{background:var(--card);border:1.5px solid var(--olive);color:var(--olive)}
+  .contact-copy:hover{background:var(--olive);color:#fff}
+  .contact-copy.done{background:var(--olive);color:#fff}
+  .contact-write{background:var(--rust);border:none;color:#fff}
+  .contact-write:hover{background:var(--rust-deep)}
   /* ---------- Bouton header + bannière perso ---------- */
   .hdr-cta{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust);background:var(--card);border:1.5px solid var(--rust);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:inherit}
   .hdr-cta:hover{background:var(--rust);color:#fff}
@@ -459,7 +475,21 @@
 
 <main><div class="perso" id="perso"></div><div class="grid" id="grid"></div></main>
 
-<footer>GrailleLight — fait avec soin en Corse</footer>
+<footer>GrailleLight — fait avec soin en Corse<br><button class="contact-link" id="contactLink">Nous contacter</button></footer>
+
+<div class="contact-overlay" id="contactOverlay">
+  <div class="contact-box">
+    <button class="contact-close" id="contactClose" aria-label="Fermer">✕</button>
+    <div class="ob-eyebrow">Contact</div>
+    <h2 class="contact-title">Une idée de partenariat ?</h2>
+    <p class="contact-sub">Vous êtes <b>annonceur</b> ou vous avez une <b>idée de partenariat</b> ? Écrivez-nous, on vous répond avec plaisir.</p>
+    <div class="contact-mail" id="contactMail">contact.graillelight@gmail.com</div>
+    <div class="contact-actions">
+      <button class="contact-copy" id="contactCopy">Copier l'adresse</button>
+      <a class="contact-write" href="mailto:contact.graillelight@gmail.com?subject=Partenariat%20GrailleLight">Écrire un mail</a>
+    </div>
+  </div>
+</div>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
   <div class="sheet" id="sheet"></div>
@@ -1020,6 +1050,23 @@ function closeMenu(){ document.getElementById('menu').classList.remove('open'); 
 document.getElementById('menuClose').addEventListener('click',closeMenu);
 document.getElementById('menuRegen').addEventListener('click',generateMenu);
 document.getElementById('menuGen').addEventListener('click',()=>{ if(menuDone) addMenuToDay(); else generateMenu(); });
+
+/* ---------- Contact ---------- */
+(function(){
+  const ov=document.getElementById('contactOverlay');
+  const open=()=>ov.classList.add('open'), close=()=>ov.classList.remove('open');
+  document.getElementById('contactLink').addEventListener('click',open);
+  document.getElementById('contactClose').addEventListener('click',close);
+  ov.addEventListener('click',e=>{ if(e.target===ov) close(); });
+  document.getElementById('contactCopy').addEventListener('click',async function(){
+    const mail=document.getElementById('contactMail').textContent.trim();
+    try{ await navigator.clipboard.writeText(mail); }catch(e){
+      const t=document.createElement('textarea'); t.value=mail; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(_){} t.remove();
+    }
+    this.textContent='Adresse copiée ✓'; this.classList.add('done');
+    setTimeout(()=>{ this.textContent="Copier l'adresse"; this.classList.remove('done'); },1800);
+  });
+})();
 function consumed(){return JOURNAL.items.reduce((s,i)=>s+i.kcal,0);}
 function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal(JOURNAL);renderTracker();}
 function resetJournal(){JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);renderTracker();}
