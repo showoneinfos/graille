@@ -178,9 +178,17 @@
   .contact-copy.done{background:var(--olive);color:#fff}
   .contact-write{background:var(--rust);border:none;color:#fff}
   .contact-write:hover{background:var(--rust-deep)}
+  .legal-box{max-width:560px;text-align:left;max-height:85vh;overflow-y:auto}
+  .legal-content h4{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--rust);margin:18px 0 6px}
+  .legal-content p{font-size:13.5px;color:var(--ink2);line-height:1.6;margin-bottom:8px}
+  .legal-content .legal-note{margin-top:16px;font-style:italic;font-size:12.5px;color:var(--ink2);border-top:1px solid var(--line);padding-top:12px}
   /* ---------- Bouton header + bannière perso ---------- */
   .hdr-cta{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust);background:var(--card);border:1.5px solid var(--rust);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:inherit}
   .hdr-cta:hover{background:var(--rust);color:#fff}
+  .hdr-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .hdr-contact{display:inline-flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);background:none;border:1.5px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:inherit}
+  .hdr-contact:hover{border-color:var(--ink);color:var(--ink)}
+  @media(max-width:520px){ .hdr-contact{display:none} }
   #perso{display:none;margin-bottom:20px}
   #perso.show{display:block}
   .trk{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
@@ -446,7 +454,10 @@
 <header>
   <div class="brandrow">
     <div class="logo">GRAI<b>LL</b>E<span class="logo-light">LIGHT</span></div>
-    <button class="hdr-cta" id="openCalc">Mes calories</button>
+    <div class="hdr-actions">
+      <button class="hdr-contact" id="openContactTop">Nous contacter</button>
+      <button class="hdr-cta" id="openCalc">Mes calories</button>
+    </div>
   </div>
   <p class="tagline">Mange ce que tu aimes, atteins ton objectif.</p>
 </header>
@@ -475,7 +486,27 @@
 
 <main><div class="perso" id="perso"></div><div class="grid" id="grid"></div></main>
 
-<footer>GrailleLight — fait avec soin en Corse<br><button class="contact-link" id="contactLink">Nous contacter</button></footer>
+<footer>GrailleLight — fait avec soin en Corse<br><button class="contact-link" id="contactLink">Nous contacter</button> · <button class="contact-link" id="legalLink">Mentions légales</button></footer>
+
+<div class="contact-overlay" id="legalOverlay">
+  <div class="contact-box legal-box">
+    <button class="contact-close" id="legalClose" aria-label="Fermer">✕</button>
+    <div class="ob-eyebrow">Mentions légales &amp; avertissement</div>
+    <h2 class="contact-title">Mentions légales</h2>
+    <div class="legal-content">
+      <h4>Avertissement santé</h4>
+      <p>GrailleLight est un outil d'information et d'inspiration culinaire. Les calories, macros et besoins caloriques affichés sont des <b>estimations indicatives</b>, calculées à partir de formules standards, et ne remplacent en aucun cas l'avis d'un professionnel de santé.</p>
+      <p>GrailleLight n'est pas un service médical et ne fournit pas de conseil médical, diététique ou nutritionnel personnalisé. Avant de commencer un régime, une sèche, une prise de masse ou de modifier votre alimentation, <b>consultez un médecin ou un diététicien</b>, en particulier en cas de problème de santé, de grossesse, ou de trouble du comportement alimentaire.</p>
+      <h4>Responsabilité</h4>
+      <p>L'utilisation de GrailleLight se fait sous votre entière responsabilité. GrailleLight décline toute responsabilité quant aux conséquences directes ou indirectes liées à l'usage des informations, recettes, calculs ou menus proposés. Vous restez seul responsable de vos choix alimentaires et de votre santé.</p>
+      <h4>Données personnelles</h4>
+      <p>Vos informations (profil, poids, journée, liste de courses) sont enregistrées <b>uniquement sur votre appareil</b> (stockage local du navigateur). Elles ne sont ni transmises, ni vendues, ni partagées.</p>
+      <h4>Éditeur &amp; hébergement</h4>
+      <p>Site édité par GrailleLight. Contact : contact.graillelight@gmail.com. Hébergement : Vercel Inc. — Base de données : Supabase.</p>
+      <p class="legal-note">Ce texte est un modèle de base. Pense à le compléter avec ton statut (auto-entrepreneur, SIRET…) et à vérifier tes obligations légales (mentions obligatoires, RGPD) selon ton activité.</p>
+    </div>
+  </div>
+</div>
 
 <div class="contact-overlay" id="contactOverlay">
   <div class="contact-box">
@@ -1056,6 +1087,7 @@ document.getElementById('menuGen').addEventListener('click',()=>{ if(menuDone) a
   const ov=document.getElementById('contactOverlay');
   const open=()=>ov.classList.add('open'), close=()=>ov.classList.remove('open');
   document.getElementById('contactLink').addEventListener('click',open);
+  const top=document.getElementById('openContactTop'); if(top) top.addEventListener('click',open);
   document.getElementById('contactClose').addEventListener('click',close);
   ov.addEventListener('click',e=>{ if(e.target===ov) close(); });
   document.getElementById('contactCopy').addEventListener('click',async function(){
@@ -1066,6 +1098,12 @@ document.getElementById('menuGen').addEventListener('click',()=>{ if(menuDone) a
     this.textContent='Adresse copiée ✓'; this.classList.add('done');
     setTimeout(()=>{ this.textContent="Copier l'adresse"; this.classList.remove('done'); },1800);
   });
+  const legalLink=document.getElementById('legalLink'), legalOv=document.getElementById('legalOverlay');
+  if(legalLink && legalOv){
+    legalLink.addEventListener('click',()=>legalOv.classList.add('open'));
+    document.getElementById('legalClose').addEventListener('click',()=>legalOv.classList.remove('open'));
+    legalOv.addEventListener('click',e=>{ if(e.target===legalOv) legalOv.classList.remove('open'); });
+  }
 })();
 function consumed(){return JOURNAL.items.reduce((s,i)=>s+i.kcal,0);}
 function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal(JOURNAL);renderTracker();}
