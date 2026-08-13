@@ -164,6 +164,8 @@
   footer{text-align:center;padding:34px 20px 48px;color:var(--ink2);font-size:12px;font-family:'Fraunces',serif;font-style:italic}
   .contact-link{margin-top:10px;background:none;border:none;font-family:'Fraunces',serif;font-style:italic;font-size:13px;color:var(--rust);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
   .contact-link:hover{color:var(--rust-deep)}
+  .visit-counter{display:inline-block;margin-top:12px;font-size:11px;font-style:normal;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);opacity:.7}
+  .visit-counter b{font-family:'Fraunces',serif;font-weight:600;color:var(--rust)}
   .contact-overlay{position:fixed;inset:0;z-index:70;background:rgba(35,32,22,.5);display:none;align-items:center;justify-content:center;padding:20px}
   .contact-overlay.open{display:flex}
   .contact-box{position:relative;background:var(--paper);border-radius:22px;max-width:420px;width:100%;padding:38px 30px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -486,7 +488,7 @@
 
 <main><div class="perso" id="perso"></div><div class="grid" id="grid"></div></main>
 
-<footer>GrailleLight — fait avec soin en Corse<br><button class="contact-link" id="contactLink">Nous contacter</button> · <button class="contact-link" id="legalLink">Mentions légales</button></footer>
+<footer>GrailleLight — fait avec soin en Corse<br><button class="contact-link" id="contactLink">Nous contacter</button> · <button class="contact-link" id="legalLink">Mentions légales</button><br><span class="visit-counter"><b id="visitCount">…</b> visites</span></footer>
 
 <div class="contact-overlay" id="legalOverlay">
   <div class="contact-box legal-box">
@@ -1282,10 +1284,33 @@ async function chargerRecettes(){
   buildPrimary(); buildBaseChips(); buildFecChips(); update();
 }
 
+/* ---------- Compteur de visites ---------- */
+async function compterVisite(){
+  try{
+    // 1 visite comptée par session de navigateur (pas à chaque rechargement)
+    if(!sessionStorage.getItem('gl_counted')){
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/incr_visite`, {
+        method:'POST',
+        headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json' },
+        body:'{}'
+      });
+      if(res.ok){ sessionStorage.setItem('gl_counted','1'); }
+    }
+    // Récupère le total pour l'afficher
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/stats?id=eq.visites&select=valeur`, {
+      headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}` }
+    });
+    const d = await r.json();
+    const el = document.getElementById('visitCount');
+    if(el && d && d[0]){ el.textContent = Number(d[0].valeur).toLocaleString('fr-FR'); }
+  }catch(e){ /* silencieux : le compteur ne doit jamais casser le site */ }
+}
+
 /* init */
 grid.innerHTML = `<div class="empty">Chargement des recettes…</div>`;
 chargerRecettes();
 initProfile();
+compterVisite();
 </script>
 </body>
 </html>
