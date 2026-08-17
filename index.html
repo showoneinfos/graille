@@ -1360,6 +1360,19 @@ function toggleMenuDay(day){
   if(idx > -1) menuWeekState.selectedDays.splice(idx, 1);
   else menuWeekState.selectedDays.push(day);
   
+  // Mettre à jour le style des boutons
+  document.querySelectorAll('.chip-f').forEach(btn => {
+    if(btn.dataset.day && menuWeekState.selectedDays.includes(btn.dataset.day)){
+      btn.style.background = 'var(--rust)';
+      btn.style.color = 'white';
+      btn.style.borderColor = 'var(--rust)';
+    } else {
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }
+  });
+  
   updateMenuWeekUI();
 }
 
@@ -1385,7 +1398,10 @@ function updateMenuWeekUI(){
       html += '<select onchange="saveMealSelect(\'' + day + '\', \'' + meal + '\', this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font-size:13px">';
       html += '<option value="">-- Choisir --</option>';
       RECETTES.forEach(r => {
-        if((r.moment || []).some(m => m.includes(meal.split('-')[0]))){
+        let mealKey = meal;
+        if(meal === 'Petit-déjeuner') mealKey = 'Petit-déj';
+        const momentArray = r.moment || [];
+        if(momentArray.includes(mealKey) || momentArray.some(m => m.includes('Déjeuner') && meal === 'Déjeuner')){
           html += '<option value="' + r.id + '">' + (r.nom || r.titre) + '</option>';
         }
       });
@@ -1407,7 +1423,9 @@ function saveMealSelect(day, meal, recipeId){
 function generateMenuWeek(){
   const content = document.getElementById('menuWeekContent');
   let html = '<h3 style="font-size:14px;font-weight:700;margin-bottom:16px">📅 Ton menu de la semaine</h3>';
-  html += '<div style="display:grid;gap:16px">';
+  html += '<div style="display:grid;gap:16px;margin-bottom:20px">';
+  
+  let allIngredients = {};
   
   menuWeekState.selectedDays.forEach(day => {
     const meals = menuWeekState.selectedMeals[day] || {};
@@ -1420,6 +1438,13 @@ function generateMenuWeek(){
         const recipe = RECETTES.find(r => r.id === recipeId);
         if(recipe){
           html += '<div style="font-size:13px;margin-bottom:6px"><span style="font-weight:600">' + meal + ':</span> ' + (recipe.nom || recipe.titre) + '</div>';
+          
+          // Ajouter les ingrédients à la liste consolidée
+          if(recipe.ingredients && Array.isArray(recipe.ingredients)){
+            recipe.ingredients.forEach(ing => {
+              allIngredients[ing] = (allIngredients[ing] || 0) + 1;
+            });
+          }
         }
       }
     });
@@ -1428,6 +1453,24 @@ function generateMenuWeek(){
   });
   
   html += '</div>';
+  
+  // Afficher la liste de courses
+  html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">🛒 Liste de courses consolidée</h3>';
+  html += '<div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px">';
+  
+  if(Object.keys(allIngredients).length === 0){
+    html += '<p style="color:var(--ink2);font-size:13px">Sélectionne des recettes pour voir les ingrédients</p>';
+  } else {
+    Object.keys(allIngredients).forEach(ing => {
+      html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px">';
+      html += '<span>' + ing + '</span>';
+      html += '<span style="color:var(--ink2)">x' + allIngredients[ing] + '</span>';
+      html += '</div>';
+    });
+  }
+  
+  html += '</div>';
+  
   content.innerHTML = html;
 }
 
