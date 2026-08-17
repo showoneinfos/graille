@@ -453,11 +453,26 @@
   </div></div>
 </div>
 
+<div class="fridge" id="menuWeek">
+  <div class="fridge-inner">
+    <button class="fr-skip" id="menuWeekClose">Fermer</button>
+    <div class="ob-eyebrow">Menu personnalisé</div>
+    <h1 class="ob-title">Planifie ta semaine</h1>
+    <p class="ob-sub">Sélectionne les jours et compose tes repas.</p>
+    <div id="menuWeekContent"></div>
+  </div>
+  <div class="fr-bar"><div class="fr-inner">
+    <button class="fr-clear" id="menuWeekGen">Générer</button>
+    <button class="fr-go" id="menuWeekDone">Terminé</button>
+  </div></div>
+</div>
+
 <header>
   <div class="brandrow">
     <div class="logo">GRAI<b>LL</b>E<span class="logo-light">LIGHT</span></div>
     <div class="hdr-actions">
       <button class="hdr-contact" id="openContactTop">Nous contacter</button>
+      <button class="hdr-cta" id="openMenuWeek" style="background:var(--olive);border-color:var(--olive);color:#fff">📅 Menu semaine</button>
       <button class="hdr-cta" id="openCalc">Mes calories</button>
     </div>
   </div>
@@ -1305,6 +1320,120 @@ async function compterVisite(){
     if(el && d && d[0]){ el.textContent = Number(d[0].valeur).toLocaleString('fr-FR'); }
   }catch(e){ /* silencieux : le compteur ne doit jamais casser le site */ }
 }
+
+/* ---------- Menu de la semaine ---------- */
+const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+const mealTypes = ['Petit-déjeuner', 'Déjeuner', 'Post-training', 'Dîner'];
+let menuWeekState = { selectedDays: [], selectedMeals: {} };
+
+function openMenuWeek(){
+  document.getElementById('menuWeek').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  buildMenuWeekUI();
+}
+
+function closeMenuWeek(){
+  document.getElementById('menuWeek').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function buildMenuWeekUI(){
+  const cont = document.getElementById('menuWeekContent');
+  menuWeekState = { selectedDays: [], selectedMeals: {} };
+  
+  let html = '<div style="margin-bottom:20px">';
+  html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Sélectionne tes jours</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-bottom:24px">';
+  
+  daysOfWeek.forEach(day => {
+    html += '<button class="chip-f" data-day="' + day + '" onclick="toggleMenuDay(\'' + day + '\')">' + day + '</button>';
+  });
+  
+  html += '</div></div>';
+  html += '<div id="menuWeekMeals"></div>';
+  cont.innerHTML = html;
+}
+
+function toggleMenuDay(day){
+  const idx = menuWeekState.selectedDays.indexOf(day);
+  if(idx > -1) menuWeekState.selectedDays.splice(idx, 1);
+  else menuWeekState.selectedDays.push(day);
+  
+  updateMenuWeekUI();
+}
+
+function updateMenuWeekUI(){
+  const mealsContainer = document.getElementById('menuWeekMeals');
+  if(menuWeekState.selectedDays.length === 0){
+    mealsContainer.innerHTML = '';
+    return;
+  }
+  
+  let html = '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Configure tes repas</h3>';
+  html += '<div style="display:grid;gap:16px">';
+  
+  menuWeekState.selectedDays.forEach(day => {
+    if(!menuWeekState.selectedMeals[day]) menuWeekState.selectedMeals[day] = {};
+    
+    html += '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px">';
+    html += '<h4 style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--rust)">' + day + '</h4>';
+    
+    mealTypes.forEach(meal => {
+      html += '<div style="margin-bottom:10px">';
+      html += '<label style="font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:6px;display:block">' + meal + '</label>';
+      html += '<select onchange="saveMealSelect(\'' + day + '\', \'' + meal + '\', this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font-size:13px">';
+      html += '<option value="">-- Choisir --</option>';
+      RECETTES.forEach(r => {
+        if((r.moment || []).some(m => m.includes(meal.split('-')[0]))){
+          html += '<option value="' + r.id + '">' + (r.nom || r.titre) + '</option>';
+        }
+      });
+      html += '</select>';
+      html += '</div>';
+    });
+    
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  mealsContainer.innerHTML = html;
+}
+
+function saveMealSelect(day, meal, recipeId){
+  menuWeekState.selectedMeals[day][meal] = recipeId;
+}
+
+function generateMenuWeek(){
+  const content = document.getElementById('menuWeekContent');
+  let html = '<h3 style="font-size:14px;font-weight:700;margin-bottom:16px">📅 Ton menu de la semaine</h3>';
+  html += '<div style="display:grid;gap:16px">';
+  
+  menuWeekState.selectedDays.forEach(day => {
+    const meals = menuWeekState.selectedMeals[day] || {};
+    html += '<div style="background:var(--card);border-left:4px solid var(--rust);border-radius:8px;padding:14px">';
+    html += '<h4 style="font-size:15px;font-weight:600;margin-bottom:10px">' + day + '</h4>';
+    
+    mealTypes.forEach(meal => {
+      const recipeId = meals[meal];
+      if(recipeId){
+        const recipe = RECETTES.find(r => r.id === recipeId);
+        if(recipe){
+          html += '<div style="font-size:13px;margin-bottom:6px"><span style="font-weight:600">' + meal + ':</span> ' + (recipe.nom || recipe.titre) + '</div>';
+        }
+      }
+    });
+    
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+document.getElementById('openMenuWeek').addEventListener('click', openMenuWeek);
+document.getElementById('menuWeekClose').addEventListener('click', closeMenuWeek);
+document.getElementById('menuWeekGen').addEventListener('click', generateMenuWeek);
+document.getElementById('menuWeekDone').addEventListener('click', closeMenuWeek);
 
 /* init */
 grid.innerHTML = `<div class="empty">Chargement des recettes…</div>`;
