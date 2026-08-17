@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur Menu Semaine - GrailleLight</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f8f8;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+        .header h1 { font-size: 32px; font-weight: 600; margin-bottom: 8px; }
+        .header p { color: #666; font-size: 16px; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .step-title { font-size: 24px; font-weight: 600; margin-bottom: 24px; }
+        
+        .grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        }
+        .grid-full { grid-template-columns: 1fr; }
+        
+        .btn {
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn:hover { border-color: #333; background: #f5f5f5; }
+        .btn.active { 
+            background: #007AFF; 
+            color: white;
+            border-color: #007AFF;
+        }
+        .btn.primary {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+        }
+        .btn.primary:hover { background: #0056b3; }
+        
+        .hidden { display: none !important; }
+        
+        .meal-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .day-card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .day-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #007AFF;
+        }
+        
+        .meal-type {
+            margin-bottom: 16px;
+        }
+        
+        .meal-type label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .meal-type select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .menu-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .menu-day {
+            background: #f9f9f9;
+            border-left: 4px solid #007AFF;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .menu-day h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .meal-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #34C759;
+        }
+        
+        .meal-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .meal-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .meal-macros {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .shopping-list {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .shopping-list h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .ingredient-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+        
+        .ingredient-name {
+            font-weight: 500;
+        }
+        
+        .ingredient-qty {
+            color: #666;
+        }
+        
+        .buttons-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-secondary {
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .btn-back {
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        .btn-back:hover { background: #f5f5f5; }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #FFE0E0;
+            border: 1px solid #FF6B6B;
+            color: #C92A2A;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        @media print {
+            .btn, .buttons-group, .step-title, .btn-back, .grid { display: none; }
+            .card { box-shadow: none; border: 1px solid #eee; page-break-inside: avoid; }
+        }
+        
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .meal-selector { grid-template-columns: 1fr; }
+            .menu-display { grid-template-columns: 1fr; }
+            .buttons-group { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Générateur Menu Semaine</h1>
+            <p>Crée ton menu personnalisé et ta liste de courses</p>
+        </div>
+
+        <div class="card">
+            <!-- STEP 1: Sélection des jours -->
+            <div id="step1" class="step-container">
+                <h2 class="step-title">Quels jours veux-tu planifier ?</h2>
+                <div class="grid">
+                    <button class="btn day-btn" onclick="toggleDay('lundi')">Lundi</button>
+                    <button class="btn day-btn" onclick="toggleDay('mardi')">Mardi</button>
+                    <button class="btn day-btn" onclick="toggleDay('mercredi')">Mercredi</button>
+                    <button class="btn day-btn" onclick="toggleDay('jeudi')">Jeudi</button>
+                    <button class="btn day-btn" onclick="toggleDay('vendredi')">Vendredi</button>
+                    <button class="btn day-btn" onclick="toggleDay('samedi')">Samedi</button>
+                    <button class="btn day-btn" onclick="toggleDay('dimanche')">Dimanche</button>
+                </div>
+                <button class="btn primary" onclick="nextStep()">Continuer</button>
+            </div>
+
+            <!-- STEP 2: Sélection des repas -->
+            <div id="step2" class="step-container hidden">
+                <button class="btn-back" onclick="goBack()">← Retour</button>
+                <h2 class="step-title">Configure tes repas</h2>
+                <div id="mealsContainer" class="meal-selector"></div>
+                <button class="btn primary" onclick="generateMenu()">Générer mon menu</button>
+            </div>
+
+            <!-- STEP 3: Affichage du menu -->
+            <div id="step3" class="step-container hidden">
+                <button class="btn-back" onclick="goBack()">← Retour</button>
+                <h2 class="step-title">Ton menu de la semaine 📋</h2>
+                
+                <div class="buttons-group">
+                    <button class="btn-secondary" onclick="printMenu()">🖨️ Imprimer</button>
+                    <button class="btn-secondary" onclick="downloadPDF()">📥 PDF</button>
+                </div>
+
+                <div id="menuDisplay" class="menu-display"></div>
+
+                <div id="shoppingListDisplay" class="shopping-list"></div>
+
+                <button class="btn primary" onclick="restart()">Créer un nouveau menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://fnihfhmonlofekgjmijv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuaWhmaG1vbmxvZmVrZ2ptaWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMTIwNzcsImV4cCI6MjEwMTY4ODA3N30.v6_q7Y2qiXbcc2ZdWt7te4wW03IOn2KVzs05zhPvyG4';
+        
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const state = {
+            selectedDays: [],
+            mealsByDay: {},
+            recipes: [],
+            selectedMeals: {},
+            currentStep: 1
+        };
+
+        const daysMap = {
+            'lundi': 'Lundi',
+            'mardi': 'Mardi',
+            'mercredi': 'Mercredi',
+            'jeudi': 'Jeudi',
+            'vendredi': 'Vendredi',
+            'samedi': 'Samedi',
+            'dimanche': 'Dimanche'
+        };
+
+        const mealTypes = ['Petit-déjeuner', 'Déjeuner', 'Post-training', 'Dîner'];
+
+        async function loadRecipes() {
+            try {
+                const { data, error } = await supabase
+                    .from('recipes')
+                    .select('*')
+                    .limit(540);
+                
+                if (error) throw error;
+                state.recipes = data || [];
+                return state.recipes;
+            } catch (err) {
+                console.error('Erreur Supabase:', err);
+                showError('Erreur de connexion à la base de données');
+                return [];
+            }
+        }
+
+        function toggleDay(day) {
+            const idx = state.selectedDays.indexOf(day);
+            if (idx > -1) {
+                state.selectedDays.splice(idx, 1);
+            } else {
+                state.selectedDays.push(day);
+            }
+            highlightButton(event.target);
+        }
+
+        function highlightButton(btn) {
+            if (!btn) return;
+            btn.parentElement.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function showStep(stepNum) {
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`step${i}`).classList.add('hidden');
+            }
+            document.getElementById(`step${stepNum}`).classList.remove('hidden');
+            state.currentStep = stepNum;
+            window.scrollTo(0, 0);
+        }
+
+        function goBack() {
+            if (state.currentStep > 1) {
+                showStep(state.currentStep - 1);
+            }
+        }
+
+        async function nextStep() {
+            if (state.selectedDays.length === 0) {
+                alert('Sélectionne au moins un jour!');
+                return;
+            }
+
+            // Charger les recettes
+            const mealsContainer = document.getElementById('mealsContainer');
+            mealsContainer.innerHTML = '<div class="loading">Chargement des recettes...</div>';
+
+            const recipes = await loadRecipes();
+            if (recipes.length === 0) {
+                mealsContainer.innerHTML = '<div class="error">Erreur: Impossible de charger les recettes</div>';
+                return;
+            }
+
+            // Créer les sélecteurs de repas
+            let html = '';
+            state.selectedDays.forEach(day => {
+                html += `
+                    <div class="day-card">
+                        <h3>${daysMap[day]}</h3>
+                        ${mealTypes.map(meal => `
+                            <div class="meal-type">
+                                <label>${meal}</label>
+                                <select onchange="saveMealSelection('${day}', '${meal}', this.value)">
+                                    <option value="">-- Choisir --</option>
+                                    ${recipes.map(r => `<option value="${JSON.stringify({name: r.name || r.titre, calories: r.calories, macros: r.macros})}">${r.name || r.titre}</option>`).join('')}
+                                </select>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            });
+
+            mealsContainer.innerHTML = html;
+            showStep(2);
+        }
+
+        function saveMealSelection(day, meal, value) {
+            if (!state.selectedMeals[day]) {
+                state.selectedMeals[day] = {};
+            }
+            if (value) {
+                state.selectedMeals[day][meal] = JSON.parse(value);
+            }
+        }
+
+        async function generateMenu() {
+            const menuDisplay = document.getElementById('menuDisplay');
+            const shoppingListDisplay = document.getElementById('shoppingListDisplay');
+
+            // Construire l'affichage du menu
+            let menuHTML = '';
+            let ingredients = {};
+
+            state.selectedDays.forEach(day => {
+                const meals = state.selectedMeals[day] || {};
+                menuHTML += `
+                    <div class="menu-day">
+                        <h3>${daysMap[day]}</h3>
+                        ${mealTypes.map(meal => {
+                            const selected = meals[meal];
+                            if (!selected) return '';
+                            
+                            return `
+                                <div class="meal-item">
+                                    <div class="meal-label">${meal}</div>
+                                    <div class="meal-name">${selected.name}</div>
+                                    <div class="meal-macros">~${selected.calories || '?'} cal</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            });
+
+            menuDisplay.innerHTML = menuHTML;
+
+            // TODO: Consolider les ingrédients (nécessite structure complète des recettes avec ingrédients)
+            let shoppingHTML = `
+                <h2>🛒 Liste de courses consolidée</h2>
+                <p style="color: #666; margin-bottom: 16px;">Les ingrédients détaillés s'afficheront une fois que tu auras configuré les recettes avec leurs ingrédients complets dans Supabase.</p>
+                <div style="background: white; padding: 16px; border-radius: 8px; border-left: 3px solid #007AFF;">
+                    <p><strong>Exemple:</strong> Si tu as "Poulet grillé" 2 fois dans la semaine, il s'affichera ici avec le total consolidé.</p>
+                </div>
+            `;
+
+            shoppingListDisplay.innerHTML = shoppingHTML;
+
+            showStep(3);
+        }
+
+        function printMenu() {
+            window.print();
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('step3');
+            const opt = {
+                margin: 10,
+                filename: `menu-semaine.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function restart() {
+            state.selectedDays = [];
+            state.selectedMeals = {};
+            document.querySelectorAll('.btn.active').forEach(b => b.classList.remove('active'));
+            showStep(1);
+        }
+
+        function showError(msg) {
+            document.querySelector('.card').insertAdjacentHTML('afterbegin', `<div class="error">${msg}</div>`);
+        }
+
+        // Initialisation
+        showStep(1);
+    </script>
+</body>
+</html>
