@@ -303,6 +303,7 @@
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   .trk-menu{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .trk-menu:hover{background:#455531;transform:translateY(-1px)}
+  .shop-eq{color:var(--ink2);font-weight:600;font-size:11.5px;white-space:nowrap}
   .menu-moments{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
   .week-lbl{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700;margin:16px 0 8px}
   .week-day{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
@@ -986,11 +987,92 @@ let JOURNAL = loadJournal();
 function loadShop(){try{return JSON.parse(localStorage.getItem('graille_shop'))||[];}catch(e){return [];}}
 function saveShop(){try{localStorage.setItem('graille_shop',JSON.stringify(SHOP));}catch(e){}}
 let SHOP=loadShop();
-function mergeShop(nom,qty,unite,libre){
-  const key=frNorm(nom)+'|'+(unite||'');
-  const ex=SHOP.find(i=>frNorm(i.nom)+'|'+(i.unite||'')===key);
-  if(ex){ if(!libre){ ex.qty+=qty; } ex.got=false; } else { SHOP.push({nom,qty,unite:unite||'',got:false,libre:!!libre}); }
+/* --- Regroupement intelligent de la liste de courses ---
+   Additionne le meme aliment meme s'il est exprime differemment :
+   3 bananes + 125 g de banane  ->  une seule ligne. */
+const PIECE_G={ /* poids moyen d'une piece, en grammes */
+  "banane":120,"pomme":150,"orange":150,"kiwi":75,"citron":100,"citron vert":70,
+  "oeuf":60,"tomate":120,"oignon":110,"echalote":25,"gousse ail":5,"ail":5,
+  "carotte":80,"courgette":200,"aubergine":250,"poivron":150,"pomme de terre":150,
+  "patate douce":200,"avocat":170,"concombre":300,"champignon":20,"peche":150,
+  "poire":160,"abricot":45,"clementine":80,"pamplemousse":250,"mangue":300,
+  "tranche pain":35,"pain":35,"tortilla":45,"pita":60,"steak":130,"escalope":130,
+  "filet poulet":150,"blanc poulet":150,"saucisse":70,"tranche jambon":40,"jambon":40,
+  "tranche bacon":20,"bacon":20,"yaourt":125,"piment":15,"echine":150
+};
+const CONDIT=/^(gousses?|tranches?|brins?|feuilles?|pincees?|cuilleres?|cas|cac|filets?|morceaux?|boites?|bocaux?|sachets?|bottes?)\s+/;
+const PLURIELS=[[/\bd['’]\s*/g,''],[/\bd\s+/g,''],[/\bde\s+la\s+/g,' '],[/\bde\s+/g,' '],[/\bdes\s+/g,' '],[/\bdu\s+/g,' '],[/\bau[x]?\s+/g,' ']];
+function ingKey(nom){
+  let n=frNorm(nom||'').trim();
+  PLURIELS.forEach(([re,rep])=>{ n=n.replace(re,rep); });
+  n=n.replace(/\s+/g,' ').trim();
+  n=n.replace(CONDIT,'');
+  n=n.split(' ').map(w=>{
+    if(w.length>3 && /s$/.test(w) && !/ss$/.test(w)) return w.replace(/s$/,'');
+    if(/x$/.test(w) && w.length>3) return w.replace(/ux$/,'l').replace(/x$/,'');
+    return w;
+  }).join(' ');
+  return n.trim();
 }
+function pieceWeight(key){
+  if(PIECE_G[key]!=null) return PIECE_G[key];
+  for(const k in PIECE_G){ if(key===k||key.startsWith(k+' ')||key.endsWith(' '+k)) return PIECE_G[k]; }
+  return null;
+}
+/* Ramene tout a une unite de reference : g (poids), ml (liquide) ou piece */
+function toBase(qty,unite,key){
+  const u=(unite||'').toLowerCase();
+  if(u==='kg') return {q:qty*1000,u:'g'};
+  if(u==='g')  return {q:qty,u:'g'};
+  if(u==='l')  return {q:qty*1000,u:'ml'};
+  if(u==='cl') return {q:qty*10,u:'ml'};
+  if(u==='ml') return {q:qty,u:'ml'};
+  if(!u){ const w=pieceWeight(key); return w? {q:qty*w,u:'g',piece:true} : {q:qty,u:'',piece:true}; }
+  return {q:qty,u:u};
+}
+function mergeShop(nom,qty,unite,libre){
+  const key=ingKey(nom);
+  const b=toBase(qty,unite,key);
+  const ex=SHOP.find(i=>i.key===key && i.u===b.u);
+  if(ex){
+    if(!libre) ex.q+=b.q;
+    if(b.piece) ex.piece=true;
+    ex.got=false;
+  } else {
+    SHOP.push({nom,key,q:b.q,u:b.u,piece:!!b.piece,got:false,libre:!!libre});
+  }
+}
+/* Texte affiche : "360 g (≈ 3 bananes)" quand ca s'achete a la piece */
+function shopLine(it){
+  if(it.libre) return '';
+  if(it.u==='g' && it.piece){
+    const w=pieceWeight(it.key);
+    if(w){
+      const n=Math.max(1,Math.round(it.q/w));
+      return `${displayQty(it.q,'g')} g <span class="shop-eq">≈ ${n}</span>`;
+    }
+  }
+  const dec1=v=>{ const r=Math.round(v*10)/10; return String(r).replace('.',','); };
+  if(it.u==='g' && it.q>=1000) return `${dec1(it.q/1000)} kg`;
+  if(it.u==='ml' && it.q>=1000) return `${dec1(it.q/1000)} L`;
+  return `${displayQty(it.q,it.u)} ${it.u}`.trim();
+}
+/* Reprend les anciennes listes enregistrees avant cette mise a jour */
+function migrateShop(){
+  let changed=false;
+  SHOP=SHOP.reduce((acc,it)=>{
+    if(it.key!==undefined && it.u!==undefined){ acc.push(it); return acc; }
+    changed=true;
+    const key=ingKey(it.nom); const b=toBase(it.qty||0,it.unite,key);
+    const ex=acc.find(x=>x.key===key && x.u===b.u);
+    if(ex){ ex.q+=b.q; if(b.piece) ex.piece=true; }
+    else acc.push({nom:it.nom,key,q:b.q,u:b.u,piece:!!b.piece,got:!!it.got,libre:!!it.libre});
+    return acc;
+  },[]);
+  if(changed) saveShop();
+}
+migrateShop();
+
 /* Accepte 2 formats d'ingredient : objet {nom,quantite,unite} ou texte "150g riz" / "3 oeufs" / "Sel" */
 function normIng(ing){
   if(ing && typeof ing==='object') return {nom:ing.nom||'', quantite:(ing.quantite==null?1:ing.quantite), unite:ing.unite||'', libre:(ing.quantite==null)};
@@ -1042,7 +1124,7 @@ function renderShop(){
     groups[g].map(({it,idx})=>`<div class="shop-item${it.got?' got':''}">
        <button class="shop-check" data-i="${idx}">${it.got?'✓':''}</button>
        <span class="shop-nom">${it.nom}</span>
-       <span class="shop-qty">${displayQty(it.qty,it.unite)} ${it.unite||''}</span>
+       <span class="shop-qty">${shopLine(it)}</span>
        <button class="shop-rm" data-i="${idx}" aria-label="Retirer">✕</button>
      </div>`).join('')+`</div>`
   ).join('');
