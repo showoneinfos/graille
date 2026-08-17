@@ -1420,6 +1420,11 @@ function saveMealSelect(day, meal, recipeId){
   menuWeekState.selectedMeals[day][meal] = recipeId;
 }
 
+function saveMealSelect(day, meal, recipeId){
+  if(!menuWeekState.selectedMeals[day]) menuWeekState.selectedMeals[day] = {};
+  menuWeekState.selectedMeals[day][meal] = recipeId;
+}
+
 function generateMenuWeek(){
   const content = document.getElementById('menuWeekContent');
   let html = '<h3 style="font-size:14px;font-weight:700;margin-bottom:16px">📅 Ton menu de la semaine</h3>';
