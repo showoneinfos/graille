@@ -304,6 +304,10 @@
   .trk-menu{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .trk-menu:hover{background:#455531;transform:translateY(-1px)}
   .menu-moments{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .week-lbl{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700;margin:16px 0 8px}
+  .week-day{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
+  .week-day-h{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--rust);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
+  .week-day-h span{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--ink2)}
   .menu-chip{padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-family:inherit;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;transition:all .12s}
   .menu-chip:hover{border-color:var(--olive)}
   .menu-chip[aria-pressed="true"]{background:var(--olive);color:#fff;border-color:var(--olive)}
@@ -457,13 +461,17 @@
   <div class="fridge-inner">
     <button class="fr-skip" id="menuWeekClose">Fermer</button>
     <div class="ob-eyebrow">Menu personnalisé</div>
-    <h1 class="ob-title">Planifie ta semaine</h1>
-    <p class="ob-sub">Sélectionne les jours et compose tes repas.</p>
-    <div id="menuWeekContent"></div>
+    <h1 class="ob-title">Ma semaine</h1>
+    <p class="ob-sub">Choisis tes jours et tes repas, on compose le reste.</p>
+    <div class="week-lbl">Jours</div>
+    <div class="menu-moments" id="weekDays"></div>
+    <div class="week-lbl">Repas de la journée</div>
+    <div class="menu-moments" id="weekMoments"></div>
+    <div id="menuWeekResult"></div>
   </div>
   <div class="fr-bar"><div class="fr-inner">
-    <button class="fr-clear" id="menuWeekGen">Générer</button>
-    <button class="fr-go" id="menuWeekDone">Terminé</button>
+    <button class="fr-clear" id="menuWeekGen">Générer ma semaine</button>
+    <button class="fr-go" id="menuWeekAdd" style="display:none">Ajouter à ma liste de courses</button>
   </div></div>
 </div>
 
@@ -1323,165 +1331,104 @@ async function compterVisite(){
 }
 
 /* ---------- Menu de la semaine ---------- */
-const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-const mealTypes = ['Petit-déjeuner', 'Déjeuner', 'Post-training', 'Dîner'];
-let menuWeekState = { selectedDays: [], selectedMeals: {} };
+const WEEK_DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+let weekDays=new Set(["Lundi","Mardi","Mercredi","Jeudi","Vendredi"]);
+let weekMoments=new Set(["Petit-déj","Déjeuner","Dîner"]);
+let WEEK_MENU=null;
 
 function openMenuWeek(){
+  WEEK_MENU=null;
+  renderWeekPickers();
+  document.getElementById('menuWeekResult').innerHTML='';
+  document.getElementById('menuWeekGen').textContent='Générer ma semaine';
+  document.getElementById('menuWeekAdd').style.display='none';
   document.getElementById('menuWeek').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  buildMenuWeekUI();
+  document.body.style.overflow='hidden';
 }
+function closeMenuWeek(){ document.getElementById('menuWeek').classList.remove('open'); document.body.style.overflow=''; }
 
-function closeMenuWeek(){
-  document.getElementById('menuWeek').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function buildMenuWeekUI(){
-  const cont = document.getElementById('menuWeekContent');
-  menuWeekState = { selectedDays: [], selectedMeals: {} };
-  
-  let html = '<div style="margin-bottom:20px">';
-  html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Sélectionne tes jours</h3>';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-bottom:24px">';
-  
-  daysOfWeek.forEach(day => {
-    html += '<button class="chip-f" data-day="' + day + '" onclick="toggleMenuDay(\'' + day + '\')">' + day + '</button>';
-  });
-  
-  html += '</div></div>';
-  html += '<div id="menuWeekMeals"></div>';
-  cont.innerHTML = html;
-}
-
-function toggleMenuDay(day){
-  const idx = menuWeekState.selectedDays.indexOf(day);
-  if(idx > -1) menuWeekState.selectedDays.splice(idx, 1);
-  else menuWeekState.selectedDays.push(day);
-  
-  // Mettre à jour le style des boutons
-  document.querySelectorAll('.chip-f').forEach(btn => {
-    if(btn.dataset.day && menuWeekState.selectedDays.includes(btn.dataset.day)){
-      btn.style.background = 'var(--rust)';
-      btn.style.color = 'white';
-      btn.style.borderColor = 'var(--rust)';
-    } else {
-      btn.style.background = '';
-      btn.style.color = '';
-      btn.style.borderColor = '';
-    }
-  });
-  
-  updateMenuWeekUI();
-}
-
-function updateMenuWeekUI(){
-  const mealsContainer = document.getElementById('menuWeekMeals');
-  if(menuWeekState.selectedDays.length === 0){
-    mealsContainer.innerHTML = '';
-    return;
-  }
-  
-  let html = '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Configure tes repas</h3>';
-  html += '<div style="display:grid;gap:16px">';
-  
-  menuWeekState.selectedDays.forEach(day => {
-    if(!menuWeekState.selectedMeals[day]) menuWeekState.selectedMeals[day] = {};
-    
-    html += '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px">';
-    html += '<h4 style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--rust)">' + day + '</h4>';
-    
-    mealTypes.forEach(meal => {
-      html += '<div style="margin-bottom:10px">';
-      html += '<label style="font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:6px;display:block">' + meal + '</label>';
-      html += '<select onchange="saveMealSelect(\'' + day + '\', \'' + meal + '\', this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font-size:13px">';
-      html += '<option value="">-- Choisir --</option>';
-      RECETTES.forEach(r => {
-        let mealKey = meal;
-        if(meal === 'Petit-déjeuner') mealKey = 'Petit-déj';
-        const momentArray = r.moment || [];
-        if(momentArray.includes(mealKey) || momentArray.some(m => m.includes('Déjeuner') && meal === 'Déjeuner')){
-          html += '<option value="' + r.id + '">' + (r.nom || r.titre) + '</option>';
-        }
-      });
-      html += '</select>';
-      html += '</div>';
-    });
-    
-    html += '</div>';
-  });
-  
-  html += '</div>';
-  mealsContainer.innerHTML = html;
-}
-
-function saveMealSelect(day, meal, recipeId){
-  menuWeekState.selectedMeals[day][meal] = recipeId;
-}
-
-function saveMealSelect(day, meal, recipeId){
-  if(!menuWeekState.selectedMeals[day]) menuWeekState.selectedMeals[day] = {};
-  menuWeekState.selectedMeals[day][meal] = recipeId;
+function renderWeekPickers(){
+  const d=document.getElementById('weekDays');
+  d.innerHTML=WEEK_DAYS.map(j=>`<button class="menu-chip" data-j="${j}" aria-pressed="${weekDays.has(j)}">${j}</button>`).join('');
+  d.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+    const j=b.dataset.j; if(weekDays.has(j)) weekDays.delete(j); else weekDays.add(j);
+    b.setAttribute('aria-pressed', weekDays.has(j));
+  }));
+  const m=document.getElementById('weekMoments');
+  m.innerHTML=MENU_MOMENTS.map(x=>`<button class="menu-chip" data-m="${x}" aria-pressed="${weekMoments.has(x)}">${x}</button>`).join('');
+  m.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+    const x=b.dataset.m; if(weekMoments.has(x)) weekMoments.delete(x); else weekMoments.add(x);
+    b.setAttribute('aria-pressed', weekMoments.has(x));
+  }));
 }
 
 function generateMenuWeek(){
-  const content = document.getElementById('menuWeekContent');
-  let html = '<h3 style="font-size:14px;font-weight:700;margin-bottom:16px">📅 Ton menu de la semaine</h3>';
-  html += '<div style="display:grid;gap:16px;margin-bottom:20px">';
-  
-  let allIngredients = {};
-  
-  menuWeekState.selectedDays.forEach(day => {
-    const meals = menuWeekState.selectedMeals[day] || {};
-    html += '<div style="background:var(--card);border-left:4px solid var(--rust);border-radius:8px;padding:14px">';
-    html += '<h4 style="font-size:15px;font-weight:600;margin-bottom:10px">' + day + '</h4>';
-    
-    mealTypes.forEach(meal => {
-      const recipeId = meals[meal];
-      if(recipeId){
-        const recipe = RECETTES.find(r => r.id === recipeId);
-        if(recipe){
-          html += '<div style="font-size:13px;margin-bottom:6px"><span style="font-weight:600">' + meal + ':</span> ' + (recipe.nom || recipe.titre) + '</div>';
-          
-          // Ajouter les ingrédients à la liste consolidée
-          if(recipe.ingredients && Array.isArray(recipe.ingredients)){
-            recipe.ingredients.forEach(ing => {
-              allIngredients[ing] = (allIngredients[ing] || 0) + 1;
-            });
-          }
-        }
-      }
+  const p=loadProfile(); if(!p){ closeMenuWeek(); openOnboard(); return; }
+  const res=document.getElementById('menuWeekResult');
+  const jours=WEEK_DAYS.filter(j=>weekDays.has(j));
+  const moments=MENU_MOMENTS.filter(m=>weekMoments.has(m));
+  if(!jours.length){ res.innerHTML='<p class="menu-hint">Choisis au moins un jour.</p>'; return; }
+  if(!moments.length){ res.innerHTML='<p class="menu-hint">Coche au moins un repas.</p>'; return; }
+
+  const sumW=moments.reduce((s,m)=>s+MENU_WEIGHTS[m],0);
+  WEEK_MENU=[];
+  jours.forEach(j=>{
+    const used=new Set(); const repas=[];
+    moments.forEach(m=>{
+      let alloc=Math.round(p.calories*MENU_WEIGHTS[m]/sumW/10)*10;
+      alloc=Math.max(CAL_MIN, Math.min(CAL_MAX, alloc));
+      let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
+      if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
+      if(!pool.length) return;
+      const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
+      repas.push({moment:m, recipe:r, kcal:alloc});
     });
-    
-    html += '</div>';
+    WEEK_MENU.push({jour:j, repas});
   });
-  
-  html += '</div>';
-  
-  // Afficher la liste de courses
-  html += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">🛒 Liste de courses consolidée</h3>';
-  html += '<div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px">';
-  
-  if(Object.keys(allIngredients).length === 0){
-    html += '<p style="color:var(--ink2);font-size:13px">Sélectionne des recettes pour voir les ingrédients</p>';
-  } else {
-    Object.keys(allIngredients).forEach(ing => {
-      html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px">';
-      html += '<span>' + ing + '</span>';
-      html += '<span style="color:var(--ink2)">x' + allIngredients[ing] + '</span>';
-      html += '</div>';
-    });
-  }
-  
-  html += '</div>';
-  
-  content.innerHTML = html;
+  renderWeekResult(p);
+  document.getElementById('menuWeekGen').textContent='Regénérer';
+  document.getElementById('menuWeekAdd').style.display='';
 }
 
-document.getElementById('menuWeekClose').addEventListener('click', closeMenuWeek);
-document.getElementById('menuWeekGen').addEventListener('click', generateMenuWeek);
-document.getElementById('menuWeekDone').addEventListener('click', closeMenuWeek);
+function renderWeekResult(p){
+  const res=document.getElementById('menuWeekResult');
+  if(!WEEK_MENU || !WEEK_MENU.length){ res.innerHTML=''; return; }
+  res.innerHTML=WEEK_MENU.map((d,di)=>{
+    const tot=d.repas.reduce((s,it)=>s+it.kcal,0);
+    return `<div class="week-day">
+      <div class="week-day-h">${d.jour} <span>${tot} kcal</span></div>
+      ${d.repas.map((it,ri)=>`<div class="menu-item">
+        <div class="menu-mom">${it.moment}</div>
+        <button class="menu-recipe" data-d="${di}" data-r="${ri}">${it.recipe.nom}</button>
+        <span class="menu-kcal">${it.kcal} kcal</span>
+        <button class="menu-swap" data-d="${di}" data-r="${ri}" title="Changer">↻</button>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  res.querySelectorAll('.menu-recipe').forEach(b=>b.addEventListener('click',()=>{
+    const it=WEEK_MENU[+b.dataset.d].repas[+b.dataset.r]; openSheet(it.recipe, it.kcal);
+  }));
+  res.querySelectorAll('.menu-swap').forEach(b=>b.addEventListener('click',()=>{
+    const di=+b.dataset.d, ri=+b.dataset.r, it=WEEK_MENU[di].repas[ri], m=it.moment;
+    const usedIds=new Set(WEEK_MENU[di].repas.map(x=>x.recipe.id));
+    let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
+    if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
+    if(pool.length){ WEEK_MENU[di].repas[ri]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; renderWeekResult(loadProfile()); }
+  }));
+}
+
+function addWeekToShop(){
+  if(!WEEK_MENU || !WEEK_MENU.length) return;
+  WEEK_MENU.forEach(d=>d.repas.forEach(it=>addRecipeToShop(it.recipe, it.kcal)));
+  updateShopBadge();
+  closeMenuWeek();
+  openShop();
+}
+
+document.getElementById('menuWeekClose').addEventListener('click',closeMenuWeek);
+document.getElementById('menuWeekGen').addEventListener('click',generateMenuWeek);
+document.getElementById('menuWeekAdd').addEventListener('click',addWeekToShop);
 
 /* init */
 grid.innerHTML = `<div class="empty">Chargement des recettes…</div>`;
