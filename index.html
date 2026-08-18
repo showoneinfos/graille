@@ -1002,11 +1002,14 @@ const PIECE_G={ /* poids moyen d'une piece, en grammes */
 };
 const CONDIT=/^(gousses?|tranches?|brins?|feuilles?|pincees?|cuilleres?|cas|cac|filets?|morceaux?|boites?|bocaux?|sachets?|bottes?)\s+/;
 const PLURIELS=[[/\bd['’]\s*/g,''],[/\bd\s+/g,''],[/\bde\s+la\s+/g,' '],[/\bde\s+/g,' '],[/\bdes\s+/g,' '],[/\bdu\s+/g,' '],[/\bau[x]?\s+/g,' ']];
+const ADJ=/\b(mures?|murs?|crus?|crues?|cuits?|cuites?|frais|fraiche[s]?|surgele[es]?|decongele[es]?|egoutte[es]?|rince[es]?|nature|bio|entier[es]?|demi[- ]ecreme|ecreme[s]?)\b/g;
 function ingKey(nom){
   let n=frNorm(nom||'').trim();
+  n=n.replace(/\([^)]*\)/g,' ');
   PLURIELS.forEach(([re,rep])=>{ n=n.replace(re,rep); });
   n=n.replace(/\s+/g,' ').trim();
   n=n.replace(CONDIT,'');
+  n=n.replace(ADJ,' ').replace(/\s+/g,' ').trim();
   n=n.split(' ').map(w=>{
     if(w.length>3 && /s$/.test(w) && !/ss$/.test(w)) return w.replace(/s$/,'');
     if(/x$/.test(w) && w.length>3) return w.replace(/ux$/,'l').replace(/x$/,'');
@@ -1020,8 +1023,15 @@ function pieceWeight(key){
   return null;
 }
 /* Ramene tout a une unite de reference : g (poids), ml (liquide) ou piece */
+const UNIT_G={'c. a soupe':15,'c a soupe':15,'cuillere a soupe':15,'cuilleres a soupe':15,'cas':15,'cs':15,
+  'c. a cafe':5,'c a cafe':5,'cuillere a cafe':5,'cuilleres a cafe':5,'cac':5,'cc':5,
+  'poignee':30,'poignees':30};
+const UNIT_PIECE=['piece','pieces','pc','pcs','unite','unites','gousse','gousses','tranche','tranches','brin','brins','feuille','feuilles','filet','filets','botte','bottes'];
 function toBase(qty,unite,key){
-  const u=(unite||'').toLowerCase();
+  let u=frNorm(unite||'').trim();
+  if(UNIT_PIECE.includes(u)) u='';
+  if(UNIT_G[u]!=null) return {q:qty*UNIT_G[u],u:'g'};
+  if(/^pincee/.test(u)) return {q:1,u:'',libre:true};
   if(u==='kg') return {q:qty*1000,u:'g'};
   if(u==='g')  return {q:qty,u:'g'};
   if(u==='l')  return {q:qty*1000,u:'ml'};
@@ -1033,10 +1043,16 @@ function toBase(qty,unite,key){
 function mergeShop(nom,qty,unite,libre){
   const key=ingKey(nom);
   const b=toBase(qty,unite,key);
-  const ex=SHOP.find(i=>i.key===key && i.u===b.u);
+  if(b.libre) libre=true;
+  let ex=SHOP.find(i=>i.key===key && i.u===b.u);
+  if(!ex && libre) ex=SHOP.find(i=>i.key===key);           // "Cumin" rejoint "Cumin 15 g"
+  if(!ex && !libre) ex=SHOP.find(i=>i.key===key && i.libre); // et inversement
   if(ex){
-    if(!libre) ex.q+=b.q;
-    if(b.piece) ex.piece=true;
+    if(!libre){
+      if(ex.libre){ ex.q=b.q; ex.u=b.u; ex.piece=!!b.piece; ex.libre=false; }
+      else if(ex.u===b.u) ex.q+=b.q;
+      if(b.piece) ex.piece=true;
+    }
     ex.got=false;
   } else {
     SHOP.push({nom,key,q:b.q,u:b.u,piece:!!b.piece,got:false,libre:!!libre});
@@ -1098,6 +1114,10 @@ function addRecipeToShop(r, targetKcal){
     const fac=cat==='prot'?fP:(cat==='carb'?fC:fO);
     const q=ing.libre ? 1 : (ing.quantite/parts)*fac;
     if(!isFinite(q)) return;
+    if(ing.libre && / et /i.test(ing.nom)){
+      ing.nom.split(/ et /i).forEach(p=>{ p=p.trim(); if(p) mergeShop(p,1,'',true); });
+      return;
+    }
     mergeShop(ing.nom, q, ing.unite, ing.libre);
   });
   saveShop();
