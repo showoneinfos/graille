@@ -3,10 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GrailleLight — Mange ce que tu aimes, atteins ton objectif</title>
+<title>GrailleLight — Recettes light gourmandes et calculateur de calories</title>
+<meta name="description" content="554 recettes light et gourmandes avec calories et macros : fast food allégé, bowls, snacking, desserts. Calcule tes calories, compose ton menu du jour ou ta semaine, génère ta liste de courses. Gratuit.">
+<link rel="canonical" href="https://www.graillelight.com/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#BB5028">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GrailleLight">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://www.graillelight.com/">
+<meta property="og:title" content="GrailleLight — Recettes light gourmandes et calculateur de calories">
+<meta property="og:description" content="554 recettes light et gourmandes avec calories et macros. Compose ton menu, génère ta liste de courses. Gratuit.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"GrailleLight",
+"url":"https://www.graillelight.com/",
+"description":"Recettes light et gourmandes avec calories et macros, calculateur de calories, menu du jour et liste de courses.",
+"inLanguage":"fr-FR"}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,900;1,9..144,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#232016;--ink2:#5C5648;--paper:#F5F1E8;--card:#FCFAF4;
@@ -294,12 +311,42 @@
   .fr-chip{padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-family:inherit;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;transition:all .12s}
   .fr-chip:hover{border-color:var(--olive)}
   .fr-chip[aria-pressed="true"]{background:var(--olive);color:#fff;border-color:var(--olive)}
-  .fr-bar{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center}
+  .fr-bar{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center}
   .fr-bar .fr-inner{max-width:640px;margin:0 auto;display:flex;gap:10px;width:100%}
   .fr-clear{background:none;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;font-family:inherit;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;white-space:nowrap}
   .fr-clear:hover{border-color:var(--rust);color:var(--rust)}
   .fr-go{flex:1;background:var(--rust);color:#fff;border:none;border-radius:12px;padding:14px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
   .fr-go:hover{background:var(--rust-deep)}
+
+  /* ---- Confort sur telephone ---- */
+  @media(max-width:600px){
+    /* zones tactiles : viser 40px minimum pour le doigt */
+    .menu-swap{width:38px;height:38px;font-size:17px}
+    .week-day-h .wk-del{width:38px;height:38px;font-size:19px}
+    .hdr-cta{padding:11px 16px;font-size:12px}
+    .hdr-contact{padding:11px 14px;font-size:12px}
+    .chip-f{padding:11px 16px;font-size:13.5px}
+    .menu-chip{padding:11px 16px;font-size:13.5px}
+    .sort-inline select{padding:11px 30px 11px 14px;font-size:13px}
+    .trk-menu,.trk-shop{padding:15px 14px;font-size:15px}
+    .fr-go,.fr-clear{padding:15px;font-size:15.5px}
+    /* petits textes : remonter les plus illisibles */
+    .flabel{font-size:10.5px}
+    .lbl{font-size:10px}
+    .k{font-size:10.5px}
+    .menu-mom{font-size:11px}
+    .cal-scale,.macro-scale,.baselbl,.badge{font-size:11px}
+    .ttl{font-size:11.5px}
+    /* le nom des recettes etait ecrase sur 98px : on met le moment au-dessus */
+    .menu-item{flex-wrap:wrap;row-gap:3px;padding:13px 0}
+    .menu-mom{flex:1 0 100%;font-size:10.5px}
+    .menu-recipe{font-size:15px;line-height:1.3}
+    .menu-kcal{font-size:13.5px}
+    .week-day-h{align-items:center}
+    .week-day{padding:14px}
+    /* panneaux : moins de marge perdue sur les cotes */
+    .fridge-inner{padding:40px 16px 130px}
+  }
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   .trk-menu{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .trk-menu:hover{background:#455531;transform:translateY(-1px)}
