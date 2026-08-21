@@ -352,6 +352,13 @@
   .trk-menu:hover{background:#455531;transform:translateY(-1px)}
   .shop-eq{color:var(--ink2);font-weight:600;font-size:11.5px;white-space:nowrap}
   .menu-moments{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .cx-row{padding:9px 0;border-bottom:1px solid var(--line)}
+  .cx-row:last-child{border-bottom:none}
+  .cx-n{font-weight:600;font-size:14.5px;line-height:1.3}
+  .cx-n i{font-style:normal;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--olive)}
+  .cx-d{font-size:13px;color:var(--ink2);margin-top:2px}
+  .cx-kg{color:var(--rust);font-weight:700}
+  .cx-warn{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:6px;line-height:1.45}
   .week-lbl{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700;margin:16px 0 8px}
   .week-day{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
   .week-day-h{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--rust);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
@@ -507,6 +514,36 @@
   <div class="fr-bar"><div class="fr-inner">
     <button class="fr-clear" id="shopClear">Vider</button>
     <button class="fr-go" id="shopDone">Terminé</button>
+  </div></div>
+</div>
+
+<div class="fridge" id="coach">
+  <div class="fridge-inner">
+    <button class="fr-skip" id="coachClose">Fermer</button>
+    <div class="ob-eyebrow">Coach sportif</div>
+    <h1 class="ob-title">Mon programme</h1>
+    <p class="ob-sub">Dis-moi ce que tu pratiques, je te fais le programme.</p>
+    <div class="week-lbl">Sport</div>
+    <div class="menu-moments" id="coachSport"></div>
+    <div class="week-lbl">Objectif</div>
+    <div class="menu-moments" id="coachObj"></div>
+    <div class="week-lbl">Niveau</div>
+    <div class="menu-moments" id="coachNiv"></div>
+    <div id="coachZonesBloc">
+      <div class="week-lbl">Ce que tu veux travailler</div>
+      <div class="menu-moments" id="coachZones"></div>
+    </div>
+    <div class="week-lbl">Où t'entraînes-tu</div>
+    <div class="menu-moments" id="coachLieu"></div>
+    <div class="week-lbl">Durée d'une séance</div>
+    <div class="menu-moments" id="coachDuree"></div>
+    <div class="week-lbl">Jours d'entraînement</div>
+    <div class="menu-moments" id="coachJours"></div>
+    <div id="coachResult"></div>
+  </div>
+  <div class="fr-bar"><div class="fr-inner">
+    <button class="fr-clear" id="coachDel" style="display:none">Supprimer</button>
+    <button class="fr-go" id="coachGen">Générer mon programme</button>
   </div></div>
 </div>
 
@@ -1344,11 +1381,13 @@ function renderTracker(){
     ${liste}
     <button class="trk-menu" id="trkMenu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>Composer mon menu du jour</button>
     <button class="trk-menu" id="trkMenuWeek"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>${hasWeek()?'Mes menus de la semaine':'Composer mon menu pour la semaine'}</button>
+    <button class="trk-menu" id="trkCoach"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M4 9v6"/><path d="M20 9v6"/><path d="M2 11v2"/><path d="M22 11v2"/></svg>${hasCoach()?'Mon programme sport':'Composer mon programme sport'}</button>
     <button class="trk-shop" id="trkShop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Ma liste de courses${SHOP.length?` · ${SHOP.length}`:''}</button>
   </div>`;
   document.getElementById('trkEdit').addEventListener('click',openOnboard);
   const mnb=document.getElementById('trkMenu'); if(mnb) mnb.addEventListener('click',openMenu);
   const mnw=document.getElementById('trkMenuWeek'); if(mnw) mnw.addEventListener('click',openMenuWeek);
+  const cch=document.getElementById('trkCoach'); if(cch) cch.addEventListener('click',openCoach);
   const shb=document.getElementById('trkShop'); if(shb) shb.addEventListener('click',openShop);
   const rb=document.getElementById('trkReset'); if(rb) rb.addEventListener('click',resetJournal);
   el.querySelectorAll('.trk-rm').forEach(b=>b.addEventListener('click',()=>removeFromJournal(+b.dataset.i)));
@@ -1656,6 +1695,786 @@ function addWeekToShop(){
 document.getElementById('menuWeekClose').addEventListener('click',closeMenuWeek);
 document.getElementById('menuWeekGen').addEventListener('click',generateMenuWeek);
 document.getElementById('menuWeekAdd').addEventListener('click',addWeekToShop);
+
+/* ---------- Coach sportif ---------- */
+const SPORT_LIST=[
+  {id:'muscu', nom:'Musculation', obj:['Prise de masse','Sèche','Force']},
+  {id:'boxe', nom:'Boxe', obj:['Perte de gras','Performance','Endurance']},
+  {id:'foot', nom:'Football', obj:['Explosivité','Endurance','Force jambes']},
+  {id:'tennis', nom:'Tennis', obj:['Agilité','Endurance','Puissance']},
+  {id:'crossfit', nom:'CrossFit', obj:['Puissance','Condition physique','Endurance']},
+  {id:'combat', nom:'Sport de combat', obj:['Puissance','Performance','Endurance']},
+  {id:'forme', nom:'Remise en forme', obj:['Perte de gras','Endurance','Tonification']}
+];
+const NIVEAUX=[{id:'deb',nom:'Débutant',f:.45},{id:'int',nom:'Intermédiaire',f:.70},{id:'avc',nom:'Avancé',f:1}];
+const LIEUX=['Salle','Maison','Extérieur'];
+const DUREES=[{id:45,nom:'45 min'},{id:60,nom:'1h'},{id:90,nom:'1h30'}];
+
+/* c = coefficient de charge (× poids de corps). 0 = poids du corps ou cardio */
+const SEANCES={
+muscu:{
+ 'Prise de masse':[
+  {t:'Jambes',ex:[
+   {n:'Vélo ou rameur',s:'6 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat barre',s:'4 × 8',r:'2 min',c:.75},
+   {n:'Presse à cuisses',s:'4 × 10',r:'90 s',c:1.4},
+   {n:'Fentes haltères',s:'3 × 10 / jambe',r:'75 s',c:.22},
+   {n:'Leg curl',s:'4 × 12',r:'60 s',c:.30},
+   {n:'Mollets debout',s:'4 × 15',r:'45 s',c:.55},
+   {n:'Gainage planche',s:'3 × 45 s',r:'45 s',c:0},
+   {n:'Étirements quadriceps et ischios',s:'5 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Pectoraux et triceps',ex:[
+   {n:'Rotations épaules + élastique',s:'5 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé couché',s:'4 × 8',r:'2 min',c:.70},
+   {n:'Développé incliné haltères',s:'4 × 10',r:'90 s',c:.25},
+   {n:'Écarté poulie',s:'3 × 12',r:'60 s',c:.16},
+   {n:'Dips',s:'3 × max',r:'90 s',c:0},
+   {n:'Extension triceps poulie',s:'4 × 12',r:'60 s',c:.28},
+   {n:'Barre au front',s:'3 × 12',r:'60 s',c:.24},
+   {n:'Étirements pectoraux',s:'5 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Dos et biceps',ex:[
+   {n:'Rameur',s:'6 min',r:'—',c:0,note:'échauffement'},
+   {n:'Tractions ou tirage vertical',s:'4 × 8',r:'2 min',c:.60},
+   {n:'Rowing barre',s:'4 × 10',r:'90 s',c:.55},
+   {n:'Tirage horizontal',s:'4 × 12',r:'75 s',c:.50},
+   {n:'Soulevé de terre jambes tendues',s:'3 × 10',r:'2 min',c:.65},
+   {n:'Curl barre',s:'4 × 10',r:'60 s',c:.30},
+   {n:'Curl marteau',s:'3 × 12',r:'60 s',c:.15},
+   {n:'Étirements dos',s:'5 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Épaules et abdos',ex:[
+   {n:'Corde à sauter',s:'5 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé militaire',s:'4 × 8',r:'2 min',c:.45},
+   {n:'Élévations latérales',s:'4 × 15',r:'60 s',c:.10},
+   {n:'Oiseau haltères',s:'3 × 15',r:'60 s',c:.08},
+   {n:'Shrugs',s:'4 × 12',r:'60 s',c:.60},
+   {n:'Relevés de jambes suspendu',s:'4 × 12',r:'60 s',c:0},
+   {n:'Gainage latéral',s:'3 × 40 s / côté',r:'45 s',c:0},
+   {n:'Étirements épaules et nuque',s:'5 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Sèche':[
+  {t:'Haut du corps en circuit',ex:[
+   {n:'Corde à sauter',s:'6 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé couché',s:'4 × 12',r:'60 s',c:.55},
+   {n:'Tirage vertical',s:'4 × 12',r:'60 s',c:.50},
+   {n:'Développé militaire',s:'3 × 15',r:'45 s',c:.35},
+   {n:'Rowing haltère',s:'3 × 15',r:'45 s',c:.20},
+   {n:'Pompes',s:'3 × max',r:'45 s',c:0},
+   {n:'Burpees',s:'4 × 12',r:'45 s',c:0},
+   {n:'Marche rapide inclinée',s:'12 min',r:'—',c:0,note:'cardio final'}]},
+  {t:'Bas du corps et cardio',ex:[
+   {n:'Vélo',s:'6 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'4 × 15',r:'60 s',c:.55},
+   {n:'Fentes marchées',s:'3 × 14 / jambe',r:'60 s',c:.15},
+   {n:'Presse à cuisses',s:'3 × 15',r:'60 s',c:1.1},
+   {n:'Leg curl',s:'3 × 15',r:'45 s',c:.25},
+   {n:'Mollets',s:'4 × 20',r:'40 s',c:.45},
+   {n:'Fractionné : 30 s vite / 30 s lent',s:'10 tours',r:'—',c:0},
+   {n:'Étirements complets',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Full body brûle-calories',ex:[
+   {n:'Rameur',s:'5 min',r:'—',c:0,note:'échauffement'},
+   {n:'Soulevé de terre',s:'4 × 12',r:'90 s',c:.70},
+   {n:'Développé couché',s:'3 × 12',r:'60 s',c:.55},
+   {n:'Tractions assistées',s:'3 × 10',r:'60 s',c:0},
+   {n:'Kettlebell swing',s:'4 × 20',r:'45 s',c:.20},
+   {n:'Mountain climbers',s:'4 × 40 s',r:'30 s',c:0},
+   {n:'Gainage',s:'3 × 60 s',r:'45 s',c:0},
+   {n:'Vélo souple',s:'10 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Force':[
+  {t:'Squat lourd',ex:[
+   {n:'Vélo + mobilité hanches',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat barre',s:'5 × 5',r:'3 min',c:.95},
+   {n:'Squat avant',s:'4 × 6',r:'2 min',c:.60},
+   {n:'Presse à cuisses',s:'4 × 8',r:'2 min',c:1.6},
+   {n:'Leg curl',s:'4 × 10',r:'75 s',c:.32},
+   {n:'Gainage lesté',s:'4 × 45 s',r:'60 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Développé lourd',ex:[
+   {n:'Élastiques épaules',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé couché',s:'5 × 5',r:'3 min',c:.90},
+   {n:'Développé militaire',s:'4 × 6',r:'2 min',c:.55},
+   {n:'Dips lestés',s:'4 × 8',r:'2 min',c:.15},
+   {n:'Barre au front',s:'4 × 10',r:'75 s',c:.28},
+   {n:'Élévations latérales',s:'3 × 15',r:'60 s',c:.10},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Soulevé de terre',ex:[
+   {n:'Rameur + mobilité dos',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Soulevé de terre',s:'5 × 5',r:'3 min',c:1.15},
+   {n:'Rowing barre',s:'4 × 6',r:'2 min',c:.65},
+   {n:'Tractions lestées',s:'4 × 6',r:'2 min',c:.12},
+   {n:'Shrugs lourds',s:'4 × 10',r:'90 s',c:.75},
+   {n:'Curl barre',s:'3 × 10',r:'60 s',c:.32},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]}]},
+boxe:{
+ 'Perte de gras':[
+  {t:'Cardio et sac',ex:[
+   {n:'Corde à sauter',s:'3 × 3 min',r:'1 min',c:0,note:'échauffement'},
+   {n:'Shadow boxing',s:'3 × 3 min',r:'1 min',c:0},
+   {n:'Sac de frappe',s:'6 × 3 min',r:'1 min',c:0},
+   {n:'Burpees',s:'4 × 15',r:'45 s',c:0},
+   {n:'Gainage',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Renforcement',ex:[
+   {n:'Corde à sauter',s:'6 min',r:'—',c:0,note:'échauffement'},
+   {n:'Pompes',s:'4 × max',r:'60 s',c:0},
+   {n:'Tractions',s:'4 × max',r:'90 s',c:0},
+   {n:'Squat sauté',s:'4 × 15',r:'60 s',c:0},
+   {n:'Kettlebell swing',s:'4 × 20',r:'45 s',c:.20},
+   {n:'Relevés de jambes',s:'4 × 15',r:'45 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Fractionné',ex:[
+   {n:'Course souple',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Sprint 30 s / marche 60 s',s:'12 tours',r:'—',c:0},
+   {n:'Shadow boxing',s:'4 × 2 min',r:'45 s',c:0},
+   {n:'Abdos circuit',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Performance':[
+  {t:'Puissance de frappe',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé couché explosif',s:'5 × 5',r:'2 min',c:.65},
+   {n:'Pompes claquées',s:'4 × 8',r:'90 s',c:0},
+   {n:'Medecine ball au mur',s:'5 × 10',r:'75 s',c:0},
+   {n:'Rotations russes',s:'4 × 20',r:'45 s',c:.08},
+   {n:'Sac : séries explosives',s:'5 × 2 min',r:'1 min',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Jambes et déplacements',ex:[
+   {n:'Mobilité chevilles et hanches',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'4 × 8',r:'2 min',c:.70},
+   {n:'Fentes sautées',s:'4 × 12 / jambe',r:'75 s',c:0},
+   {n:'Montées de box',s:'4 × 10 / jambe',r:'60 s',c:0},
+   {n:'Déplacements latéraux',s:'6 × 45 s',r:'45 s',c:0},
+   {n:'Gainage',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Technique et endurance',ex:[
+   {n:'Corde à sauter',s:'3 × 3 min',r:'1 min',c:0,note:'échauffement'},
+   {n:'Shadow avec combinaisons',s:'5 × 3 min',r:'1 min',c:0},
+   {n:'Sac : travail au corps',s:'6 × 3 min',r:'1 min',c:0},
+   {n:'Pattes d\'ours si partenaire',s:'4 × 3 min',r:'1 min',c:0},
+   {n:'Abdos',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Endurance':[
+  {t:'Fond',ex:[
+   {n:'Course souple',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Course allure modérée',s:'30 min',r:'—',c:0},
+   {n:'Corde à sauter',s:'4 × 3 min',r:'1 min',c:0},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Rounds longs',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Sac : rounds de 4 min',s:'8 rounds',r:'45 s',c:0},
+   {n:'Pompes entre les rounds',s:'8 × 15',r:'—',c:0},
+   {n:'Abdos',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Circuit',ex:[
+   {n:'Corde à sauter',s:'6 min',r:'—',c:0,note:'échauffement'},
+   {n:'Circuit : burpees, squats, pompes, mountain climbers',s:'6 tours de 4 × 40 s',r:'90 s entre tours',c:0},
+   {n:'Shadow boxing',s:'3 × 3 min',r:'1 min',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}]},
+foot:{
+ 'Explosivité':[
+  {t:'Puissance jambes',ex:[
+   {n:'Course + montées de genoux',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'5 × 5',r:'2 min 30',c:.85},
+   {n:'Squat sauté',s:'4 × 8',r:'2 min',c:0},
+   {n:'Montées de box explosives',s:'4 × 8 / jambe',r:'90 s',c:0},
+   {n:'Fentes bulgares',s:'3 × 10 / jambe',r:'75 s',c:.20},
+   {n:'Gainage',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Sprints',ex:[
+   {n:'Course progressive',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Sprints 30 m',s:'8 répétitions',r:'90 s',c:0},
+   {n:'Sprints avec changement de direction',s:'6 répétitions',r:'2 min',c:0},
+   {n:'Échelle de rythme',s:'6 passages',r:'60 s',c:0},
+   {n:'Abdos',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Haut du corps et gainage',ex:[
+   {n:'Rameur',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé couché',s:'4 × 8',r:'2 min',c:.60},
+   {n:'Tractions',s:'4 × max',r:'90 s',c:0},
+   {n:'Rowing haltère',s:'4 × 10',r:'75 s',c:.22},
+   {n:'Gainage dynamique',s:'4 × 45 s',r:'45 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Endurance':[
+  {t:'Fractionné long',ex:[
+   {n:'Course souple',s:'12 min',r:'—',c:0,note:'échauffement'},
+   {n:'4 min rapide / 2 min lent',s:'6 tours',r:'—',c:0},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Fractionné court',ex:[
+   {n:'Course + mobilité',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'30 s vite / 30 s lent',s:'16 tours',r:'—',c:0},
+   {n:'Navettes',s:'8 × 20 m',r:'60 s',c:0},
+   {n:'Abdos',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Sortie longue',ex:[
+   {n:'Course souple',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Course allure régulière',s:'40 min',r:'—',c:0},
+   {n:'Renforcement mollets',s:'4 × 20',r:'45 s',c:0},
+   {n:'Étirements',s:'10 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Force jambes':[
+  {t:'Force maximale',ex:[
+   {n:'Vélo + mobilité',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'5 × 5',r:'3 min',c:.95},
+   {n:'Soulevé de terre jambes tendues',s:'4 × 8',r:'2 min',c:.70},
+   {n:'Presse à cuisses',s:'4 × 8',r:'2 min',c:1.5},
+   {n:'Leg curl',s:'4 × 10',r:'75 s',c:.32},
+   {n:'Mollets',s:'4 × 15',r:'45 s',c:.55},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Unilatéral',ex:[
+   {n:'Course + mobilité hanches',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Fentes bulgares',s:'4 × 10 / jambe',r:'90 s',c:.25},
+   {n:'Squat sur une jambe',s:'3 × 8 / jambe',r:'90 s',c:0},
+   {n:'Montées de box',s:'4 × 12 / jambe',r:'60 s',c:.15},
+   {n:'Gainage latéral',s:'3 × 45 s / côté',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Puissance',ex:[
+   {n:'Course progressive',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat sauté',s:'5 × 8',r:'2 min',c:0},
+   {n:'Sauts sur box',s:'5 × 6',r:'2 min',c:0},
+   {n:'Sprints 20 m',s:'8 répétitions',r:'90 s',c:0},
+   {n:'Abdos',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}]},
+tennis:{
+ 'Agilité':[
+  {t:'Vitesse de pieds',ex:[
+   {n:'Course + montées de genoux',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Échelle de rythme',s:'8 passages',r:'60 s',c:0},
+   {n:'Déplacements latéraux',s:'8 × 30 s',r:'45 s',c:0},
+   {n:'Sprints avec changement de direction',s:'8 répétitions',r:'90 s',c:0},
+   {n:'Gainage',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Équilibre et bas du corps',ex:[
+   {n:'Vélo + mobilité',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'4 × 10',r:'90 s',c:.60},
+   {n:'Fentes latérales',s:'4 × 10 / jambe',r:'75 s',c:.15},
+   {n:'Squat sur une jambe',s:'3 × 8 / jambe',r:'75 s',c:0},
+   {n:'Mollets',s:'4 × 20',r:'45 s',c:.40},
+   {n:'Gainage latéral',s:'3 × 45 s / côté',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Haut du corps',ex:[
+   {n:'Élastiques épaules',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé couché',s:'4 × 10',r:'90 s',c:.55},
+   {n:'Tirage horizontal',s:'4 × 12',r:'75 s',c:.45},
+   {n:'Rotations externes élastique',s:'3 × 15 / bras',r:'45 s',c:0},
+   {n:'Rotations russes',s:'4 × 20',r:'45 s',c:.08},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Endurance':[
+  {t:'Fractionné',ex:[
+   {n:'Course souple',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'1 min vite / 1 min lent',s:'12 tours',r:'—',c:0},
+   {n:'Navettes',s:'8 × 20 m',r:'60 s',c:0},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Fond',ex:[
+   {n:'Course souple',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Course allure régulière',s:'35 min',r:'—',c:0},
+   {n:'Renforcement général',s:'4 × 60 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Circuit',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Circuit : squats, pompes, burpees, gainage',s:'5 tours de 4 × 45 s',r:'90 s entre tours',c:0},
+   {n:'Déplacements latéraux',s:'6 × 30 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Puissance':[
+  {t:'Explosivité jambes',ex:[
+   {n:'Course + mobilité',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'4 × 6',r:'2 min 30',c:.85},
+   {n:'Squat sauté',s:'4 × 8',r:'2 min',c:0},
+   {n:'Sauts latéraux',s:'4 × 12',r:'75 s',c:0},
+   {n:'Gainage dynamique',s:'4 × 45 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Puissance du haut',ex:[
+   {n:'Élastiques + rameur',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé couché explosif',s:'5 × 5',r:'2 min',c:.65},
+   {n:'Medecine ball rotation',s:'5 × 12',r:'75 s',c:0},
+   {n:'Tractions',s:'4 × max',r:'90 s',c:0},
+   {n:'Rotations russes lestées',s:'4 × 20',r:'45 s',c:.10},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Complet',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Soulevé de terre',s:'4 × 6',r:'2 min 30',c:.90},
+   {n:'Développé militaire',s:'4 × 8',r:'90 s',c:.45},
+   {n:'Fentes sautées',s:'4 × 10 / jambe',r:'75 s',c:0},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}]},
+crossfit:{
+ 'Puissance':[
+  {t:'Force et WOD',ex:[
+   {n:'Rameur + mobilité',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Soulevé de terre',s:'5 × 5',r:'2 min 30',c:1.10},
+   {n:'Épaulé-jeté',s:'5 × 3',r:'2 min 30',c:.65},
+   {n:'WOD : 21-15-9 thrusters et tractions',s:'pour le temps',r:'—',c:.30},
+   {n:'Gainage',s:'3 × 60 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Haltéro',ex:[
+   {n:'Mobilité épaules et hanches',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Arraché technique',s:'6 × 3',r:'2 min',c:.50},
+   {n:'Squat avant',s:'5 × 5',r:'2 min 30',c:.70},
+   {n:'Développé militaire',s:'4 × 6',r:'2 min',c:.50},
+   {n:'WOD : 5 tours de 10 kettlebell swings et 10 box jumps',s:'pour le temps',r:'—',c:.22},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Métabolique',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'AMRAP 20 min : 5 tractions, 10 pompes, 15 squats',s:'max de tours',r:'—',c:0},
+   {n:'Rameur',s:'5 × 500 m',r:'90 s',c:0},
+   {n:'Gainage',s:'3 × 60 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Condition physique':[
+  {t:'Full body',ex:[
+   {n:'Rameur',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'4 × 10',r:'90 s',c:.65},
+   {n:'Développé couché',s:'4 × 10',r:'90 s',c:.55},
+   {n:'Rowing barre',s:'4 × 10',r:'90 s',c:.50},
+   {n:'Kettlebell swing',s:'4 × 20',r:'60 s',c:.22},
+   {n:'Burpees',s:'4 × 12',r:'60 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Circuit',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Circuit : thrusters, box jumps, pompes, rameur',s:'5 tours de 4 × 45 s',r:'90 s entre tours',c:.25},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Cardio et gainage',ex:[
+   {n:'Vélo',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Rameur',s:'6 × 400 m',r:'90 s',c:0},
+   {n:'Mountain climbers',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Planche et variantes',s:'5 × 60 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Endurance':[
+  {t:'Longue durée',ex:[
+   {n:'Course souple',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Course allure régulière',s:'35 min',r:'—',c:0},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Chipper',ex:[
+   {n:'Rameur',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'100 squats, 80 pompes, 60 abdos, 40 burpees, 20 tractions',s:'pour le temps',r:'—',c:0},
+   {n:'Étirements',s:'10 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Intervalles',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Rameur : 1 min fort / 1 min souple',s:'12 tours',r:'—',c:0},
+   {n:'Kettlebell swing',s:'5 × 20',r:'60 s',c:.20},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}]},
+combat:{
+ 'Puissance':[
+  {t:'Force explosive',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Soulevé de terre',s:'5 × 5',r:'2 min 30',c:1.0},
+   {n:'Développé couché explosif',s:'5 × 5',r:'2 min',c:.70},
+   {n:'Medecine ball au sol',s:'5 × 10',r:'75 s',c:0},
+   {n:'Tractions explosives',s:'4 × 6',r:'90 s',c:0},
+   {n:'Gainage',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Jambes et projection',ex:[
+   {n:'Mobilité hanches',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'5 × 5',r:'2 min 30',c:.90},
+   {n:'Fentes lestées',s:'4 × 10 / jambe',r:'90 s',c:.25},
+   {n:'Squat sauté',s:'4 × 10',r:'75 s',c:0},
+   {n:'Kettlebell swing',s:'4 × 20',r:'60 s',c:.25},
+   {n:'Gainage latéral',s:'3 × 45 s / côté',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Grip et tirage',ex:[
+   {n:'Rameur',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Tractions prise serviette',s:'4 × max',r:'2 min',c:0},
+   {n:'Rowing barre',s:'4 × 8',r:'90 s',c:.60},
+   {n:'Curl marteau',s:'4 × 12',r:'60 s',c:.16},
+   {n:'Fermier : marche lestée',s:'4 × 40 m',r:'90 s',c:.55},
+   {n:'Abdos',s:'4 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Performance':[
+  {t:'Technique et physique',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Travail technique à vide',s:'5 × 3 min',r:'1 min',c:0},
+   {n:'Sac ou partenaire',s:'6 × 3 min',r:'1 min',c:0},
+   {n:'Pompes et abdos alternés',s:'5 × 45 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Renforcement',ex:[
+   {n:'Rameur',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'4 × 8',r:'2 min',c:.75},
+   {n:'Développé militaire',s:'4 × 8',r:'90 s',c:.45},
+   {n:'Tractions',s:'4 × max',r:'90 s',c:0},
+   {n:'Kettlebell swing',s:'4 × 20',r:'60 s',c:.22},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'6 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Circuit combat',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Circuit : burpees, sprawls, squats sautés, gainage',s:'6 tours de 4 × 40 s',r:'90 s entre tours',c:0},
+   {n:'Shadow',s:'4 × 2 min',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Endurance':[
+  {t:'Fond',ex:[
+   {n:'Course souple',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'Course allure régulière',s:'35 min',r:'—',c:0},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Rounds',ex:[
+   {n:'Corde à sauter',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Rounds de 5 min au sac ou grappling',s:'6 rounds',r:'1 min',c:0},
+   {n:'Sprawls',s:'5 × 20',r:'60 s',c:0},
+   {n:'Abdos',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Fractionné',ex:[
+   {n:'Course souple',s:'10 min',r:'—',c:0,note:'échauffement'},
+   {n:'30 s sprint / 60 s marche',s:'14 tours',r:'—',c:0},
+   {n:'Burpees',s:'5 × 15',r:'60 s',c:0},
+   {n:'Gainage',s:'4 × 60 s',r:'30 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}]},
+forme:{
+ 'Perte de gras':[
+  {t:'Full body doux',ex:[
+   {n:'Marche rapide ou vélo',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat au poids du corps',s:'3 × 15',r:'60 s',c:0},
+   {n:'Pompes sur genoux ou classiques',s:'3 × 10',r:'60 s',c:0},
+   {n:'Tirage élastique',s:'3 × 15',r:'60 s',c:0},
+   {n:'Fentes',s:'3 × 10 / jambe',r:'60 s',c:0},
+   {n:'Gainage',s:'3 × 30 s',r:'45 s',c:0},
+   {n:'Marche rapide',s:'15 min',r:'—',c:0,note:'cardio final'}]},
+  {t:'Cardio',ex:[
+   {n:'Marche rapide',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Vélo ou marche inclinée',s:'30 min',r:'—',c:0},
+   {n:'Abdos',s:'3 × 30 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Circuit léger',ex:[
+   {n:'Vélo',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Circuit : squats, pompes, gainage, montées de genoux',s:'4 tours de 4 × 30 s',r:'90 s entre tours',c:0},
+   {n:'Marche rapide',s:'12 min',r:'—',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Endurance':[
+  {t:'Marche et course',ex:[
+   {n:'Marche rapide',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Alternance 2 min course / 2 min marche',s:'8 tours',r:'—',c:0},
+   {n:'Gainage',s:'3 × 40 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Vélo',ex:[
+   {n:'Vélo souple',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Vélo allure régulière',s:'35 min',r:'—',c:0},
+   {n:'Renforcement jambes',s:'3 × 15',r:'60 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Cardio varié',ex:[
+   {n:'Marche rapide',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Rameur ou elliptique',s:'20 min',r:'—',c:0},
+   {n:'Corde à sauter',s:'5 × 1 min',r:'1 min',c:0},
+   {n:'Gainage',s:'3 × 40 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}],
+ 'Tonification':[
+  {t:'Haut du corps',ex:[
+   {n:'Vélo + mobilité',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Développé haltères',s:'3 × 12',r:'75 s',c:.15},
+   {n:'Tirage élastique ou machine',s:'3 × 15',r:'60 s',c:.35},
+   {n:'Élévations latérales',s:'3 × 15',r:'60 s',c:.06},
+   {n:'Curl haltères',s:'3 × 12',r:'60 s',c:.10},
+   {n:'Gainage',s:'3 × 40 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Bas du corps',ex:[
+   {n:'Marche rapide',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'4 × 15',r:'60 s',c:.35},
+   {n:'Fentes',s:'3 × 12 / jambe',r:'60 s',c:.12},
+   {n:'Pont fessier',s:'4 × 15',r:'60 s',c:.25},
+   {n:'Mollets',s:'3 × 20',r:'45 s',c:.30},
+   {n:'Gainage latéral',s:'3 × 30 s / côté',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]},
+  {t:'Full body',ex:[
+   {n:'Vélo',s:'8 min',r:'—',c:0,note:'échauffement'},
+   {n:'Squat',s:'3 × 15',r:'60 s',c:.35},
+   {n:'Développé haltères',s:'3 × 12',r:'60 s',c:.15},
+   {n:'Rowing haltère',s:'3 × 12',r:'60 s',c:.15},
+   {n:'Fentes',s:'3 × 10 / jambe',r:'60 s',c:0},
+   {n:'Abdos',s:'3 × 40 s',r:'45 s',c:0},
+   {n:'Étirements',s:'8 min',r:'—',c:0,note:'retour au calme'}]}]}
+};
+
+/* ---- Musculation : choix des zones a travailler ---- */
+const ZONES=[
+  {id:'jambes',nom:'Jambes'},{id:'pecs',nom:'Pectoraux'},{id:'dos',nom:'Dos'},
+  {id:'epaules',nom:'Épaules'},{id:'bras',nom:'Bras'},{id:'abdos',nom:'Abdos'}
+];
+/* c = coefficient de charge (x poids de corps), iso = exercice d'isolation */
+const POOL={
+ jambes:{ech:'Vélo ou rameur 6 min',eti:'Étirements quadriceps et ischios',ex:[
+  {n:'Squat barre',c:.75},{n:'Presse à cuisses',c:1.4},{n:'Soulevé de terre jambes tendues',c:.65},
+  {n:'Fentes haltères',c:.22},{n:'Squat avant',c:.60},{n:'Fentes bulgares',c:.25},
+  {n:'Squat gobelet',c:.30},{n:'Fentes marchées',c:.18},{n:'Squat sumo',c:.70},
+  {n:'Soulevé de terre roumain',c:.70},{n:'Hack squat',c:1.0},
+  {n:'Leg extension',c:.35,iso:1},{n:'Leg curl',c:.30,iso:1},{n:'Mollets debout',c:.55,iso:1},
+  {n:'Mollets assis',c:.35,iso:1},{n:'Abduction hanches',c:.25,iso:1},
+  {n:'Hip thrust',c:.70},{n:'Montées de box',c:.15}]},
+ pecs:{ech:'Rotations épaules et élastique 5 min',eti:'Étirements pectoraux',ex:[
+  {n:'Développé couché',c:.70},{n:'Développé incliné haltères',c:.25},{n:'Développé décliné',c:.65},
+  {n:'Dips',c:0},{n:'Pompes',c:0},{n:'Développé haltères à plat',c:.28},
+  {n:'Développé machine',c:.60},{n:'Pompes surélevées',c:0},{n:'Développé incliné barre',c:.55},
+  {n:'Écarté poulie',c:.16,iso:1},{n:'Écarté haltères',c:.14,iso:1},
+  {n:'Écarté incliné',c:.12,iso:1},{n:'Pec deck',c:.30,iso:1},{n:'Pull-over',c:.20,iso:1}]},
+ dos:{ech:'Rameur 6 min',eti:'Étirements dos et lombaires',ex:[
+  {n:'Tractions ou tirage vertical',c:.60},{n:'Rowing barre',c:.55},{n:'Soulevé de terre',c:1.0},
+  {n:'Tirage horizontal',c:.50},{n:'Rowing haltère',c:.22},{n:'Tirage nuque',c:.45},
+  {n:'Rowing T-bar',c:.50},{n:'Tirage prise serrée',c:.50},{n:'Rowing machine',c:.55},
+  {n:'Tractions supination',c:0},{n:'Rowing élastique',c:0},
+  {n:'Pull-over poulie',c:.25,iso:1},{n:'Shrugs',c:.60,iso:1},{n:'Extension lombaire',c:0,iso:1}]},
+ epaules:{ech:'Corde à sauter 5 min',eti:'Étirements épaules et nuque',ex:[
+  {n:'Développé militaire',c:.45},{n:'Développé haltères assis',c:.20},{n:'Développé Arnold',c:.18},
+  {n:'Développé machine épaules',c:.40},{n:'Rowing menton',c:.30},{n:'Pompes piquées',c:0},
+  {n:'Élévations latérales',c:.10,iso:1},{n:'Oiseau haltères',c:.08,iso:1},
+  {n:'Élévations frontales',c:.09,iso:1},{n:'Face pull',c:.25,iso:1},
+  {n:'Élévations latérales poulie',c:.09,iso:1},{n:'Oiseau machine',c:.20,iso:1}]},
+ bras:{ech:'Élastique et rotations 5 min',eti:'Étirements biceps et triceps',ex:[
+  {n:'Curl barre',c:.30},{n:'Barre au front',c:.24},{n:'Dips lestés',c:.12},
+  {n:'Curl barre EZ',c:.28},{n:'Développé couché prise serrée',c:.55},{n:'Pompes diamant',c:0},
+  {n:'Curl haltères',c:.14,iso:1},{n:'Curl marteau',c:.15,iso:1},
+  {n:'Curl pupitre',c:.22,iso:1},{n:'Curl concentration',c:.12,iso:1},
+  {n:'Extension triceps poulie',c:.28,iso:1},{n:'Extension nuque haltère',c:.14,iso:1},
+  {n:'Kickback triceps',c:.10,iso:1},{n:'Curl poulie basse',c:.25,iso:1}]},
+ abdos:{ech:'Corde à sauter 5 min',eti:'Étirements dos et abdominaux',ex:[
+  {n:'Gainage planche',c:0},{n:'Relevés de jambes suspendu',c:0},{n:'Roulette abdominale',c:0},
+  {n:'Mountain climbers',c:0},{n:'Relevés de jambes au sol',c:0},{n:'Hollow body',c:0},
+  {n:'Crunch poulie',c:.30,iso:1},{n:'Gainage latéral',c:0,iso:1},
+  {n:'Rotations russes',c:.08,iso:1},{n:'Crunch au sol',c:0,iso:1},
+  {n:'Planche dynamique',c:0,iso:1},{n:'Essuie-glace',c:0,iso:1}]}
+};
+/* series, repos et intensite selon l'objectif */
+const SCHEMA={
+ 'Prise de masse':{base:{s:'4 × 8',r:'2 min'},iso:{s:'3 × 12',r:'60 s'},mult:1},
+ 'Sèche':{base:{s:'4 × 12',r:'60 s'},iso:{s:'3 × 15',r:'45 s'},mult:.75},
+ 'Force':{base:{s:'5 × 5',r:'3 min'},iso:{s:'4 × 10',r:'75 s'},mult:1.25}
+};
+
+/* repartit les zones choisies sur les jours d'entrainement */
+function repartirZones(zones,nbJours){
+  if(!zones.length) return [];
+  const jours=[];
+  if(zones.length<=nbJours){
+    for(let i=0;i<nbJours;i++) jours.push([zones[i%zones.length]]);
+  } else {
+    for(let i=0;i<nbJours;i++) jours.push([]);
+    zones.forEach((z,i)=>jours[i%nbJours].push(z));
+  }
+  return jours;
+}
+
+/* melange reproductible : meme graine = meme resultat */
+function melange(arr,graine){
+  const a=arr.slice(); let g=graine*9301+49297;
+  for(let i=a.length-1;i>0;i--){
+    g=(g*9301+49297)%233280;
+    const j=Math.floor((g/233280)*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+/* construit une seance a partir des zones du jour */
+function seanceMuscu(zonesDuJour,obj,duree,graine){
+  const sc=SCHEMA[obj]||SCHEMA['Prise de masse'];
+  const maxEx = duree<=45?5 : duree<=60?7 : 9;
+  const parZone=Math.min(6,Math.max(2,Math.floor(maxEx/zonesDuJour.length)));
+  const liste=[];
+  const p0=POOL[zonesDuJour[0]];
+  liste.push({n:p0.ech,s:'—',r:'—',c:0,note:'échauffement'});
+  zonesDuJour.forEach((z,zi)=>{
+    const p=POOL[z]; if(!p) return;
+    const poly=melange(p.ex.filter(e=>!e.iso),graine+zi*7);
+    const iso=melange(p.ex.filter(e=>e.iso),graine+zi*13);
+    /* toujours commencer par un gros exercice, puis completer */
+    const nbPoly=Math.min(poly.length,Math.max(1,Math.ceil(parZone*0.6)));
+    const choix=[...poly.slice(0,nbPoly),...iso].slice(0,parZone);
+    choix.forEach(e=>{
+      const m=e.iso?sc.iso:sc.base;
+      liste.push({n:e.n,s:m.s,r:m.r,c:e.c*sc.mult});
+    });
+  });
+  liste.push({n:p0.eti+' · 5 min',s:'—',r:'—',c:0,note:'retour au calme'});
+  return {titre:zonesDuJour.map(z=>(ZONES.find(x=>x.id===z)||{}).nom).join(' et '), ex:liste};
+}
+
+let coachState={sport:'muscu',obj:'Prise de masse',niveau:'int',lieu:'Salle',duree:60,jours:new Set(['Lundi','Mercredi','Vendredi']),zones:new Set(['jambes','pecs','dos','epaules','bras','abdos'])};
+let COACH_PROG=null;
+let coachGraine=Date.now()%10000;
+
+function saveCoach(){
+  try{
+    if(!COACH_PROG){ localStorage.removeItem('graille_coach'); return; }
+    localStorage.setItem('graille_coach',JSON.stringify({
+      st:{...coachState,jours:[...coachState.jours],zones:[...coachState.zones]}, prog:COACH_PROG}));
+  }catch(e){}
+}
+function loadCoach(){
+  try{
+    const d=JSON.parse(localStorage.getItem('graille_coach')); if(!d) return null;
+    if(d.st){ coachState={...d.st,jours:new Set(d.st.jours||[]),zones:new Set(d.st.zones||['jambes','pecs','dos','epaules','bras','abdos'])}; }
+    return (d.prog&&d.prog.length)?d.prog:null;
+  }catch(e){ return null; }
+}
+function hasCoach(){
+  try{ const d=JSON.parse(localStorage.getItem('graille_coach')); return !!(d&&d.prog&&d.prog.length); }catch(e){ return false; }
+}
+
+function openCoach(){
+  COACH_PROG=loadCoach();
+  renderCoachPickers();
+  document.getElementById('coachResult').innerHTML='';
+  document.getElementById('coachGen').textContent=COACH_PROG?'Regénérer':'Générer mon programme';
+  document.getElementById('coachDel').style.display=COACH_PROG?'':'none';
+  document.getElementById('coach').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(COACH_PROG) renderCoachResult();
+}
+function closeCoach(){ document.getElementById('coach').classList.remove('open'); document.body.style.overflow=''; }
+
+function chips(list,actif,onclick){
+  return list.map(o=>{
+    const id=typeof o==='object'?o.id:o, nom=typeof o==='object'?o.nom:o;
+    return `<button class="menu-chip" data-v="${id}" aria-pressed="${actif(id)}">${nom}</button>`;
+  }).join('');
+}
+function bindChips(el,cb){
+  el.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>cb(b.dataset.v)));
+}
+
+function renderCoachPickers(){
+  const sp=SPORT_LIST.find(s=>s.id===coachState.sport)||SPORT_LIST[0];
+  if(!sp.obj.includes(coachState.obj)) coachState.obj=sp.obj[0];
+
+  const S=document.getElementById('coachSport');
+  S.innerHTML=chips(SPORT_LIST.map(s=>({id:s.id,nom:s.nom})),v=>v===coachState.sport);
+  bindChips(S,v=>{ coachState.sport=v; renderCoachPickers(); });
+
+  const O=document.getElementById('coachObj');
+  O.innerHTML=chips(sp.obj,v=>v===coachState.obj);
+  bindChips(O,v=>{ coachState.obj=v; renderCoachPickers(); });
+
+  const N=document.getElementById('coachNiv');
+  N.innerHTML=chips(NIVEAUX.map(n=>({id:n.id,nom:n.nom})),v=>v===coachState.niveau);
+  bindChips(N,v=>{ coachState.niveau=v; renderCoachPickers(); });
+
+  const L=document.getElementById('coachLieu');
+  L.innerHTML=chips(LIEUX,v=>v===coachState.lieu);
+  bindChips(L,v=>{ coachState.lieu=v; renderCoachPickers(); });
+
+  const D=document.getElementById('coachDuree');
+  D.innerHTML=chips(DUREES.map(d=>({id:d.id,nom:d.nom})),v=>+v===coachState.duree);
+  bindChips(D,v=>{ coachState.duree=+v; renderCoachPickers(); });
+
+  const zoneBloc=document.getElementById('coachZonesBloc');
+  if(coachState.sport==='muscu'){
+    zoneBloc.style.display='';
+    const Z=document.getElementById('coachZones');
+    Z.innerHTML=chips(ZONES,v=>coachState.zones.has(v));
+    bindChips(Z,v=>{
+      if(coachState.zones.has(v)){ if(coachState.zones.size>1) coachState.zones.delete(v); }
+      else coachState.zones.add(v);
+      renderCoachPickers();
+    });
+  } else zoneBloc.style.display='none';
+
+  const J=document.getElementById('coachJours');
+  J.innerHTML=chips(WEEK_DAYS,v=>coachState.jours.has(v));
+  bindChips(J,v=>{ coachState.jours.has(v)?coachState.jours.delete(v):coachState.jours.add(v); renderCoachPickers(); });
+}
+
+/* charge indicative a partir du poids de corps du profil */
+function charge(coef,poids,facteur){
+  if(!coef) return null;
+  const kg=coef*poids*facteur;
+  if(kg<2) return null;
+  return (kg<20? Math.round(kg) : Math.round(kg/2.5)*2.5)+' kg';
+}
+/* nb d'exercices selon la duree choisie, avec variation */
+function coupeSeance(ex,duree,graine){
+  const max = duree<=45?6 : duree<=60?8 : 99;
+  const debut=ex[0], fin=ex[ex.length-1];
+  let milieu=ex.slice(1,-1);
+  if(graine!=null && milieu.length>2){
+    /* on garde le 1er exercice principal, on melange la suite */
+    const tete=milieu[0], reste=melange(milieu.slice(1),graine);
+    milieu=[tete,...reste];
+  }
+  if(ex.length<=max) return [debut,...milieu,fin];
+  return [debut,...milieu.slice(0,max-2),fin];
+}
+
+function generateCoach(nouvelle){
+  if(nouvelle!==false) coachGraine=Math.floor(Math.random()*100000);
+  const jours=WEEK_DAYS.filter(j=>coachState.jours.has(j));
+  const res=document.getElementById('coachResult');
+  if(!jours.length){ res.innerHTML='<p class="menu-hint">Choisis au moins un jour d\'entraînement.</p>'; return; }
+  const p=loadProfile();
+  const poids=(p&&p.poids)?p.poids:75;
+  const fac=(NIVEAUX.find(n=>n.id===coachState.niveau)||NIVEAUX[1]).f;
+  if(coachState.sport==='muscu'){
+    const zones=ZONES.map(z=>z.id).filter(z=>coachState.zones.has(z));
+    if(!zones.length){ res.innerHTML='<p class="menu-hint">Choisis au moins une zone à travailler.</p>'; return; }
+    const rep=repartirZones(zones,jours.length);
+    COACH_PROG=jours.map((j,i)=>{
+      const s=seanceMuscu(rep[i],coachState.obj,coachState.duree,coachGraine+i*31);
+      return {jour:j, titre:s.titre, ex:s.ex.map(e=>({
+        n:e.n, s:e.s, r:e.r, note:e.note||'', poids:charge(e.c,poids,fac)
+      }))};
+    });
+  } else {
+    const seances=(SEANCES[coachState.sport]||{})[coachState.obj]||[];
+    if(!seances.length){ res.innerHTML='<p class="menu-hint">Programme indisponible pour ce choix.</p>'; return; }
+    const dep=coachGraine%seances.length;
+    COACH_PROG=jours.map((j,i)=>{
+      const s=seances[(i+dep)%seances.length];
+      return {jour:j, titre:s.t, ex:coupeSeance(s.ex,coachState.duree,coachGraine+i*17).map(e=>({
+        n:e.n, s:e.s, r:e.r, note:e.note||'', poids:charge(e.c,poids,fac)
+      }))};
+    });
+  }
+  saveCoach();
+  renderCoachResult();
+  renderTracker();
+  document.getElementById('coachGen').textContent='Regénérer';
+  document.getElementById('coachDel').style.display='';
+}
+
+function renderCoachResult(){
+  const res=document.getElementById('coachResult');
+  if(!COACH_PROG||!COACH_PROG.length){ res.innerHTML=''; return; }
+  const sp=SPORT_LIST.find(s=>s.id===coachState.sport);
+  res.innerHTML=`<div class="week-top">
+      <div class="week-lbl" style="margin:0">${sp?sp.nom:''} · ${coachState.obj} · ${COACH_PROG.length} séance${COACH_PROG.length>1?'s':''}</div>
+    </div>`+
+    COACH_PROG.map((d,di)=>`<div class="week-day">
+      <div class="week-day-h">${d.jour} <span>${d.titre}</span>
+        <button class="wk-del cx-swap" data-d="${di}" title="Changer cette séance">↻</button>
+      </div>
+      ${d.ex.map(e=>`<div class="cx-row">
+        <div class="cx-n">${e.n}${e.note?` <i>${e.note}</i>`:''}</div>
+        <div class="cx-d"><b>${e.s}</b>${e.r&&e.r!=='—'?` · repos ${e.r}`:''}${e.poids?` · <span class="cx-kg">${e.poids}</span>`:''}</div>
+      </div>`).join('')}
+    </div>`).join('')+
+    `<p class="cx-warn">Les charges sont indicatives, calculées sur ton poids. Si c'est trop lourd, baisse. Si c'est trop léger, monte de 1 à 2 kg à la séance suivante. En cas de douleur, arrête.</p>`;
+  res.querySelectorAll('.cx-swap').forEach(b=>b.addEventListener('click',()=>swapSeance(+b.dataset.d)));
+}
+
+function swapSeance(di){
+  const p=loadProfile(); const poids=(p&&p.poids)?p.poids:75;
+  const fac=(NIVEAUX.find(n=>n.id===coachState.niveau)||NIVEAUX[1]).f;
+  const g=Math.floor(Math.random()*100000);
+  if(coachState.sport==='muscu'){
+    const zones=ZONES.map(z=>z.id).filter(z=>coachState.zones.has(z));
+    const jours=WEEK_DAYS.filter(j=>coachState.jours.has(j));
+    const rep=repartirZones(zones,jours.length);
+    const s=seanceMuscu(rep[di],coachState.obj,coachState.duree,g);
+    COACH_PROG[di]={jour:COACH_PROG[di].jour,titre:s.titre,ex:s.ex.map(e=>({n:e.n,s:e.s,r:e.r,note:e.note||'',poids:charge(e.c,poids,fac)}))};
+  } else {
+    const seances=(SEANCES[coachState.sport]||{})[coachState.obj]||[];
+    if(!seances.length) return;
+    const s=seances[g%seances.length];
+    COACH_PROG[di]={jour:COACH_PROG[di].jour,titre:s.t,ex:coupeSeance(s.ex,coachState.duree,g).map(e=>({n:e.n,s:e.s,r:e.r,note:e.note||'',poids:charge(e.c,poids,fac)}))};
+  }
+  saveCoach(); renderCoachResult();
+}
+
+function clearCoach(){
+  COACH_PROG=null;
+  try{ localStorage.removeItem('graille_coach'); }catch(e){}
+  document.getElementById('coachResult').innerHTML='';
+  document.getElementById('coachGen').textContent='Générer mon programme';
+  document.getElementById('coachDel').style.display='none';
+  renderTracker();
+}
+
+document.getElementById('coachClose').addEventListener('click',closeCoach);
+document.getElementById('coachGen').addEventListener('click',generateCoach);
+document.getElementById('coachDel').addEventListener('click',()=>{ if(confirm('Supprimer mon programme ?')) clearCoach(); });
 
 /* init */
 grid.innerHTML = `<div class="empty">Chargement des recettes…</div>`;
