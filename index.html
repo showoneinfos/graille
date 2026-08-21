@@ -217,9 +217,9 @@
   .trk-edit{margin-left:auto;background:none;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit}
   .trk-edit:hover{border-color:var(--rust);color:var(--rust)}
   .trk-remain{display:flex;align-items:baseline;gap:9px;margin-bottom:12px}
-  .trk-remain .trk-num{font-family:'Archivo','DM Sans',sans-serif;font-weight:900;font-size:42px;line-height:.9;color:var(--olive)}
-  .trk-remain.over .trk-num{color:var(--rust)}
-  .trk-remain small{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink2)}
+  .trk-remain .trk-num{font-family:'Archivo','DM Sans',sans-serif;font-variation-settings:'wdth' 118,'wght' 900;font-size:clamp(52px,14vw,66px);line-height:.85;letter-spacing:-2px;color:#FF4A1C;font-variant-numeric:tabular-nums}
+  .trk-remain.over .trk-num{color:#FF7A45}
+  .trk-remain small{font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#fff}
   .trk-bar{height:8px;border-radius:999px;background:var(--line2);overflow:hidden;margin-bottom:12px}
   .trk-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--rust));transition:width .35s ease}
   .trk-sub{font-size:12.5px;color:var(--ink2);display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center}
@@ -358,13 +358,26 @@
   /* les chiffres : gros, serres, tabulaires */
   .big,.macro b,.k b,.week-day-h span{font-variant-numeric:tabular-nums}
   /* bandeau noir : la masse pleine de l'affiche */
+  /* bloc calories : masse noire pleine */
   .trk{border:0;background:var(--ink);color:#fff;border-radius:18px}
-  .trk .trk-h,.trk .trk-sub,.trk .k{color:#B9C0C4}
-  .trk .big{color:#fff}
-  .trk .bar{background:rgba(255,255,255,.14)}
-  .trk .bar i{background:var(--gold)}
-  .trk .trk-edit{border-color:rgba(255,255,255,.25);color:#fff;background:transparent}
-  .badge{background:var(--gold);color:var(--ink);border:0;font-weight:800;
+  .trk-remain>span:not(.trk-num){color:#9AA1A6}
+  .trk-sub{color:#9AA1A6}
+  .trk-sub b{color:#fff}
+  .trk-kg{background:transparent;border-color:rgba(255,255,255,.28);color:#fff}
+  .trk-edit{border-color:rgba(255,255,255,.28);color:#fff;background:transparent}
+  .trk-bar{background:rgba(255,255,255,.14)}
+  .trk-fill{background:linear-gradient(90deg,#FF4A1C,var(--gold))}
+  .trk-list-title{color:#9AA1A6}
+  .trk-item{border-bottom-color:rgba(255,255,255,.12);color:#fff}
+  .trk-rm{background:transparent;border-color:rgba(255,255,255,.28);color:#fff}
+  .trk-reset{border-color:rgba(255,255,255,.28);color:#fff}
+  .trk-empty{color:#9AA1A6}
+  /* les 4 actions : contour clair, et la liste de courses en vert */
+  .trk-menu{background:transparent;border:1.5px solid rgba(255,255,255,.32);color:#fff}
+  .trk-menu:hover{border-color:var(--gold);color:var(--gold)}
+  .trk-shop{background:var(--gold);border:1.5px solid var(--gold);color:var(--ink)}
+  .trk-cta{background:var(--gold);color:var(--ink)}
+  .badge{background:var(--rust);color:#fff;border:0;font-weight:800;
     text-transform:uppercase;letter-spacing:1px}
   /* boutons : angles francs, pas de rondeurs molles */
   .trk-menu,.trk-shop,.fr-go,.fr-clear,.hdr-cta,.hdr-contact,.chip-f,.menu-chip,.fridge-cta{
@@ -374,7 +387,7 @@
   /* survol : la barre d'accent, pas l'ombre floue */
   .card:hover{transform:none;box-shadow:none;border-color:var(--ink)}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-  .trk-menu{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
+  .trk-menu{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:transparent;border:1.5px solid rgba(255,255,255,.32);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .trk-menu:hover{background:#A82100;transform:translateY(-1px)}
   .shop-eq{color:var(--ink2);font-weight:600;font-size:11.5px;white-space:nowrap}
   .menu-moments{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
@@ -408,7 +421,7 @@
   .menu-kcal{font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap}
   .menu-swap{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--olive);font-size:15px;cursor:pointer}
   .menu-swap:hover{border-color:var(--olive);background:var(--olive);color:#fff}
-  .trk-shop{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:13px;border:none;border-radius:12px;background:var(--rust);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
+  .trk-shop{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:13px;border:none;border-radius:12px;background:var(--gold);border:1.5px solid var(--gold);color:var(--ink);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .trk-shop:hover{background:var(--rust-deep);transform:translateY(-1px)}
   .add-shop{display:block;width:100%;margin:-6px 0 22px;padding:13px;border:1.5px solid var(--olive);border-radius:12px;background:var(--card);color:var(--olive);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s}
   .add-shop:hover{background:var(--olive);color:#fff}
