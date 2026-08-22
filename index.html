@@ -720,7 +720,7 @@ function roundQty(v,unite){
 }
 function displayQty(v,unite){return fmtQty(roundQty(v,unite));}
 function thumbHTML(r){
-  if(r.image_url) return `<img src="${r.image_url}" alt="${r.nom}" loading="lazy">`;
+  if(r.image_url) return `<img src="${r.image_url}" alt="${nomL(r)}" loading="lazy">`;
   const t=CAT_TINT[r.categorie]||["#EAE1CE","#DBCEB4"];
   return `<div class="ph" style="background:linear-gradient(140deg,${t[0]},${t[1]})">${ICON_PLATE}<span>Photo à venir</span></div>`;
 }
@@ -813,15 +813,15 @@ function render(list){
     document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
   } else {
     grid.innerHTML=list.map(r=>`
-      <button class="card" data-i="${RECETTES.indexOf(r)}" aria-label="Voir ${r.nom}">
+      <button class="card" data-i="${RECETTES.indexOf(r)}" aria-label="${tr('Voir les recettes')} ${nomL(r)}">
         <div class="thumb">
           <span class="badge">${r.categorie}</span>
           <span class="kcal-tag"><b>${r.calories}</b><small>kcal</small></span>
           ${thumbHTML(r)}
         </div>
         <div class="cardbody">
-          <div class="cardtitle">${r.nom}</div>
-          ${fridgeMode ? fridgeNote(r) : `<p class="carddesc">${r.description}</p>`}
+          <div class="cardtitle">${nomL(r)}</div>
+          ${fridgeMode ? fridgeNote(r) : `<p class="carddesc">${descL(r)||''}</p>`}
           <div class="macros">
             <div class="macro kcal"><div class="val">${r.calories}</div><div class="lbl">kcal</div></div>
             <div class="macro prot"><div class="val">${r.proteines}</div><div class="lbl">Prot.</div></div>
@@ -881,14 +881,14 @@ function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CA
 function closeSheet(){overlay.classList.remove('open');document.body.style.overflow='';}
 function factorFor(r){return activeTarget/r.calories;}
 function heroHTML(r){
-  if(r.image_url) return `<img src="${r.image_url}" alt="${r.nom}">`;
+  if(r.image_url) return `<img src="${r.image_url}" alt="${nomL(r)}">`;
   const t=CAT_TINT[r.categorie]||["#EAE1CE","#DBCEB4"];
   return `<div class="ph" style="background:linear-gradient(140deg,${t[0]},${t[1]})">${ICON_PLATE}<span>Photo à venir</span></div>`;
 }
 function drawSheet(){
   const r=activeRecipe,f=factorFor(r);
   const ms=macroState();
-  const ingList=(r.ingredients||[]).map(raw=>{
+  const ingList=ingL(r).map(raw=>{
     const ing=normIng(raw);
     if(!ing || !ing.nom) return '';
     const parts=r.portions||1;
@@ -899,7 +899,7 @@ function drawSheet(){
     if(base===null) return `<li><span>${ing.nom}</span><span class="qty"></span></li>`;
     return `<li><span>${ing.nom}</span><span class="qty" data-base="${base}" data-unite="${ing.unite}" data-cat="${cat}">${displayQty(base*fac,ing.unite)} ${ing.unite}</span></li>`;
   }).join('');
-  const steps=(r.etapes||[]).map(s=>`<li>${s}</li>`).join('');
+  const steps=etL(r).map(s=>`<li>${s}</li>`).join('');
   const modeChip = (r.mode_cuisson==='Airfryer'&&r.temperature_airfryer)
     ? `<div class="chip"><span class="k">Airfryer</span><span class="v">${r.temperature_airfryer}°C</span></div>`
     : `<div class="chip"><span class="k">Cuisson</span><span class="v">${r.mode_cuisson}</span></div>`;
@@ -917,8 +917,8 @@ function drawSheet(){
       <div class="sheet-tags"><span>${r.categorie}</span><span>${BASE_LABEL[r.base]}</span></div>
     </div>
     <div class="sheet-body">
-      <h2 id="sheet-title">${r.nom}</h2>
-      <p class="desc">${r.description}</p>
+      <h2 id="sheet-title">${nomL(r)}</h2>
+      <p class="desc">${descL(r)||''}</p>
       <div class="macros sheet-macros">
         <div class="macro kcal"><div class="val" id="mKcal">${activeTarget}</div><div class="lbl">kcal</div></div>
         <div class="macro prot"><div class="val" id="mProt">${Math.round(ms.P)}</div><div class="lbl">Prot.</div></div>
@@ -1235,7 +1235,7 @@ function addRecipeToShop(r, targetKcal){
   if(targetKcal!=null && r.calories){ const f=targetKcal/r.calories; fP=fC=fO=f; }
   else { const ms=macroState(); fP=ms.fProt; fC=ms.fCarb; fO=ms.f; }
   const parts=r.portions||1;
-  (r.ingredients||[]).forEach(raw=>{
+  ingL(r).forEach(raw=>{
     const ing=normIng(raw);
     if(!ing || !ing.nom) return;
     const n=frNorm(ing.nom);
@@ -1329,7 +1329,7 @@ function renderMenuResult(p){
   res.innerHTML=`<div class="menu-total">Menu du jour · <b>${total}</b> kcal <span>(objectif ${p.calories})</span></div>`+
     MENU.map((it,i)=>`<div class="menu-item">
       <div class="menu-mom">${it.moment}</div>
-      <button class="menu-recipe" data-i="${i}">${it.recipe.nom}</button>
+      <button class="menu-recipe" data-i="${i}">${nomL(it.recipe)}</button>
       <span class="menu-kcal">${it.kcal} kcal</span>
       <button class="menu-swap" data-i="${i}" title="Changer cette recette">↻</button>
     </div>`).join('');
@@ -1346,7 +1346,7 @@ function renderMenuResult(p){
 }
 function addMenuToDay(){
   if(!MENU.length) return;
-  MENU.forEach(it=>{ addToJournal(it.recipe.id, it.recipe.nom, it.kcal); addRecipeToShop(it.recipe, it.kcal); });
+  MENU.forEach(it=>{ addToJournal(it.recipe.id, nomL(it.recipe), it.kcal); addRecipeToShop(it.recipe, it.kcal); });
   updateShopBadge(); closeMenu();
 }
 function openMenu(){
@@ -1688,7 +1688,7 @@ function renderWeekResult(p){
       </div>
       ${d.repas.map((it,ri)=>`<div class="menu-item">
         <div class="menu-mom">${it.moment}</div>
-        <button class="menu-recipe" data-d="${di}" data-r="${ri}">${it.recipe.nom}</button>
+        <button class="menu-recipe" data-d="${di}" data-r="${ri}">${nomL(it.recipe)}</button>
         <span class="menu-kcal">${it.kcal} kcal</span>
         <button class="menu-swap" data-d="${di}" data-r="${ri}" title="Changer">↻</button>
       </div>`).join('')}
@@ -2522,6 +2522,21 @@ document.getElementById('coachGen').addEventListener('click',generateCoach);
 document.getElementById('coachDel').addEventListener('click',()=>{ if(confirm('Supprimer mon programme ?')) clearCoach(); });
 
 /* ---------- Traduction ---------- */
+/* Les recettes traduites vivent dans nom_en, ingredients_en, etc.
+   Si la traduction manque, on retombe sur le francais : rien ne casse. */
+function champL(r,champ){
+  if(!r) return null;
+  if(typeof LANG!=='undefined' && LANG!=='fr'){
+    const v=r[champ+'_'+LANG];
+    if(v!=null && !(Array.isArray(v)&&!v.length) && v!=='') return v;
+  }
+  return r[champ];
+}
+function nomL(r){ return champL(r,'nom'); }
+function descL(r){ return champL(r,'description'); }
+function ingL(r){ return champL(r,'ingredients')||[]; }
+function etL(r){ return champL(r,'etapes')||[]; }
+
 /* "Rotations épaules et élastique 5 min" -> on traduit la partie connue */
 function trExo(t){
   if(LANG==='fr'||!DICT) return t;
