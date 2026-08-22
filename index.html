@@ -2652,6 +2652,16 @@ async function changerLangue(code,auto){
   document.documentElement.lang=code;
   appliquerLangue();
   majSelecteurLangue();
+  rafraichirRecettes();
+}
+
+/* les cartes et les menus contiennent des noms de recettes : il faut les redessiner */
+function rafraichirRecettes(){
+  try{ if(typeof RECETTES!=='undefined' && RECETTES.length && typeof update==='function') update(); }catch(e){}
+  try{ if(typeof renderTracker==='function') renderTracker(); }catch(e){}
+  try{ if(typeof MENU!=='undefined' && MENU && MENU.length && typeof renderMenuResult==='function' && typeof loadProfile==='function') renderMenuResult(loadProfile()); }catch(e){}
+  try{ if(typeof WEEK_MENU!=='undefined' && WEEK_MENU && typeof renderWeekResult==='function' && typeof loadProfile==='function') renderWeekResult(loadProfile()); }catch(e){}
+  try{ if(typeof COACH_PROG!=='undefined' && COACH_PROG && typeof renderCoachResult==='function') renderCoachResult(); }catch(e){}
 }
 
 function majSelecteurLangue(){
