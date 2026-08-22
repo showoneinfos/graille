@@ -398,6 +398,11 @@
   .cx-d{font-size:13px;color:var(--ink2);margin-top:2px}
   .cx-kg{color:var(--rust);font-weight:700}
   .cx-warn{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:6px;line-height:1.45}
+  .langsel{display:flex;gap:2px;border:1.5px solid var(--line);border-radius:10px;padding:2px;background:var(--card)}
+  .langsel button{border:0;background:none;font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.5px;
+    color:var(--ink2);padding:6px 8px;border-radius:7px;cursor:pointer}
+  .langsel button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  @media(max-width:600px){.langsel button{padding:8px 9px;font-size:11.5px}}
   .week-lbl{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700;margin:16px 0 8px}
   .week-day{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
   .week-day-h{font-family:'Archivo','DM Sans',sans-serif;font-weight:600;font-size:17px;color:var(--rust);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
@@ -608,6 +613,7 @@
   <div class="brandrow">
     <div class="logo">GRAI<b>LL</b>E<span class="logo-light">LIGHT</span></div>
     <div class="hdr-actions">
+      <div class="langsel" id="langSel" data-noTr></div>
       <button class="hdr-contact" id="openContactTop">Nous contacter</button>
       <button class="hdr-cta" id="openCalc">Mes calories</button>
     </div>
@@ -2468,15 +2474,15 @@ function renderCoachResult(){
   if(!COACH_PROG||!COACH_PROG.length){ res.innerHTML=''; return; }
   const sp=SPORT_LIST.find(s=>s.id===coachState.sport);
   res.innerHTML=`<div class="week-top">
-      <div class="week-lbl" style="margin:0">${sp?sp.nom:''} · ${coachState.obj} · ${COACH_PROG.length} séance${COACH_PROG.length>1?'s':''}</div>
+      <div class="week-lbl" style="margin:0">${tr(sp?sp.nom:'')} · ${tr(coachState.obj)} · ${COACH_PROG.length} ${tr(COACH_PROG.length>1?'séances':'séance')}</div>
     </div>`+
     COACH_PROG.map((d,di)=>`<div class="week-day">
-      <div class="week-day-h">${d.jour} <span>${d.titre}</span>
+      <div class="week-day-h">${tr(d.jour)} <span>${tr(d.titre)}</span>
         <button class="wk-del cx-swap" data-d="${di}" title="Changer cette séance">↻</button>
       </div>
       ${d.ex.map(e=>`<div class="cx-row">
-        <div class="cx-n">${e.n}${e.note?` <i>${e.note}</i>`:''}</div>
-        <div class="cx-d"><b>${e.s}</b>${e.r&&e.r!=='—'?` · repos ${e.r}`:''}${e.poids?` · <span class="cx-kg">${e.poids}</span>`:''}</div>
+        <div class="cx-n">${trExo(e.n)}${e.note?` <i>${tr(e.note)}</i>`:''}</div>
+        <div class="cx-d"><b>${trSerie(e.s)}</b>${e.r&&e.r!=='—'?` · ${tr('repos')} ${trSerie(e.r)}`:''}${e.poids?` · <span class="cx-kg">${e.poids}</span>`:''}</div>
       </div>`).join('')}
     </div>`).join('')+
     `<p class="cx-warn">Les charges sont indicatives, calculées sur ton poids. Si c'est trop lourd, baisse. Si c'est trop léger, monte de 1 à 2 kg à la séance suivante. En cas de douleur, arrête.</p>`;
@@ -2515,11 +2521,146 @@ document.getElementById('coachClose').addEventListener('click',closeCoach);
 document.getElementById('coachGen').addEventListener('click',generateCoach);
 document.getElementById('coachDel').addEventListener('click',()=>{ if(confirm('Supprimer mon programme ?')) clearCoach(); });
 
+/* ---------- Traduction ---------- */
+/* "Rotations épaules et élastique 5 min" -> on traduit la partie connue */
+function trExo(t){
+  if(LANG==='fr'||!DICT) return t;
+  const d=tr(t); if(d!==t) return d;
+  const m=String(t).match(/^(.*?)(\s*·?\s*\d+\s*(?:min|s)\s*)$/);
+  if(m){ const base=tr(m[1].trim()); if(base!==m[1].trim()) return base+' '+m[2].trim(); }
+  return t;
+}
+/* "4 × 8", "3 × 10 / jambe", "2 min", "45 s" */
+function trSerie(t){
+  if(LANG==='fr'||!DICT) return t;
+  return String(t)
+    .replace(/\/ jambe/g,'/ '+tr('jambe'))
+    .replace(/\/ bras/g,'/ '+tr('bras'))
+    .replace(/\/ côté/g,'/ '+tr('côté'))
+    .replace(/\bmax\b/g,tr('max'));
+}
+const LANGS=[{c:'fr',n:'FR'},{c:'en',n:'EN'},{c:'es',n:'ES'},{c:'pt',n:'PT'},{c:'de',n:'DE'}];
+let LANG='fr', DICT=null;
+
+function detectLang(){
+  try{
+    const sauve=localStorage.getItem('graille_lang');
+    if(sauve && LANGS.some(l=>l.c===sauve)) return sauve;
+    const nav=(navigator.language||'fr').slice(0,2).toLowerCase();
+    if(LANGS.some(l=>l.c===nav)) return nav;
+  }catch(e){}
+  return 'fr';
+}
+
+/* traduit un texte s'il figure dans le dictionnaire, sinon le laisse tel quel */
+function tr(t){
+  if(!DICT||LANG==='fr') return t;
+  const k=String(t).replace(/\s+/g,' ').trim();
+  if(!k) return t;
+  const v=DICT[k];
+  if(v===undefined) return t;
+  /* on preserve les espaces autour */
+  return String(t).replace(k,v);
+}
+
+/* parcourt la page et remplace les textes connus */
+let trEnCours=false;
+function appliquerLangue(racine){
+  if(LANG==='fr'||!DICT) return;
+  trEnCours=true;
+  const zone=racine||document.body;
+  const it=document.createTreeWalker(zone,NodeFilter.SHOW_TEXT,{
+    acceptNode(n){
+      const p=n.parentNode;
+      if(!p) return NodeFilter.FILTER_REJECT;
+      const tag=p.nodeName;
+      if(tag==='SCRIPT'||tag==='STYLE') return NodeFilter.FILTER_REJECT;
+      if(p.closest&&p.closest('[data-noTr]')) return NodeFilter.FILTER_REJECT;
+      return n.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+    }
+  });
+  const aFaire=[];
+  let n; while(n=it.nextNode()) aFaire.push(n);
+  aFaire.forEach(n=>{
+    const avant=n.nodeValue, apres=tr(avant);
+    if(apres!==avant) n.nodeValue=apres;
+  });
+  zone.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el=>{
+    ['placeholder','title','aria-label'].forEach(a=>{
+      const v=el.getAttribute(a); if(!v) return;
+      const t=tr(v); if(t!==v) el.setAttribute(a,t);
+    });
+  });
+  trEnCours=false;
+}
+
+/* le site redessine souvent : on retraduit ce qui change */
+function surveillerTraduction(){
+  if(!window.MutationObserver) return;
+  const obs=new MutationObserver(muts=>{
+    if(trEnCours||LANG==='fr'||!DICT) return;
+    const vus=new Set();
+    muts.forEach(m=>{
+      if(m.type==='childList') m.addedNodes.forEach(nd=>{
+        if(nd.nodeType===1) vus.add(nd);
+        else if(nd.nodeType===3&&nd.parentNode) vus.add(nd.parentNode);
+      });
+    });
+    if(!vus.size) return;
+    trEnCours=true;
+    vus.forEach(el=>{ try{ appliquerLangue(el); }catch(e){} });
+    trEnCours=false;
+  });
+  obs.observe(document.body,{childList:true,subtree:true});
+}
+
+async function changerLangue(code,auto){
+  if(code===LANG&&DICT) return;
+  /* si une traduction est deja appliquee, le francais n'est plus dans la page :
+     on recharge pour repartir d'une base propre */
+  if(!auto && DICT && LANG!=='fr'){
+    try{ localStorage.setItem('graille_lang',code); }catch(e){}
+    location.reload(); return;
+  }
+  LANG=code;
+  try{ localStorage.setItem('graille_lang',code); }catch(e){}
+  if(code==='fr'){ location.reload(); return; }
+  if(!window.GRAILLE_DICT||window.GRAILLE_DICT.__lang!==code){
+    await new Promise((ok,ko)=>{
+      const sc=document.createElement('script');
+      sc.src='/lang-'+code+'.js?v=1';
+      sc.onload=ok; sc.onerror=ko;
+      document.head.appendChild(sc);
+    }).catch(()=>{});
+  }
+  DICT=(window.GRAILLE_DICT&&window.GRAILLE_DICT.__lang===code)?window.GRAILLE_DICT:null;
+  document.documentElement.lang=code;
+  appliquerLangue();
+  majSelecteurLangue();
+}
+
+function majSelecteurLangue(){
+  const el=document.getElementById('langSel'); if(!el) return;
+  el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.l===LANG));
+}
+
+function initLangue(){
+  const el=document.getElementById('langSel');
+  if(el){
+    el.innerHTML=LANGS.map(l=>`<button data-l="${l.c}" aria-pressed="${l.c===LANG}">${l.n}</button>`).join('');
+    el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>changerLangue(b.dataset.l)));
+  }
+  surveillerTraduction();
+  const d=detectLang();
+  if(d!=='fr') changerLangue(d,true);
+}
+
 /* init */
 grid.innerHTML = `<div class="empty">Chargement des recettes…</div>`;
 chargerRecettes();
 initProfile();
 compterVisite();
+initLangue();
 </script>
 </body>
 </html>
