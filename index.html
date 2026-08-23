@@ -436,6 +436,8 @@
   .lang-menu button[aria-selected="true"] b{color:var(--gold)}
   .lang-menu button[aria-selected="true"] span{color:#fff}
   @media(max-width:600px){.langsel button{padding:8px 9px;font-size:11.5px}}
+  .wk-ok{color:var(--gold);font-weight:800;font-size:11px;white-space:nowrap}
+  .wk-miss{color:#FF7A45;font-weight:800;font-size:11px;white-space:nowrap}
   .week-lbl{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);font-weight:700;margin:16px 0 8px}
   .week-day{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
   .week-day-h{font-family:'Archivo','DM Sans',sans-serif;font-weight:600;font-size:17px;color:var(--rust);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
@@ -634,6 +636,9 @@
     <div class="menu-moments" id="weekDays"></div>
     <div class="week-lbl">Repas de la journée</div>
     <div class="menu-moments" id="weekMoments"></div>
+    <div class="week-lbl">Avec quoi</div>
+    <div class="menu-moments" id="weekSource"></div>
+    <p class="menu-hint" id="weekFrigoNote" style="margin-top:-2px"></p>
     <div id="menuWeekResult"></div>
   </div>
   <div class="fr-bar"><div class="fr-inner">
@@ -1629,13 +1634,14 @@ async function compterVisite(){
 const WEEK_DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
 let weekDays=new Set(["Lundi","Mardi","Mercredi","Jeudi","Vendredi"]);
 let weekMoments=new Set(["Petit-déj","Déjeuner","Dîner"]);
+let weekFrigo=false;
 let WEEK_MENU=null;
 
 function saveWeek(){
   try{
     if(!WEEK_MENU){ localStorage.removeItem('graille_week'); return; }
     localStorage.setItem('graille_week', JSON.stringify({
-      jours:[...weekDays], moments:[...weekMoments],
+      jours:[...weekDays], moments:[...weekMoments], frigo:weekFrigo,
       menu:WEEK_MENU.map(d=>({jour:d.jour, repas:d.repas.map(it=>({moment:it.moment, id:it.recipe.id, kcal:it.kcal}))}))
     }));
   }catch(e){}
@@ -1645,6 +1651,7 @@ function loadWeek(){
     const w=JSON.parse(localStorage.getItem('graille_week')); if(!w) return null;
     if(w.jours&&w.jours.length) weekDays=new Set(w.jours);
     if(w.moments&&w.moments.length) weekMoments=new Set(w.moments);
+    weekFrigo=!!w.frigo;
     const menu=(w.menu||[]).map(d=>({jour:d.jour, repas:(d.repas||[]).map(it=>{
       const r=RECETTES.find(x=>x.id===it.id); return r?{moment:it.moment, recipe:r, kcal:it.kcal}:null;
     }).filter(Boolean)})).filter(d=>d.repas.length);
@@ -1671,6 +1678,20 @@ function renderWeekPickers(){
     const j=b.dataset.j; if(weekDays.has(j)) weekDays.delete(j); else weekDays.add(j);
     b.setAttribute('aria-pressed', weekDays.has(j));
   }));
+  const src=document.getElementById('weekSource');
+  src.innerHTML=`<button class="menu-chip" data-f="0" aria-pressed="${!weekFrigo}">Toutes les recettes</button>
+                 <button class="menu-chip" data-f="1" aria-pressed="${weekFrigo}">Avec mon frigo</button>`;
+  src.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+    weekFrigo=b.dataset.f==='1'; renderWeekPickers();
+  }));
+  const note=document.getElementById('weekFrigoNote');
+  if(weekFrigo){
+    const n=fridgeSel.size;
+    note.textContent = n
+      ? n+' ingrédient'+(n>1?'s':'')+' coché'+(n>1?'s':'')+' dans ton frigo. On pioche d\'abord dedans.'
+      : "Ton frigo est vide : coche d'abord ce que tu as dans « Mon frigo ».";
+  } else note.textContent='';
+
   const m=document.getElementById('weekMoments');
   m.innerHTML=MENU_MOMENTS.map(x=>`<button class="menu-chip" data-m="${x}" aria-pressed="${weekMoments.has(x)}">${x}</button>`).join('');
   m.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
@@ -1697,8 +1718,18 @@ function generateMenuWeek(){
       let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
       if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
       if(!pool.length) return;
+      let manque=0;
+      if(weekFrigo && fridgeSel.size){
+        /* on cherche d'abord ce qu'on peut faire sans rien acheter,
+           puis on élargit s'il n'y a pas assez de choix */
+        let dispo=pool.filter(r=>recipeMissing(r).length===0);
+        if(dispo.length<2) dispo=pool.filter(r=>recipeMissing(r).length<=1);
+        if(dispo.length<2) dispo=pool.filter(r=>recipeMissing(r).length<=2);
+        if(dispo.length){ pool=dispo; }
+      }
       const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
-      repas.push({moment:m, recipe:r, kcal:alloc});
+      if(weekFrigo && fridgeSel.size) manque=recipeMissing(r).length;
+      repas.push({moment:m, recipe:r, kcal:alloc, manque});
     });
     WEEK_MENU.push({jour:j, repas});
   });
@@ -1726,7 +1757,7 @@ function renderWeekResult(p){
       ${d.repas.map((it,ri)=>`<div class="menu-item">
         <div class="menu-mom">${it.moment}</div>
         <button class="menu-recipe" data-d="${di}" data-r="${ri}">${nomL(it.recipe)}</button>
-        <span class="menu-kcal">${it.kcal} kcal</span>
+        <span class="menu-kcal">${it.kcal} kcal${it.manque===0?' <b class="wk-ok">✓ frigo</b>':(it.manque>0?' <b class="wk-miss">'+it.manque+' à acheter</b>':'')}</span>
         <button class="menu-swap" data-d="${di}" data-r="${ri}" title="Changer">↻</button>
       </div>`).join('')}
     </div>`;
