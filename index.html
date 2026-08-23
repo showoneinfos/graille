@@ -14,6 +14,12 @@
 <title>GrailleLight — Recettes light gourmandes et calculateur de calories</title>
 <meta name="description" content="554 recettes light et gourmandes avec calories et macros : fast food allégé, bowls, snacking, desserts. Calcule tes calories, compose ton menu du jour ou ta semaine, génère ta liste de courses. Gratuit.">
 <link rel="canonical" href="https://www.graillelight.com/">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icone-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GrailleLight">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="robots" content="index,follow">
 <meta name="theme-color" content="#0E1013">
 <meta property="og:type" content="website">
@@ -406,6 +412,12 @@
   .cx-d{font-size:13px;color:var(--ink2);margin-top:2px}
   .cx-kg{color:var(--rust);font-weight:700}
   .cx-warn{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:6px;line-height:1.45}
+  .hdr-install{display:none;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:800;
+    letter-spacing:1px;text-transform:uppercase;background:var(--gold);color:var(--ink);border:1.5px solid var(--gold);
+    border-radius:999px;padding:8px 14px;cursor:pointer;flex:0 0 auto}
+  .hdr-install svg{width:13px;height:13px}
+  /* une fois installée, on masque ce qui n'a plus de sens */
+  .en-app .hdr-install{display:none!important}
   .langsel{position:relative;flex:0 0 auto}
   .lang-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:800;
     letter-spacing:1px;text-transform:uppercase;color:var(--ink2);background:none;border:1.5px solid var(--line);
@@ -634,6 +646,10 @@
   <div class="brandrow">
     <div class="logo">GRAI<b>LL</b>E<span class="logo-light">LIGHT</span></div>
     <div class="hdr-actions">
+      <button class="hdr-install" id="btnInstall" style="display:none" onclick="lancerInstall()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
+        Installer
+      </button>
       <div class="langsel" id="langSel" data-noTr></div>
       <button class="hdr-contact" id="openContactTop">Nous contacter</button>
       <button class="hdr-cta" id="openCalc">Mes calories</button>
@@ -2715,6 +2731,43 @@ function initLangue(){
   surveillerTraduction();
   const d=detectLang();
   if(d!=='fr') changerLangue(d,true);
+}
+
+/* ---------- Application installable ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
+}
+/* savoir si la personne ouvre depuis son écran d'accueil ou depuis le navigateur */
+(function(){
+  try{
+    const enApp = window.matchMedia('(display-mode: standalone)').matches
+               || window.navigator.standalone === true
+               || new URLSearchParams(location.search).get('source')==='app';
+    if(enApp){
+      document.documentElement.classList.add('en-app');
+      if(typeof gtag==='function') gtag('event','ouverture_app',{mode:'installee'});
+    }
+  }catch(e){}
+})();
+
+/* proposer l'installation sur Android, discrètement */
+let invitationInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); invitationInstall=e;
+  const b=document.getElementById('btnInstall'); if(b) b.style.display='inline-flex';
+  if(typeof gtag==='function') gtag('event','install_proposee');
+});
+window.addEventListener('appinstalled',()=>{
+  const b=document.getElementById('btnInstall'); if(b) b.style.display='none';
+  if(typeof gtag==='function') gtag('event','app_installee');
+});
+async function lancerInstall(){
+  if(!invitationInstall) return;
+  invitationInstall.prompt();
+  const r=await invitationInstall.userChoice.catch(()=>({outcome:'dismissed'}));
+  if(typeof gtag==='function') gtag('event','install_reponse',{choix:r.outcome});
+  invitationInstall=null;
+  const b=document.getElementById('btnInstall'); if(b) b.style.display='none';
 }
 
 /* init */

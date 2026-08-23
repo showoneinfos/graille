@@ -1,0 +1,23 @@
+{
+  "name": "GrailleLight — Recettes light et calories",
+  "short_name": "GrailleLight",
+  "description": "554 recettes light et gourmandes avec calories et macros. Compose ton menu, génère ta liste de courses.",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0C0E0A",
+  "theme_color": "#0E1013",
+  "lang": "fr",
+  "categories": ["food", "health", "fitness", "lifestyle"],
+  "icons": [
+    { "src": "/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Mon menu du jour", "url": "/?ouvrir=menu&source=app" },
+    { "name": "Ma liste de courses", "url": "/?ouvrir=courses&source=app" },
+    { "name": "Mon programme sport", "url": "/?ouvrir=coach&source=app" }
+  ]
+}
