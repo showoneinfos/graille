@@ -2780,8 +2780,11 @@ if('serviceWorker' in navigator){
    On explique le geste, mais seulement a quelqu'un qui revient. */
 (function(){
   const ua=navigator.userAgent||'';
-  const estIOS=/iPhone|iPad|iPod/i.test(ua) || (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  const estSafari=!/CriOS|FxiOS|EdgiOS|OPiOS|Chrome/i.test(ua);
+  /* on exclut d'abord tout ce qui n'est pas un appareil Apple */
+  if(/CrOS|Windows|Android|Linux(?!.*iPhone)/i.test(ua)) return;
+  const estIOS=/iPhone|iPad|iPod/i.test(ua)
+            || (/Macintosh/i.test(ua) && navigator.maxTouchPoints>1);
+  const estSafari=/Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Chromium/i.test(ua);
   const dejaInstalle=window.navigator.standalone===true || modeApp();
   if(!estIOS||!estSafari||dejaInstalle) return;
 
@@ -2794,8 +2797,10 @@ if('serviceWorker' in navigator){
 
   if(visites<2 || Date.now()<masqueJusqu) return;
 
+  const panneauOuvert=()=>!!document.querySelector('.fridge.open, .onboard.open, .overlay.open, .contact-overlay.open');
   setTimeout(()=>{
     const el=document.getElementById('iosInvite'); if(!el) return;
+    if(panneauOuvert()) return;           /* on ne gêne pas quelqu'un en train de composer */
     el.hidden=false;
     if(typeof gtag==='function') gtag('event','ios_invite_affichee');
     const fermer=()=>{
@@ -2805,6 +2810,11 @@ if('serviceWorker' in navigator){
     };
     document.getElementById('iosClose').addEventListener('click',fermer);
     setTimeout(()=>{ if(!el.hidden) el.hidden=true; },20000);
+    /* un panneau s'ouvre -> on s'efface */
+    const veille=setInterval(()=>{
+      if(el.hidden){ clearInterval(veille); return; }
+      if(panneauOuvert()){ el.hidden=true; clearInterval(veille); }
+    },400);
   },12000);
 })();
 
