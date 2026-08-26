@@ -1972,6 +1972,10 @@ function generateFamille(){
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
     if(!pool.length) return;
+    /* pour un repas famille, on préfère une recette avec un féculent (riz, pâtes, pomme de terre...)
+       plutôt qu'un plat protéines + légumes seul, plus adapté à nourrir tout le monde */
+    const avecFeculent=pool.filter(r=>recipeHasStarch(r,CARB_KW));
+    if(avecFeculent.length) pool=avecFeculent;
     const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
     const {total, regimeTarget}=famTargetsFor(r,m,p);
     FAMILLE_MENU.push({moment:m, recipe:r, total, regimeTarget});
@@ -2003,6 +2007,8 @@ function renderFamilleResult(){
     const usedIds=new Set(FAMILLE_MENU.map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
+    const avecFeculentSwap=pool.filter(r=>recipeHasStarch(r,CARB_KW));
+    if(avecFeculentSwap.length) pool=avecFeculentSwap;
     if(pool.length){
       const nr=pool[Math.floor(Math.random()*pool.length)];
       const {total, regimeTarget}=famTargetsFor(nr, m, loadProfile());
