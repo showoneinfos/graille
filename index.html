@@ -1930,26 +1930,49 @@ function renderFamillePickers(){
   });
 });
 
-function famBreakdownText(regimeTarget){
+function famBreakdownText(regimeTarget, regimePortion){
   const parts=[];
   if(famAdultes) parts.push(famAdultes+' adulte'+(famAdultes>1?'s':''));
   if(famPetits) parts.push(famPetits+' petit'+(famPetits>1?'s':'')+' (2-6 ans)');
   if(famEnfants) parts.push(famEnfants+' enfant'+(famEnfants>1?'s':'')+' (7-12 ans)');
   if(famAdos) parts.push(famAdos+' ado'+(famAdos>1?'s':''));
   let t=parts.join(' · ');
-  if(regimeTarget!=null) t += ' · dont ton objectif : '+regimeTarget+' kcal';
+  if(regimeTarget!=null){
+    t += ' · ton objectif : '+regimeTarget+' kcal';
+    if(regimePortion) t += ' (~'+regimePortion.feculent+'g féculent + ~'+regimePortion.autre+'g accompagnement)';
+  }
   return t;
+}
+
+/* Traduit la portion calorique de la personne au régime en grammes concrets à se servir,
+   à partir de la composition réelle de CETTE recette (chaque recette a ses propres proportions). */
+function famPersonalPortion(r, personalKcal){
+  const f=personalKcal/r.calories;
+  const parts=r.portions||1;
+  let feculent=0, autre=0;
+  ingL(r).forEach(raw=>{
+    const ing=normIng(raw);
+    if(!ing || !ing.nom || ing.libre) return; // sel, épices... pas de grammage pertinent
+    const n=frNorm(ing.nom);
+    const base=ing.quantite/parts;
+    const key=ingKey(ing.nom);
+    const conv=toBase(base*f, ing.unite, key);
+    if(conv.u!=='g' && conv.u!=='ml') return; // unité non convertible en poids -> ignorée du grammage
+    if(isCarbIng(n)) feculent+=conv.q; else autre+=conv.q;
+  });
+  return { feculent: roundQty(feculent,'g'), autre: roundQty(autre,'g') };
 }
 
 function famTargetsFor(r, m, p){
   const base=r.calories;
-  let regimeTarget=null, adultesRestants=famAdultes;
+  let regimeTarget=null, regimePortion=null, adultesRestants=famAdultes;
   if(famRegime && p){
     const sel=MENU_MOMENTS.filter(x=>famMoments.has(x));
     const sumW=sel.reduce((s,x)=>s+MENU_WEIGHTS[x],0)||1;
     regimeTarget=Math.round(p.calories*MENU_WEIGHTS[m]/sumW/10)*10;
     regimeTarget=Math.max(CAL_MIN, Math.min(CAL_MAX, regimeTarget));
     adultesRestants=Math.max(0, famAdultes-1);
+    regimePortion=famPersonalPortion(r, regimeTarget);
   }
   const total=Math.round((
     adultesRestants*base +
@@ -1958,7 +1981,7 @@ function famTargetsFor(r, m, p){
     famEnfants*base*FAM_RATIO.enfant +
     famAdos*base*FAM_RATIO.ado
   )/10)*10;
-  return {total, regimeTarget};
+  return {total, regimeTarget, regimePortion};
 }
 
 function generateFamille(){
@@ -1977,8 +2000,8 @@ function generateFamille(){
     const avecFeculent=pool.filter(r=>recipeHasStarch(r,CARB_KW));
     if(avecFeculent.length) pool=avecFeculent;
     const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
-    const {total, regimeTarget}=famTargetsFor(r,m,p);
-    FAMILLE_MENU.push({moment:m, recipe:r, total, regimeTarget});
+    const {total, regimeTarget, regimePortion}=famTargetsFor(r,m,p);
+    FAMILLE_MENU.push({moment:m, recipe:r, total, regimeTarget, regimePortion});
   });
   saveFamilleConfig();
   renderFamilleResult();
@@ -1998,9 +2021,9 @@ function renderFamilleResult(){
       <span class="menu-kcal">${it.total} kcal</span>
       <button class="menu-swap" data-i="${i}" title="Changer cette recette">↻</button>
     </div>
-    <p class="fam-breakdown">${famBreakdownText(it.regimeTarget)}</p>`).join('');
+    <p class="fam-breakdown">${famBreakdownText(it.regimeTarget, it.regimePortion)}</p>`).join('');
   res.querySelectorAll('.menu-recipe').forEach(b=>b.addEventListener('click',()=>{
-    const it=FAMILLE_MENU[+b.dataset.i]; openFamilleSheet(it.recipe, it.total);
+    const it=FAMILLE_MENU[+b.dataset.i]; openFamilleSheet(it.recipe, it.total, it.regimeTarget, it.regimePortion);
   }));
   res.querySelectorAll('.menu-swap').forEach(b=>b.addEventListener('click',()=>{
     const i=+b.dataset.i, it=FAMILLE_MENU[i], m=it.moment;
@@ -2011,8 +2034,8 @@ function renderFamilleResult(){
     if(avecFeculentSwap.length) pool=avecFeculentSwap;
     if(pool.length){
       const nr=pool[Math.floor(Math.random()*pool.length)];
-      const {total, regimeTarget}=famTargetsFor(nr, m, loadProfile());
-      FAMILLE_MENU[i]={moment:m, recipe:nr, total, regimeTarget};
+      const {total, regimeTarget, regimePortion}=famTargetsFor(nr, m, loadProfile());
+      FAMILLE_MENU[i]={moment:m, recipe:nr, total, regimeTarget, regimePortion};
       renderFamilleResult();
     }
   }));
@@ -2020,7 +2043,7 @@ function renderFamilleResult(){
 
 /* Aperçu des ingrédients pour toute la famille : réutilise la fenêtre de recette,
    mais avec les quantités à l'échelle du foyer plutôt qu'à 1 personne. */
-function openFamilleSheet(r, totalKcal){
+function openFamilleSheet(r, totalKcal, regimeTarget, regimePortion){
   const f=totalKcal/r.calories;
   const ingList=ingL(r).map(raw=>{
     const ing=normIng(raw); if(!ing || !ing.nom) return '';
@@ -2030,6 +2053,12 @@ function openFamilleSheet(r, totalKcal){
     return `<li><span>${ing.nom}</span><span class="qty">${displayQty(base*f,ing.unite)} ${ing.unite}</span></li>`;
   }).join('');
   const steps=etL(r).map(s=>`<li>${s}</li>`).join('');
+  const regimeBlock = (regimeTarget!=null && regimePortion) ? `
+      <div class="serve-note">Ta part si tu suis ton objectif · ${regimeTarget} kcal</div>
+      <div class="macros sheet-macros" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px">
+        <div class="macro"><div class="val">${regimePortion.feculent}</div><div class="lbl">g féculent</div></div>
+        <div class="macro"><div class="val">${regimePortion.autre}</div><div class="lbl">g accompagnement</div></div>
+      </div>` : '';
   sheet.innerHTML=`
     <div class="sheet-hero">
       <button class="closebtn" id="famSheetClose" aria-label="Fermer">✕</button>
@@ -2039,7 +2068,8 @@ function openFamilleSheet(r, totalKcal){
     <div class="sheet-body">
       <h2>${nomL(r)}</h2>
       <p class="desc">${descL(r)||''}</p>
-      <div class="cal-readout" style="margin:4px 0 24px"><span class="cal-num">${Math.round(totalKcal)}</span><span class="cal-unit">kcal pour la famille</span></div>
+      <div class="cal-readout" style="margin:4px 0 20px"><span class="cal-num">${Math.round(totalKcal)}</span><span class="cal-unit">kcal pour la famille</span></div>
+      ${regimeBlock}
       <div class="block-title">Ingrédients</div>
       <div class="serve-note">Quantités pour toute la famille</div>
       <ul class="ingredients">${ingList}</ul>
