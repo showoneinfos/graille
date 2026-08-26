@@ -418,6 +418,12 @@
   .hdr-install svg{width:13px;height:13px}
   /* une fois installée, on masque ce qui n'a plus de sens */
   .en-app .hdr-install{display:none!important}
+  .air-cta{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:12px;font-weight:800;
+    letter-spacing:.6px;text-transform:uppercase;background:var(--card);color:var(--ink2);
+    border:1.5px solid var(--line);border-radius:999px;padding:9px 15px;cursor:pointer;flex:0 0 auto;
+    transition:all .15s}
+  .air-cta:hover{border-color:var(--ink);color:var(--ink)}
+  .air-cta[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   .langsel{position:relative;flex:0 0 auto}
   .lang-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:800;
     letter-spacing:1px;text-transform:uppercase;color:var(--ink2);background:none;border:1.5px solid var(--line);
@@ -666,6 +672,7 @@
 <div class="toolbar">
   <div class="filterbar">
     <button class="fridge-cta" id="openFridge"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Mon frigo</button>
+    <button class="air-cta" id="btnAir" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8"/><path d="M9 13h6"/><circle cx="17" cy="17.5" r="1"/></svg>Airfryer</button>
     <div class="sort-inline">
       <select id="sort">
         <option value="default">Trier</option>
@@ -747,6 +754,7 @@ const chipsBase=document.getElementById('chipsBase');
 const chipsFec=document.getElementById('chipsFec');
 const sortSel=document.getElementById('sort');
 let activeCat="Tous", activeBase="Toutes", activeFec="Tous";
+let airMode=false;
 const FEC_ORDER=["Riz","Pâtes","Pommes de terre","Patate douce","Quinoa","Semoule","Boulgour","Nouilles","Avoine","Lentilles","Pois chiches","Pain"];
 const FEC_KW={"Riz":["riz"],"Pâtes":["pates","macaroni"],"Pommes de terre":["pomme de terre","pommes de terre"],"Patate douce":["patate douce","patate"],"Quinoa":["quinoa"],"Semoule":["semoule"],"Boulgour":["boulgour"],"Nouilles":["nouille"],"Avoine":["avoine"],"Lentilles":["lentille"],"Pois chiches":["pois chiche"],"Pain":["pain","bagel","panini"]};
 
@@ -838,6 +846,7 @@ function buildBaseChips(){
 
 function currentList(){
   let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase)&&(activeFec==="Tous"||recipeHasStarch(r,FEC_KW[activeFec])));
+  if(airMode) list=list.filter(r=>String(r.mode_cuisson||'').toLowerCase().includes('airfryer'));
   if(fridgeMode){
     list=list.filter(r=>recipeMissing(r).length<=fridgeTol);
     list.sort((a,b)=>(recipeMissing(a).length-recipeMissing(b).length) || (fridgeUsed(b)-fridgeUsed(a)));
@@ -852,7 +861,7 @@ function currentList(){
 function render(list){
   if(!list.length){
     grid.innerHTML=`<div class="empty">Aucune recette pour cette combinaison.<br><button id="reset">Réinitialiser les filtres</button></div>`;
-    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
+    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;airMode=false;{const b=document.getElementById('btnAir');if(b)b.setAttribute('aria-pressed','false');}renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
   } else {
     grid.innerHTML=list.map(r=>`
       <button class="card" data-i="${RECETTES.indexOf(r)}" aria-label="${tr('Voir les recettes')} ${nomL(r)}">
@@ -1569,6 +1578,16 @@ function renderFridgeActive(){
     document.getElementById('frRemove').addEventListener('click',()=>{ fridgeMode=false; renderFridgeActive(); update(); });
   } else { el.classList.remove('show'); el.innerHTML=''; }
 }
+(function(){
+  const b=document.getElementById('btnAir');
+  if(!b) return;
+  b.addEventListener('click',()=>{
+    airMode=!airMode;
+    b.setAttribute('aria-pressed',airMode);
+    if(typeof gtag==='function' && airMode) gtag('event','filtre_airfryer');
+    update();
+  });
+})();
 document.getElementById('openFridge').addEventListener('click',openFridge);
 document.getElementById('frSkip').addEventListener('click',closeFridge);
 document.getElementById('frClear').addEventListener('click',()=>{ fridgeSel.clear(); buildFridgeGroups(); });
