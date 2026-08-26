@@ -452,6 +452,10 @@
   .week-day-h .wk-del:hover{border-color:var(--rust);color:var(--rust)}
   .week-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:16px 0 10px}
   .week-top .wk-clear{border:1px solid var(--line);background:var(--paper);color:var(--ink2);border-radius:999px;padding:7px 13px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+  /* ---- Repas famille ---- */
+  .fam-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+  @media(max-width:480px){ .fam-row{grid-template-columns:repeat(2,1fr)} }
+  .fam-breakdown{font-size:11.5px;color:var(--ink2);margin:-6px 0 14px 2px}
   .week-top .wk-clear:hover{border-color:var(--rust);color:var(--rust)}
   .menu-chip{padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-family:inherit;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;transition:all .12s}
   .menu-chip:hover{border-color:var(--olive)}
@@ -650,6 +654,31 @@
   <div class="fr-bar"><div class="fr-inner">
     <button class="fr-clear" id="menuWeekGen">Générer ma semaine</button>
     <button class="fr-go" id="menuWeekAdd" style="display:none">Ajouter à ma liste de courses</button>
+  </div></div>
+</div>
+
+<div class="fridge" id="famille">
+  <div class="fridge-inner">
+    <button class="fr-skip" id="familleClose">Fermer</button>
+    <div class="ob-eyebrow">Repas en famille</div>
+    <h1 class="ob-title">Repas famille</h1>
+    <p class="ob-sub">Dis-moi qui est à table, GrailleLight calcule les portions et les calories pour tout le monde.</p>
+    <div class="week-lbl">Qui est à table</div>
+    <div class="fam-row">
+      <div class="ob-field"><label>Adultes</label><input id="famAdultes" type="number" inputmode="numeric" min="0" max="10" value="2"></div>
+      <div class="ob-field"><label>Petits · 2-6 ans</label><input id="famPetits" type="number" inputmode="numeric" min="0" max="10" value="0"></div>
+      <div class="ob-field"><label>Enfants · 7-12 ans</label><input id="famEnfants" type="number" inputmode="numeric" min="0" max="10" value="0"></div>
+      <div class="ob-field"><label>Ados · 13-17 ans</label><input id="famAdos" type="number" inputmode="numeric" min="0" max="10" value="0"></div>
+    </div>
+    <div class="week-lbl">Ton objectif calorique</div>
+    <div class="menu-moments" id="famRegime"></div>
+    <div class="week-lbl">Repas de la journée</div>
+    <div class="menu-moments" id="famMoments"></div>
+    <div id="familleResult"></div>
+  </div>
+  <div class="fr-bar"><div class="fr-inner">
+    <button class="fr-clear" id="familleGen">Générer les repas</button>
+    <button class="fr-go" id="familleAdd" style="display:none">Ajouter à ma liste de courses</button>
   </div></div>
 </div>
 
@@ -1477,12 +1506,14 @@ function renderTracker(){
     ${liste}
     <button class="trk-menu" id="trkMenu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>Composer mon menu du jour</button>
     <button class="trk-menu" id="trkMenuWeek"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>${hasWeek()?'Mes menus de la semaine':'Composer mon menu pour la semaine'}</button>
+    <button class="trk-menu" id="trkFamille"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M14.5 14.2c2.6.4 4.5 2.6 4.5 5.3"/></svg>Composer un repas famille</button>
     <button class="trk-menu" id="trkCoach"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M4 9v6"/><path d="M20 9v6"/><path d="M2 11v2"/><path d="M22 11v2"/></svg>${hasCoach()?'Mon programme sport':'Composer mon programme sport'}</button>
     <button class="trk-shop" id="trkShop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Ma liste de courses${SHOP.length?` · ${SHOP.length}`:''}</button>
   </div>`;
   document.getElementById('trkEdit').addEventListener('click',openOnboard);
   const mnb=document.getElementById('trkMenu'); if(mnb) mnb.addEventListener('click',openMenu);
   const mnw=document.getElementById('trkMenuWeek'); if(mnw) mnw.addEventListener('click',openMenuWeek);
+  const fmb=document.getElementById('trkFamille'); if(fmb) fmb.addEventListener('click',openFamille);
   const cch=document.getElementById('trkCoach'); if(cch) cch.addEventListener('click',openCoach);
   const shb=document.getElementById('trkShop'); if(shb) shb.addEventListener('click',openShop);
   const rb=document.getElementById('trkReset'); if(rb) rb.addEventListener('click',resetJournal);
@@ -1827,6 +1858,214 @@ function addWeekToShop(){
 document.getElementById('menuWeekClose').addEventListener('click',closeMenuWeek);
 document.getElementById('menuWeekGen').addEventListener('click',generateMenuWeek);
 document.getElementById('menuWeekAdd').addEventListener('click',addWeekToShop);
+
+/* ---------- Repas famille ----------
+   Principe : la recette est conçue pour 1 portion adulte (r.calories).
+   - Chaque adulte "normal" mange une portion pleine (r.calories).
+   - Si "mon objectif calorique" est activé, UN adulte (le profil enregistré
+     sur cet appareil) mange une portion calée sur son objectif du moment,
+     comme dans "Menu du jour".
+   - Les enfants mangent une fraction de la portion adulte selon leur tranche d'âge.
+   Le total obtenu sert à la fois à afficher les quantités et à remplir la
+   liste de courses (mêmes fonctions que pour une recette classique). */
+const FAM_RATIO = { petit:0.40, enfant:0.65, ado:0.90 }; // 2-6 ans, 7-12 ans, 13-17 ans
+let famAdultes=2, famPetits=0, famEnfants=0, famAdos=0, famRegime=true;
+let famMoments=new Set(["Petit-déj","Déjeuner","Dîner"]);
+let FAMILLE_MENU=null;
+
+function loadFamille(){
+  try{
+    const s=JSON.parse(localStorage.getItem('graille_famille'));
+    if(!s) return;
+    if(s.adultes!=null) famAdultes=s.adultes;
+    if(s.petits!=null) famPetits=s.petits;
+    if(s.enfants!=null) famEnfants=s.enfants;
+    if(s.ados!=null) famAdos=s.ados;
+    if(s.regime!=null) famRegime=s.regime;
+    if(s.moments&&s.moments.length) famMoments=new Set(s.moments);
+  }catch(e){}
+}
+function saveFamilleConfig(){
+  try{ localStorage.setItem('graille_famille', JSON.stringify({adultes:famAdultes,petits:famPetits,enfants:famEnfants,ados:famAdos,regime:famRegime,moments:[...famMoments]})); }catch(e){}
+}
+loadFamille();
+
+function famPersonCount(){ return famAdultes+famPetits+famEnfants+famAdos; }
+
+function renderFamillePickers(){
+  document.getElementById('famAdultes').value=famAdultes;
+  document.getElementById('famPetits').value=famPetits;
+  document.getElementById('famEnfants').value=famEnfants;
+  document.getElementById('famAdos').value=famAdos;
+
+  const p=loadProfile();
+  const rg=document.getElementById('famRegime');
+  if(p){
+    rg.innerHTML=`<button class="menu-chip" data-r="1" aria-pressed="${famRegime}">Oui, avec mon objectif</button>
+                  <button class="menu-chip" data-r="0" aria-pressed="${!famRegime}">Non, portion classique</button>`;
+    rg.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+      famRegime=b.dataset.r==='1'; renderFamillePickers(); saveFamilleConfig();
+    }));
+  } else {
+    rg.innerHTML=`<p class="menu-hint">Calcule tes calories (bouton « Mes calories ») pour que ton repas famille tienne compte de ton objectif.</p>`;
+  }
+
+  const m=document.getElementById('famMoments');
+  m.innerHTML=MENU_MOMENTS.map(x=>`<button class="menu-chip" data-m="${x}" aria-pressed="${famMoments.has(x)}">${x}</button>`).join('');
+  m.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+    const x=b.dataset.m; if(famMoments.has(x)) famMoments.delete(x); else famMoments.add(x);
+    b.setAttribute('aria-pressed', famMoments.has(x)); saveFamilleConfig();
+  }));
+}
+['famAdultes','famPetits','famEnfants','famAdos'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{
+    const el=document.getElementById(id);
+    let v=Math.max(0, Math.min(10, Math.round(+el.value||0)));
+    el.value=v;
+    if(id==='famAdultes') famAdultes=v;
+    else if(id==='famPetits') famPetits=v;
+    else if(id==='famEnfants') famEnfants=v;
+    else famAdos=v;
+    saveFamilleConfig();
+  });
+});
+
+function famBreakdownText(regimeTarget){
+  const parts=[];
+  if(famAdultes) parts.push(famAdultes+' adulte'+(famAdultes>1?'s':''));
+  if(famPetits) parts.push(famPetits+' petit'+(famPetits>1?'s':'')+' (2-6 ans)');
+  if(famEnfants) parts.push(famEnfants+' enfant'+(famEnfants>1?'s':'')+' (7-12 ans)');
+  if(famAdos) parts.push(famAdos+' ado'+(famAdos>1?'s':''));
+  let t=parts.join(' · ');
+  if(regimeTarget!=null) t += ' · dont ton objectif : '+regimeTarget+' kcal';
+  return t;
+}
+
+function famTargetsFor(r, m, p){
+  const base=r.calories;
+  let regimeTarget=null, adultesRestants=famAdultes;
+  if(famRegime && p){
+    const sel=MENU_MOMENTS.filter(x=>famMoments.has(x));
+    const sumW=sel.reduce((s,x)=>s+MENU_WEIGHTS[x],0)||1;
+    regimeTarget=Math.round(p.calories*MENU_WEIGHTS[m]/sumW/10)*10;
+    regimeTarget=Math.max(CAL_MIN, Math.min(CAL_MAX, regimeTarget));
+    adultesRestants=Math.max(0, famAdultes-1);
+  }
+  const total=Math.round((
+    adultesRestants*base +
+    (regimeTarget||0) +
+    famPetits*base*FAM_RATIO.petit +
+    famEnfants*base*FAM_RATIO.enfant +
+    famAdos*base*FAM_RATIO.ado
+  )/10)*10;
+  return {total, regimeTarget};
+}
+
+function generateFamille(){
+  const res=document.getElementById('familleResult');
+  if(!famPersonCount()){ res.innerHTML='<p class="menu-hint">Indique au moins une personne à table.</p>'; return; }
+  const sel=MENU_MOMENTS.filter(m=>famMoments.has(m));
+  if(!sel.length){ res.innerHTML='<p class="menu-hint">Coche au moins un repas.</p>'; return; }
+  const p=loadProfile();
+  const used=new Set(); FAMILLE_MENU=[];
+  sel.forEach(m=>{
+    let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
+    if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
+    if(!pool.length) return;
+    const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
+    const {total, regimeTarget}=famTargetsFor(r,m,p);
+    FAMILLE_MENU.push({moment:m, recipe:r, total, regimeTarget});
+  });
+  saveFamilleConfig();
+  renderFamilleResult();
+  document.getElementById('familleGen').textContent='Régénérer';
+  document.getElementById('familleAdd').style.display='';
+}
+
+function renderFamilleResult(){
+  const res=document.getElementById('familleResult');
+  if(!FAMILLE_MENU || !FAMILLE_MENU.length){ res.innerHTML=''; return; }
+  const n=famPersonCount();
+  const grand=FAMILLE_MENU.reduce((s,it)=>s+it.total,0);
+  res.innerHTML=`<div class="menu-total">Repas famille · <b>${n}</b> personne${n>1?'s':''} · ${grand} kcal au total</div>`+
+    FAMILLE_MENU.map((it,i)=>`<div class="menu-item">
+      <div class="menu-mom">${it.moment}</div>
+      <button class="menu-recipe" data-i="${i}">${nomL(it.recipe)}</button>
+      <span class="menu-kcal">${it.total} kcal</span>
+      <button class="menu-swap" data-i="${i}" title="Changer cette recette">↻</button>
+    </div>
+    <p class="fam-breakdown">${famBreakdownText(it.regimeTarget)}</p>`).join('');
+  res.querySelectorAll('.menu-recipe').forEach(b=>b.addEventListener('click',()=>{
+    const it=FAMILLE_MENU[+b.dataset.i]; openFamilleSheet(it.recipe, it.total);
+  }));
+  res.querySelectorAll('.menu-swap').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.i, it=FAMILLE_MENU[i], m=it.moment;
+    const usedIds=new Set(FAMILLE_MENU.map(x=>x.recipe.id));
+    let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
+    if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
+    if(pool.length){
+      const nr=pool[Math.floor(Math.random()*pool.length)];
+      const {total, regimeTarget}=famTargetsFor(nr, m, loadProfile());
+      FAMILLE_MENU[i]={moment:m, recipe:nr, total, regimeTarget};
+      renderFamilleResult();
+    }
+  }));
+}
+
+/* Aperçu des ingrédients pour toute la famille : réutilise la fenêtre de recette,
+   mais avec les quantités à l'échelle du foyer plutôt qu'à 1 personne. */
+function openFamilleSheet(r, totalKcal){
+  const f=totalKcal/r.calories;
+  const ingList=ingL(r).map(raw=>{
+    const ing=normIng(raw); if(!ing || !ing.nom) return '';
+    if(ing.libre) return `<li><span>${ing.nom}</span><span class="qty"></span></li>`;
+    const parts=r.portions||1;
+    const base=ing.quantite/parts;
+    return `<li><span>${ing.nom}</span><span class="qty">${displayQty(base*f,ing.unite)} ${ing.unite}</span></li>`;
+  }).join('');
+  const steps=etL(r).map(s=>`<li>${s}</li>`).join('');
+  sheet.innerHTML=`
+    <div class="sheet-hero">
+      <button class="closebtn" id="famSheetClose" aria-label="Fermer">✕</button>
+      ${heroHTML(r)}
+      <div class="sheet-tags"><span>${r.categorie}</span><span>${BASE_LABEL[r.base]}</span></div>
+    </div>
+    <div class="sheet-body">
+      <h2>${nomL(r)}</h2>
+      <p class="desc">${descL(r)||''}</p>
+      <div class="cal-readout" style="margin:4px 0 24px"><span class="cal-num">${Math.round(totalKcal)}</span><span class="cal-unit">kcal pour la famille</span></div>
+      <div class="block-title">Ingrédients</div>
+      <div class="serve-note">Quantités pour toute la famille</div>
+      <ul class="ingredients">${ingList}</ul>
+      <div class="block-title">Préparation</div>
+      <ol class="steps">${steps}</ol>
+    </div>`;
+  document.getElementById('famSheetClose').addEventListener('click',closeSheet);
+  overlay.classList.add('open'); document.body.style.overflow='hidden'; sheet.scrollTop=0;
+}
+
+function addFamilleToShop(){
+  if(!FAMILLE_MENU || !FAMILLE_MENU.length) return;
+  FAMILLE_MENU.forEach(it=>{
+    addRecipeToShop(it.recipe, it.total);
+    if(famRegime && it.regimeTarget!=null) addToJournal(it.recipe.id, nomL(it.recipe), it.regimeTarget);
+  });
+  updateShopBadge(); renderTracker();
+  closeFamille(); openShop();
+}
+
+function openFamille(){
+  renderFamillePickers();
+  document.getElementById('familleResult').innerHTML='';
+  document.getElementById('familleGen').textContent='Générer les repas';
+  document.getElementById('familleAdd').style.display='none';
+  FAMILLE_MENU=null;
+  document.getElementById('famille').classList.add('open'); document.body.style.overflow='hidden';
+}
+function closeFamille(){ document.getElementById('famille').classList.remove('open'); document.body.style.overflow=''; }
+document.getElementById('familleClose').addEventListener('click',closeFamille);
+document.getElementById('familleGen').addEventListener('click',generateFamille);
+document.getElementById('familleAdd').addEventListener('click',addFamilleToShop);
 
 /* ---------- Coach sportif ---------- */
 const SPORT_LIST=[
@@ -2748,6 +2987,7 @@ function rafraichirRecettes(){
   try{ if(typeof renderTracker==='function') renderTracker(); }catch(e){}
   try{ if(typeof MENU!=='undefined' && MENU && MENU.length && typeof renderMenuResult==='function' && typeof loadProfile==='function') renderMenuResult(loadProfile()); }catch(e){}
   try{ if(typeof WEEK_MENU!=='undefined' && WEEK_MENU && typeof renderWeekResult==='function' && typeof loadProfile==='function') renderWeekResult(loadProfile()); }catch(e){}
+  try{ if(typeof FAMILLE_MENU!=='undefined' && FAMILLE_MENU && FAMILLE_MENU.length && typeof renderFamilleResult==='function') renderFamilleResult(); }catch(e){}
   try{ if(typeof COACH_PROG!=='undefined' && COACH_PROG && typeof renderCoachResult==='function') renderCoachResult(); }catch(e){}
 }
 
