@@ -770,8 +770,8 @@ let RECETTES = [];
 const CATS_ORDER = ["Fast food","Bowls","Végé","Légumes","Dessert","Petit-déj","Encas"];
 const MOMENTS_ORDER = ["Petit-déj","Encas 10h","Déjeuner","Post-training","Encas 16h","Dîner"];
 const CAT_TINT = {"Fast food":["#ECE0C9","#E2D2B2"],"Bowls":["#DEE4D2","#CED8BC"],"Végé":["#DAE2D0","#C8D5B6"],"Légumes":["#DCE3CF","#CCD8B8"],"Dessert":["#EBDACD","#DFC9B6"],"Petit-déj":["#EDE3CE","#E1D2B4"],"Encas":["#E7DEC9","#D8CBB0"],"Sauce":["#E6DAC6","#D6C4A6"],"Express":["#E3DEC6","#D3CBA4"],"Salade":["#D9E3CA","#C4D5AC"],"Monde":["#E4DAC6","#D3C3A0"]};
-const BASES_ORDER = ["Poulet","Dinde","Bœuf","Saumon","Poisson","Œuf","Sans"];
-const BASE_LABEL = {"Poulet":"Poulet","Dinde":"Dinde","Bœuf":"Bœuf","Saumon":"Saumon","Poisson":"Poisson","Œuf":"Œuf","Sans":"Végétarien"};
+const BASES_ORDER = ["Poulet","Dinde","Bœuf","Porc","Saumon","Poisson","Œuf","Sans"];
+const BASE_LABEL = {"Poulet":"Poulet","Dinde":"Dinde","Bœuf":"Bœuf","Porc":"Porc","Saumon":"Saumon","Poisson":"Poisson","Œuf":"Œuf","Sans":"Végétarien"};
 
 const ICON_CLOCK='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>';
 const ICON_PEOPLE='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c0-3 2.9-5 6.5-5s6.5 2 6.5 5"/></svg>';
@@ -1870,6 +1870,20 @@ document.getElementById('menuWeekAdd').addEventListener('click',addWeekToShop);
    Le total obtenu sert à la fois à afficher les quantités et à remplir la
    liste de courses (mêmes fonctions que pour une recette classique). */
 const FAM_RATIO = { petit:0.40, enfant:0.65, ado:0.90 }; // 2-6 ans, 7-12 ans, 13-17 ans
+/* mots-clés légumes, réutilisés depuis la liste "Mon frigo" déjà présente dans le site */
+const LEGUME_KW = (FR_GROUPS.find(([g])=>g==="Légumes")||[null,[]])[1].flatMap(([,kw])=>kw);
+/* pour un repas famille, on préfère toujours une recette complète : féculent + légumes.
+   Si aucune recette ne coche les deux cases, on relâche progressivement la contrainte
+   plutôt que de renvoyer une liste vide. */
+function famPoolPreferer(pool){
+  const avecLesDeux=pool.filter(r=>recipeHasStarch(r,CARB_KW) && recipeHasStarch(r,LEGUME_KW));
+  if(avecLesDeux.length) return avecLesDeux;
+  const avecFeculent=pool.filter(r=>recipeHasStarch(r,CARB_KW));
+  if(avecFeculent.length) return avecFeculent;
+  const avecLegume=pool.filter(r=>recipeHasStarch(r,LEGUME_KW));
+  if(avecLegume.length) return avecLegume;
+  return pool;
+}
 let famAdultes=2, famPetits=0, famEnfants=0, famAdos=0, famRegime=true;
 let famMoments=new Set(["Petit-déj","Déjeuner","Dîner"]);
 let FAMILLE_MENU=null;
@@ -1998,10 +2012,7 @@ function generateFamille(){
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
     if(!pool.length) return;
-    /* pour un repas famille, on préfère une recette avec un féculent (riz, pâtes, pomme de terre...)
-       plutôt qu'un plat protéines + légumes seul, plus adapté à nourrir tout le monde */
-    const avecFeculent=pool.filter(r=>recipeHasStarch(r,CARB_KW));
-    if(avecFeculent.length) pool=avecFeculent;
+    pool=famPoolPreferer(pool);
     const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
     const {total, regimeTarget, regimePortion}=famTargetsFor(r,m,p);
     FAMILLE_MENU.push({moment:m, recipe:r, total, regimeTarget, regimePortion});
@@ -2034,8 +2045,7 @@ function renderFamilleResult(){
     const usedIds=new Set(FAMILLE_MENU.map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
-    const avecFeculentSwap=pool.filter(r=>recipeHasStarch(r,CARB_KW));
-    if(avecFeculentSwap.length) pool=avecFeculentSwap;
+    pool=famPoolPreferer(pool);
     if(pool.length){
       const nr=pool[Math.floor(Math.random()*pool.length)];
       const {total, regimeTarget, regimePortion}=famTargetsFor(nr, m, loadProfile());
