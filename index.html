@@ -675,11 +675,28 @@
     <div class="menu-moments" id="famRegime"></div>
     <div class="week-lbl">Repas de la journée</div>
     <div class="menu-moments" id="famMoments"></div>
+    <div class="week-lbl">Avec quoi</div>
+    <div class="menu-moments" id="famSource"></div>
+    <p class="menu-hint" id="famFrigoNote" style="margin-top:-2px"></p>
     <div id="familleResult"></div>
   </div>
   <div class="fr-bar"><div class="fr-inner">
     <button class="fr-clear" id="familleGen">Générer les repas</button>
     <button class="fr-go" id="familleAdd" style="display:none">Ajouter à ma liste de courses</button>
+  </div></div>
+</div>
+
+<div class="fridge" id="famFridge">
+  <div class="fridge-inner">
+    <button class="fr-skip" id="famFrSkip">Fermer</button>
+    <div class="ob-eyebrow">Frigo — repas famille</div>
+    <h1 class="ob-title">Ce que tu as pour la famille</h1>
+    <p class="ob-sub">Coche les ingrédients disponibles pour ce repas famille. C'est un frigo à part, indépendant de « Mon frigo » de l'accueil. (Le sel, le poivre, l'huile et les épices sont supposés dans tes placards.)</p>
+    <div id="famFrGroups"></div>
+  </div>
+  <div class="fr-bar"><div class="fr-inner">
+    <button class="fr-clear" id="famFrClear">Tout décocher</button>
+    <button class="fr-go" id="famFrGo">Valider</button>
   </div></div>
 </div>
 
@@ -1535,7 +1552,7 @@ function initProfile(){
 const FR_STAPLES=["sel","poivre","huile","ail","oignon","farine","levure","maizena","vinaigre","eau","sucre","miel","cannelle","cumin","paprika","curry","curcuma","muscade","herbes","thym","origan","basilic","persil","menthe","coriandre","ciboulette","aneth","gingembre","piment","cinq-epices","ras el hanout","cacao","sesame","citron","vanille","bouillon","cafe","glacons","agar-agar","moutarde","capres","cornichons","olives","concentre de tomate","nuoc-mam","miso","ponzu","beurre","bechamel","celeri","cajun","epices"];
 const FR_GROUPS=[
  ["Féculents & bases",[["Riz",["riz"]],["Pâtes",["pates","macaroni"]],["Quinoa",["quinoa"]],["Boulgour",["boulgour"]],["Semoule",["semoule"]],["Nouilles",["nouille"]],["Avoine",["flocons d'avoine","avoine"]],["Pain",["pain","bagel","panini"]],["Tortilla",["tortilla","coques a tacos"]],["Pomme de terre",["pomme de terre","pommes de terre"]],["Patate douce",["patate douce","patate"]],["Lentilles",["lentille"]],["Pois chiches",["pois chiche"]],["Haricots",["haricots rouge","haricots noir"]],["Maïs",["mais"]],["Chapelure/panko",["chapelure"]],["Galettes de riz",["galettes de riz"]],["Panais",["panais"]]]],
- ["Protéines",[["Poulet",["poulet"]],["Dinde",["dinde"]],["Bœuf",["boeuf"]],["Saumon",["saumon"]],["Thon",["thon"]],["Poisson blanc",["cabillaud","colin"]],["Crevettes",["crevette"]],["Œufs",["oeuf"]],["Tofu",["tofu"]],["Halloumi",["halloumi"]],["Jambon de dinde",["jambon","bacon de dinde"]],["Whey/protéine",["whey"]],["Saucisse",["saucisse"]],["Falafels",["falafel"]]]],
+ ["Protéines",[["Poulet",["poulet"]],["Dinde",["dinde"]],["Bœuf",["boeuf"]],["Porc",["porc"]],["Saumon",["saumon"]],["Thon",["thon"]],["Poisson blanc",["cabillaud","colin"]],["Crevettes",["crevette"]],["Œufs",["oeuf"]],["Tofu",["tofu"]],["Halloumi",["halloumi"]],["Jambon de dinde",["jambon","bacon de dinde"]],["Whey/protéine",["whey"]],["Saucisse",["saucisse"]],["Falafels",["falafel"]]]],
  ["Légumes",[["Courgette",["courgette"]],["Brocoli",["brocoli"]],["Carotte",["carotte"]],["Poivron",["poivron"]],["Tomate",["tomate"]],["Épinards",["epinard"]],["Champignons",["champignon"]],["Aubergine",["aubergine"]],["Chou / chou-fleur",["chou","choux"]],["Haricots verts",["haricots vert"]],["Asperges",["asperge"]],["Concombre",["concombre"]],["Salade",["salade","romaine"]],["Betterave",["betterave"]],["Courge/butternut",["butternut","courge"]],["Petits pois",["petits pois"]]]],
  ["Laitiers & fromages",[["Yaourt grec",["yaourt"]],["Fromage blanc",["fromage blanc"]],["Skyr",["skyr"]],["Cottage cheese",["cottage"]],["Lait",["lait"]],["Lait de coco",["lait de coco"]],["Crème",["creme"]],["Fromage",["mozzarella","cheddar","feta","parmesan","emmental","chevre","fromage rape","fromage frais"]],["Beurre de cacahuète",["beurre de cacahuete","cacahuete"]]]],
  ["Fruits",[["Banane",["banane"]],["Fruits rouges",["fruits rouges","myrtille","fraise","raisin"]],["Pomme",["pomme"]],["Mangue",["mangue"]],["Ananas",["ananas"]],["Avocat",["avocat"]],["Kiwi",["kiwi"]],["Orange",["orange"]],["Dattes",["dattes"]],["Compote",["compote"]]]],
@@ -1887,6 +1904,11 @@ function famPoolPreferer(pool){
 let famAdultes=2, famPetits=0, famEnfants=0, famAdos=0, famRegime=true;
 let famMoments=new Set(["Petit-déj","Déjeuner","Dîner"]);
 let FAMILLE_MENU=null;
+/* Frigo dédié au repas famille : un Set totalement séparé de "fridgeSel" (le frigo de
+   l'accueil / de la semaine). Cocher des ingrédients ici ne touche jamais l'autre frigo,
+   et inversement. Comme pour fridgeSel, le contenu coché n'est pas mémorisé d'une visite
+   à l'autre (le frigo change tous les jours) ; seule la préférence "avec mon frigo" l'est. */
+let famFridgeSel=new Set(), famFridgeOn=false;
 
 function loadFamille(){
   try{
@@ -1898,12 +1920,40 @@ function loadFamille(){
     if(s.ados!=null) famAdos=s.ados;
     if(s.regime!=null) famRegime=s.regime;
     if(s.moments&&s.moments.length) famMoments=new Set(s.moments);
+    if(s.frigoOn!=null) famFridgeOn=s.frigoOn;
   }catch(e){}
 }
 function saveFamilleConfig(){
-  try{ localStorage.setItem('graille_famille', JSON.stringify({adultes:famAdultes,petits:famPetits,enfants:famEnfants,ados:famAdos,regime:famRegime,moments:[...famMoments]})); }catch(e){}
+  try{ localStorage.setItem('graille_famille', JSON.stringify({adultes:famAdultes,petits:famPetits,enfants:famEnfants,ados:famAdos,regime:famRegime,moments:[...famMoments],frigoOn:famFridgeOn})); }catch(e){}
 }
 loadFamille();
+
+/* Mêmes règles de correspondance ingrédient <-> frigo que pour "Mon frigo" (frCovered),
+   mais appliquées à famFridgeSel : la logique est identique, la sélection est indépendante. */
+function famSelectedKw(){ let a=[]; famFridgeSel.forEach(l=>{a=a.concat(FR_LABEL_KW[l]||[]);}); return a; }
+function famRecipeMissing(r){
+  const kws=famSelectedKw(); const miss=[];
+  (r.ingredients||[]).forEach(i=>{ const n=frNorm(i.nom||""); if(!frCovered(n,kws)) miss.push(i.nom); });
+  return miss;
+}
+function buildFamFridgeGroups(){
+  const box=document.getElementById('famFrGroups');
+  box.innerHTML=FR_GROUPS.map(([g,items])=>
+    `<div class="fr-group"><h3>${g}</h3><div class="fr-chips">`+
+    items.map(([l])=>`<button class="fr-chip" data-l="${l}" aria-pressed="${famFridgeSel.has(l)}">${l}</button>`).join('')+
+    `</div></div>`
+  ).join('');
+  box.querySelectorAll('.fr-chip').forEach(b=>b.addEventListener('click',()=>{
+    const l=b.dataset.l;
+    if(famFridgeSel.has(l)) famFridgeSel.delete(l); else famFridgeSel.add(l);
+    b.setAttribute('aria-pressed', famFridgeSel.has(l));
+  }));
+}
+function openFamFridge(){ buildFamFridgeGroups(); document.getElementById('famFridge').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeFamFridge(){ document.getElementById('famFridge').classList.remove('open'); document.body.style.overflow=''; }
+document.getElementById('famFrSkip').addEventListener('click',closeFamFridge);
+document.getElementById('famFrClear').addEventListener('click',()=>{ famFridgeSel.clear(); buildFamFridgeGroups(); });
+document.getElementById('famFrGo').addEventListener('click',()=>{ closeFamFridge(); renderFamillePickers(); });
 
 function famPersonCount(){ return famAdultes+famPetits+famEnfants+famAdos; }
 
@@ -1931,6 +1981,22 @@ function renderFamillePickers(){
     const x=b.dataset.m; if(famMoments.has(x)) famMoments.delete(x); else famMoments.add(x);
     b.setAttribute('aria-pressed', famMoments.has(x)); saveFamilleConfig();
   }));
+
+  const src=document.getElementById('famSource');
+  src.innerHTML=`<button class="menu-chip" data-f="0" aria-pressed="${!famFridgeOn}">Toutes les recettes</button>
+                 <button class="menu-chip" data-f="1" aria-pressed="${famFridgeOn}">Avec mon frigo</button>`;
+  src.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+    famFridgeOn=b.dataset.f==='1'; saveFamilleConfig(); renderFamillePickers();
+  }));
+  const note=document.getElementById('famFrigoNote');
+  if(famFridgeOn){
+    const n=famFridgeSel.size;
+    note.innerHTML=(n
+      ? n+' ingrédient'+(n>1?'s':'')+' coché'+(n>1?'s':'')+' dans ce frigo famille (indépendant de « Mon frigo »). On pioche d\'abord dedans. '
+      : 'Ce frigo famille est vide pour l\'instant. ')
+      +`<button class="ob-link" id="famOpenFridgeBtn" style="display:inline;width:auto;margin:0;padding:0;text-decoration:underline">${n?'Modifier':'Choisir'} les ingrédients</button>`;
+    document.getElementById('famOpenFridgeBtn').addEventListener('click', openFamFridge);
+  } else note.innerHTML='';
 }
 ['famAdultes','famPetits','famEnfants','famAdos'].forEach(id=>{
   document.getElementById(id).addEventListener('input',()=>{
@@ -2012,10 +2078,20 @@ function generateFamille(){
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
     if(!pool.length) return;
+    let manque=0;
+    if(famFridgeOn && famFridgeSel.size){
+      /* comme pour la semaine : on cherche d'abord ce qui se fait avec le frigo famille,
+         puis on élargit s'il n'y a pas assez de choix — jamais avec le frigo de l'accueil. */
+      let dispo=pool.filter(r=>famRecipeMissing(r).length===0);
+      if(dispo.length<2) dispo=pool.filter(r=>famRecipeMissing(r).length<=1);
+      if(dispo.length<2) dispo=pool.filter(r=>famRecipeMissing(r).length<=2);
+      if(dispo.length) pool=dispo;
+    }
     pool=famPoolPreferer(pool);
     const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
+    if(famFridgeOn && famFridgeSel.size) manque=famRecipeMissing(r).length;
     const {total, regimeTarget, regimePortion}=famTargetsFor(r,m,p);
-    FAMILLE_MENU.push({moment:m, recipe:r, total, regimeTarget, regimePortion});
+    FAMILLE_MENU.push({moment:m, recipe:r, total, regimeTarget, regimePortion, manque});
   });
   saveFamilleConfig();
   renderFamilleResult();
@@ -2032,7 +2108,7 @@ function renderFamilleResult(){
     FAMILLE_MENU.map((it,i)=>`<div class="menu-item">
       <div class="menu-mom">${it.moment}</div>
       <button class="menu-recipe" data-i="${i}">${nomL(it.recipe)}</button>
-      <span class="menu-kcal">${it.total} kcal</span>
+      <span class="menu-kcal">${it.total} kcal${famFridgeOn&&famFridgeSel.size?(it.manque===0?' <b class="wk-ok">✓ frigo</b>':' <b class="wk-miss">'+it.manque+' à acheter</b>'):''}</span>
       <button class="menu-swap" data-i="${i}" title="Changer cette recette">↻</button>
     </div>
     <p class="fam-breakdown">${famBreakdownText()}</p>
@@ -2045,11 +2121,19 @@ function renderFamilleResult(){
     const usedIds=new Set(FAMILLE_MENU.map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
+    let manque=0;
+    if(famFridgeOn && famFridgeSel.size){
+      let dispo=pool.filter(r=>famRecipeMissing(r).length===0);
+      if(dispo.length<2) dispo=pool.filter(r=>famRecipeMissing(r).length<=1);
+      if(dispo.length<2) dispo=pool.filter(r=>famRecipeMissing(r).length<=2);
+      if(dispo.length) pool=dispo;
+    }
     pool=famPoolPreferer(pool);
     if(pool.length){
       const nr=pool[Math.floor(Math.random()*pool.length)];
+      if(famFridgeOn && famFridgeSel.size) manque=famRecipeMissing(nr).length;
       const {total, regimeTarget, regimePortion}=famTargetsFor(nr, m, loadProfile());
-      FAMILLE_MENU[i]={moment:m, recipe:nr, total, regimeTarget, regimePortion};
+      FAMILLE_MENU[i]={moment:m, recipe:nr, total, regimeTarget, regimePortion, manque};
       renderFamilleResult();
     }
   }));
