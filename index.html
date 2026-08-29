@@ -227,6 +227,8 @@
   @media(max-width:520px){
     .brandrow{flex-wrap:wrap;row-gap:10px}
     .hdr-actions{flex-wrap:wrap;width:100%;justify-content:flex-start}
+    .filterbar{flex-wrap:wrap;row-gap:8px}
+    .filterbar .sort-inline{margin-left:0;width:100%}
   }
   /* Lien Telegram : sous le slogan, jamais dans la ligne logo/boutons déjà pleine sur mobile */
   .hdr-telegram{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.3px;color:var(--rust);text-decoration:none}
@@ -734,6 +736,7 @@
   <div class="filterbar">
     <button class="fridge-cta" id="openFridge"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Mon frigo</button>
     <button class="air-cta" id="btnAir" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8"/><path d="M9 13h6"/><circle cx="17" cy="17.5" r="1"/></svg>Airfryer</button>
+    <button class="air-cta" id="btnBarres" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="6" rx="2"/><path d="M8 9v6"/><path d="M12 9v6"/><path d="M16 9v6"/></svg>Barres protéinées</button>
     <div class="sort-inline">
       <select id="sort">
         <option value="default">Trier</option>
@@ -816,6 +819,7 @@ const chipsFec=document.getElementById('chipsFec');
 const sortSel=document.getElementById('sort');
 let activeCat="Tous", activeBase="Toutes", activeFec="Tous";
 let airMode=false;
+let barMode=false;
 const FEC_ORDER=["Riz","Pâtes","Pommes de terre","Patate douce","Quinoa","Semoule","Boulgour","Nouilles","Avoine","Lentilles","Pois chiches","Pain"];
 const FEC_KW={"Riz":["riz"],"Pâtes":["pates","macaroni"],"Pommes de terre":["pomme de terre","pommes de terre"],"Patate douce":["patate douce","patate"],"Quinoa":["quinoa"],"Semoule":["semoule"],"Boulgour":["boulgour"],"Nouilles":["nouille"],"Avoine":["avoine"],"Lentilles":["lentille"],"Pois chiches":["pois chiche"],"Pain":["pain","bagel","panini"]};
 
@@ -908,6 +912,7 @@ function buildBaseChips(){
 function currentList(){
   let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase)&&(activeFec==="Tous"||recipeHasStarch(r,FEC_KW[activeFec])));
   if(airMode) list=list.filter(r=>String(r.mode_cuisson||'').toLowerCase().includes('airfryer'));
+  if(barMode) list=list.filter(r=>r.categorie==='Barres protéinées');
   if(fridgeMode){
     list=list.filter(r=>recipeMissing(r).length<=fridgeTol);
     list.sort((a,b)=>(recipeMissing(a).length-recipeMissing(b).length) || (fridgeUsed(b)-fridgeUsed(a)));
@@ -922,7 +927,7 @@ function currentList(){
 function render(list){
   if(!list.length){
     grid.innerHTML=`<div class="empty">Aucune recette pour cette combinaison.<br><button id="reset">Réinitialiser les filtres</button></div>`;
-    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;airMode=false;{const b=document.getElementById('btnAir');if(b)b.setAttribute('aria-pressed','false');}renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
+    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;airMode=false;barMode=false;{const b=document.getElementById('btnAir');if(b)b.setAttribute('aria-pressed','false');}{const b=document.getElementById('btnBarres');if(b)b.setAttribute('aria-pressed','false');}renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
   } else {
     grid.innerHTML=list.map(r=>`
       <button class="card" data-i="${RECETTES.indexOf(r)}" aria-label="${tr('Voir les recettes')} ${nomL(r)}">
@@ -1648,6 +1653,16 @@ function renderFridgeActive(){
     airMode=!airMode;
     b.setAttribute('aria-pressed',airMode);
     if(typeof gtag==='function' && airMode) gtag('event','filtre_airfryer');
+    update();
+  });
+})();
+(function(){
+  const b=document.getElementById('btnBarres');
+  if(!b) return;
+  b.addEventListener('click',()=>{
+    barMode=!barMode;
+    b.setAttribute('aria-pressed',barMode);
+    if(typeof gtag==='function' && barMode) gtag('event','filtre_barres_proteinees');
     update();
   });
 })();
