@@ -2034,10 +2034,18 @@ function famBreakdownText(){
   return parts.join(' · ');
 }
 /* Ligne mise en avant (couleur accent) : c'est l'info qui compte le plus pour la personne au régime. */
-function famRegimeLine(regimeTarget, regimePortion){
+/* Certains plats (sautés, mijotés en sauce, bolognaise, curry, pâtes...) se mangent
+   mélangés dans l'assiette : séparer "féculent" et "accompagnement" n'a pas de sens
+   pratique pour se servir. Pour ceux-là (recette.plat_melange = true côté Supabase),
+   on affiche une seule quantité globale plutôt que la répartition en deux. */
+function famRegimeLine(regimeTarget, regimePortion, melange){
   if(regimeTarget==null) return '';
   let t='🎯 Ta part : '+regimeTarget+' kcal';
-  if(regimePortion) t += ' · ~'+regimePortion.feculent+'g féculent + ~'+regimePortion.autre+'g accompagnement';
+  if(regimePortion){
+    t += melange
+      ? ' · ~'+regimePortion.total+'g au total'
+      : ' · ~'+regimePortion.feculent+'g féculent + ~'+regimePortion.autre+'g accompagnement';
+  }
   return `<p class="fam-regime">${t}</p>`;
 }
 
@@ -2057,7 +2065,7 @@ function famPersonalPortion(r, personalKcal){
     if(conv.u!=='g' && conv.u!=='ml') return; // unité non convertible en poids -> ignorée du grammage
     if(isCarbIng(n)) feculent+=conv.q; else autre+=conv.q;
   });
-  return { feculent: roundQty(feculent,'g'), autre: roundQty(autre,'g') };
+  return { feculent: roundQty(feculent,'g'), autre: roundQty(autre,'g'), total: roundQty(feculent+autre,'g') };
 }
 
 function famTargetsFor(r, m, p){
@@ -2126,7 +2134,7 @@ function renderFamilleResult(){
       <button class="menu-swap" data-i="${i}" title="Changer cette recette">↻</button>
     </div>
     <p class="fam-breakdown">${famBreakdownText()}</p>
-    ${famRegimeLine(it.regimeTarget, it.regimePortion)}`).join('');
+    ${famRegimeLine(it.regimeTarget, it.regimePortion, !!it.recipe.plat_melange)}`).join('');
   res.querySelectorAll('.menu-recipe').forEach(b=>b.addEventListener('click',()=>{
     const it=FAMILLE_MENU[+b.dataset.i]; openFamilleSheet(it.recipe, it.total, it.regimeTarget, it.regimePortion);
   }));
@@ -2165,12 +2173,16 @@ function openFamilleSheet(r, totalKcal, regimeTarget, regimePortion){
     return `<li><span>${ing.nom}</span><span class="qty">${displayQty(base*f,ing.unite)} ${ing.unite}</span></li>`;
   }).join('');
   const steps=etL(r).map(s=>`<li>${s}</li>`).join('');
-  const regimeBlock = (regimeTarget!=null && regimePortion) ? `
+  const regimeBlock = (regimeTarget!=null && regimePortion) ? (r.plat_melange ? `
+      <div class="serve-note">Ta part si tu suis ton objectif · ${regimeTarget} kcal</div>
+      <div class="macros sheet-macros" style="grid-template-columns:1fr;margin-bottom:20px">
+        <div class="macro"><div class="val">${regimePortion.total}</div><div class="lbl">g au total (tout est mélangé dans ce plat)</div></div>
+      </div>` : `
       <div class="serve-note">Ta part si tu suis ton objectif · ${regimeTarget} kcal</div>
       <div class="macros sheet-macros" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px">
         <div class="macro"><div class="val">${regimePortion.feculent}</div><div class="lbl">g féculent</div></div>
         <div class="macro"><div class="val">${regimePortion.autre}</div><div class="lbl">g accompagnement</div></div>
-      </div>` : '';
+      </div>`) : '';
   sheet.innerHTML=`
     <div class="sheet-hero">
       <button class="closebtn" id="famSheetClose" aria-label="Fermer">✕</button>
