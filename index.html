@@ -221,7 +221,13 @@
   .hdr-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
   .hdr-contact{display:inline-flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);background:none;border:1.5px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:inherit}
   .hdr-contact:hover{border-color:var(--ink);color:var(--ink)}
-  @media(max-width:520px){ .hdr-contact{display:none} }
+  /* Sur petit écran, le logo + les 3 boutons ne tiennent jamais sur une seule ligne :
+     plutôt que de les laisser déborder hors de l'écran (illisible), on les laisse
+     passer à la ligne proprement, alignés à gauche comme le reste de l'entête. */
+  @media(max-width:520px){
+    .brandrow{flex-wrap:wrap;row-gap:10px}
+    .hdr-actions{flex-wrap:wrap;width:100%;justify-content:flex-start}
+  }
   /* Lien Telegram : sous le slogan, jamais dans la ligne logo/boutons déjà pleine sur mobile */
   .hdr-telegram{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.3px;color:var(--rust);text-decoration:none}
   .hdr-telegram:hover{color:var(--rust-deep)}
