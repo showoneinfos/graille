@@ -86,6 +86,9 @@
   .frow .flabel{flex:0 0 74px;padding-left:18px;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2);font-weight:700;position:relative}
   .frow .flabel::before{content:"";position:absolute;left:9px;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--rust)}
   .frow .chips{flex:1;min-width:0;padding:5px 16px 5px 0}
+  .frow .chips.scrollable{padding-right:30px;
+    -webkit-mask-image:linear-gradient(to right, #000 calc(100% - 34px), transparent 100%);
+    mask-image:linear-gradient(to right, #000 calc(100% - 34px), transparent 100%)}
   @media(max-width:600px){ .frow .flabel{flex:0 0 60px;font-size:9px;letter-spacing:.8px} .frow{gap:6px} }
   .chips::-webkit-scrollbar{display:none}
   .chips.base{padding-bottom:12px}
@@ -481,6 +484,7 @@
   .menu-mom{flex:0 0 92px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--rust)}
   .menu-recipe{flex:1;text-align:left;background:none;border:none;font-family:inherit;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;padding:0}
   .menu-recipe:hover{color:var(--rust);text-decoration:underline}
+  .menu-fam-label{flex:1;text-align:left;font-family:inherit;font-weight:600;font-size:14px;color:var(--ink2)}
   .menu-kcal{font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap}
   .menu-swap{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--olive);font-size:15px;cursor:pointer}
   .menu-swap:hover{border-color:var(--olive);background:var(--olive);color:#fff}
@@ -659,6 +663,8 @@
     <div class="menu-moments" id="weekDays"></div>
     <div class="week-lbl">Repas de la journée</div>
     <div class="menu-moments" id="weekMoments"></div>
+    <div class="week-lbl" id="weekDinnerLbl" style="display:none">Repas en famille (pas de recette individuelle)</div>
+    <div class="menu-moments" id="weekDinnerMode" style="display:none"></div>
     <div class="week-lbl">Avec quoi</div>
     <div class="menu-moments" id="weekSource"></div>
     <p class="menu-hint" id="weekFrigoNote" style="margin-top:-2px"></p>
@@ -972,8 +978,14 @@ function updateFiltersCount(){
   if(activeFec!=="Tous") n++;
   el.textContent=n||''; el.classList.toggle('show', n>0);
 }
-function update(){ updateFiltersCount(); render(currentList()); }
+function update(){ updateFiltersCount(); render(currentList()); updateChipsFade(); }
 sortSel.addEventListener('change',update);
+function updateChipsFade(){
+  document.querySelectorAll('.frow .chips').forEach(el=>{
+    el.classList.toggle('scrollable', el.scrollWidth > el.clientWidth + 2);
+  });
+}
+window.addEventListener('resize', updateChipsFade);
 
 /* MODAL */
 const overlay=document.getElementById('overlay');
@@ -1732,14 +1744,15 @@ const WEEK_DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanch
 let weekDays=new Set(["Lundi","Mardi","Mercredi","Jeudi","Vendredi"]);
 let weekMoments=new Set(["Petit-déj","Déjeuner","Dîner"]);
 let weekFrigo=false;
+let weekFamMoments=new Set();
 let WEEK_MENU=null;
 
 function saveWeek(){
   try{
     if(!WEEK_MENU){ localStorage.removeItem('graille_week'); return; }
     localStorage.setItem('graille_week', JSON.stringify({
-      jours:[...weekDays], moments:[...weekMoments], frigo:weekFrigo,
-      menu:WEEK_MENU.map(d=>({jour:d.jour, repas:d.repas.map(it=>({moment:it.moment, id:it.recipe.id, kcal:it.kcal}))}))
+      jours:[...weekDays], moments:[...weekMoments], frigo:weekFrigo, famMoments:[...weekFamMoments],
+      menu:WEEK_MENU.map(d=>({jour:d.jour, repas:d.repas.map(it=>({moment:it.moment, id:it.recipe?it.recipe.id:null, famille:!it.recipe, kcal:it.kcal}))}))
     }));
   }catch(e){}
 }
@@ -1749,7 +1762,9 @@ function loadWeek(){
     if(w.jours&&w.jours.length) weekDays=new Set(w.jours);
     if(w.moments&&w.moments.length) weekMoments=new Set(w.moments);
     weekFrigo=!!w.frigo;
+    weekFamMoments=new Set(w.famMoments||[]);
     const menu=(w.menu||[]).map(d=>({jour:d.jour, repas:(d.repas||[]).map(it=>{
+      if(it.famille || it.id==null) return {moment:it.moment, recipe:null, kcal:it.kcal};
       const r=RECETTES.find(x=>x.id===it.id); return r?{moment:it.moment, recipe:r, kcal:it.kcal}:null;
     }).filter(Boolean)})).filter(d=>d.repas.length);
     return menu.length?menu:null;
@@ -1793,8 +1808,22 @@ function renderWeekPickers(){
   m.innerHTML=MENU_MOMENTS.map(x=>`<button class="menu-chip" data-m="${x}" aria-pressed="${weekMoments.has(x)}">${x}</button>`).join('');
   m.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
     const x=b.dataset.m; if(weekMoments.has(x)) weekMoments.delete(x); else weekMoments.add(x);
-    b.setAttribute('aria-pressed', weekMoments.has(x));
+    renderWeekPickers();
   }));
+
+  const dlbl=document.getElementById('weekDinnerLbl');
+  const dm=document.getElementById('weekDinnerMode');
+  const selMoments=MENU_MOMENTS.filter(x=>x!=='Petit-déj' && weekMoments.has(x));
+  if(selMoments.length){
+    dlbl.style.display=''; dm.style.display='';
+    dm.innerHTML=selMoments.map(x=>`<button class="menu-chip" data-fm="${x}" aria-pressed="${weekFamMoments.has(x)}">${x}</button>`).join('');
+    dm.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+      const x=b.dataset.fm; if(weekFamMoments.has(x)) weekFamMoments.delete(x); else weekFamMoments.add(x);
+      renderWeekPickers();
+    }));
+  } else {
+    dlbl.style.display='none'; dm.style.display='none'; dm.innerHTML='';
+  }
 }
 
 function generateMenuWeek(){
@@ -1812,6 +1841,10 @@ function generateMenuWeek(){
     moments.forEach(m=>{
       let alloc=Math.round(p.calories*MENU_WEIGHTS[m]/sumW/10)*10;
       alloc=Math.max(CAL_MIN, Math.min(CAL_MAX, alloc));
+      if(m!=='Petit-déj' && weekFamMoments.has(m)){
+        repas.push({moment:m, recipe:null, kcal:alloc});
+        return;
+      }
       let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
       if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
       if(!pool.length) return;
@@ -1853,9 +1886,11 @@ function renderWeekResult(p){
       </div>
       ${d.repas.map((it,ri)=>`<div class="menu-item">
         <div class="menu-mom">${it.moment}</div>
-        <button class="menu-recipe" data-d="${di}" data-r="${ri}">${nomL(it.recipe)}</button>
+        ${it.recipe
+          ? `<button class="menu-recipe" data-d="${di}" data-r="${ri}">${nomL(it.recipe)}</button>`
+          : `<span class="menu-fam-label">🍽 Repas familial</span>`}
         <span class="menu-kcal">${it.kcal} kcal${it.manque===0?' <b class="wk-ok">✓ frigo</b>':(it.manque>0?' <b class="wk-miss">'+it.manque+' à acheter</b>':'')}</span>
-        <button class="menu-swap" data-d="${di}" data-r="${ri}" title="Changer">↻</button>
+        ${it.recipe ? `<button class="menu-swap" data-d="${di}" data-r="${ri}" title="Changer">↻</button>` : ''}
       </div>`).join('')}
     </div>`;
   }).join('');
@@ -1897,7 +1932,7 @@ function hasWeek(){
 function addWeekToShop(){
   if(!WEEK_MENU || !WEEK_MENU.length) return;
   let n=0;
-  WEEK_MENU.forEach(d=>d.repas.forEach(it=>{ try{ addRecipeToShop(it.recipe, it.kcal); n++; }catch(e){} }));
+  WEEK_MENU.forEach(d=>d.repas.forEach(it=>{ if(!it.recipe) return; try{ addRecipeToShop(it.recipe, it.kcal); n++; }catch(e){} }));
   updateShopBadge(); saveWeek();
   closeMenuWeek(); openShop();
 }
