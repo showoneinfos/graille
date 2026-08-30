@@ -1031,18 +1031,30 @@ function macroState(){
 let __scrollLockCount=0;
 function lockScroll(){ __scrollLockCount++; document.body.style.overflow='hidden'; }
 function unlockScroll(){ __scrollLockCount=Math.max(0,__scrollLockCount-1); if(__scrollLockCount===0) document.body.style.overflow=''; }
-/* La fiche recette est une carte centrée avec du fond assombri tout autour :
-   avec certaines souris, le défilement natif au-dessus de la fiche était
-   très peu sensible (un cran de molette ne faisait bouger le texte que de
-   quelques pixels), et ne marchait pas du tout au-dessus du fond assombri.
-   On prend donc systématiquement la main sur le défilement dans toute la
-   fenêtre (fond ET fiche) avec un pas confortable, quelle que soit la souris. */
-overlay.addEventListener('wheel', function(e){
-  if(!overlay.classList.contains('open')) return;
+/* Avec certaines souris (molette "à crans", plutôt que la molette lisse d'un
+   pavé tactile), le navigateur reçoit des tout petits pas de défilement —
+   la page ou une fenêtre ouverte (fiche recette, frigo, menu...) bouge alors
+   à peine à chaque cran. On détecte ce cas précis (deltaMode différent de 0 :
+   la souris "compte en lignes" et non en pixels) et on prend la main pour
+   appliquer un pas confortable, sur la bonne zone qui défile (la page, ou la
+   fenêtre ouverte survolée) — sans rien changer pour les souris/pavés qui
+   fonctionnaient déjà normalement (deltaMode=0, on les laisse tranquilles). */
+function scrollableAncestor(el){
+  while(el && el.nodeType===1 && el!==document.documentElement){
+    if(el.classList && el.classList.contains('overlay')) return sheet; // fond de la fiche recette -> vise la fiche elle-même
+    const cs=getComputedStyle(el);
+    if((cs.overflowY==='auto'||cs.overflowY==='scroll') && el.scrollHeight>el.clientHeight) return el;
+    el=el.parentElement;
+  }
+  return null; // aucune fenêtre ouverte concernée : c'est la page elle-même
+}
+window.addEventListener('wheel', function(e){
+  if(e.deltaMode===0) return; // molette déjà précise : le navigateur gère très bien, on ne touche à rien
+  const target=scrollableAncestor(e.target);
   let dy=e.deltaY;
-  if(e.deltaMode===1) dy*=18;               // molette "à crans" (unité ligne) -> pixels
-  else if(e.deltaMode===2) dy*=sheet.clientHeight; // molette "page"
-  sheet.scrollTop += dy;
+  if(e.deltaMode===1) dy*=18;                                    // molette "à crans" (unité ligne) -> pixels
+  else if(e.deltaMode===2) dy*=(target?target.clientHeight:window.innerHeight); // molette "page"
+  if(target) target.scrollTop+=dy; else window.scrollBy(0,dy);
   e.preventDefault();
 }, {passive:false});
 function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');lockScroll();sheet.scrollTop=0;}
