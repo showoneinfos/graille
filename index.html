@@ -1525,7 +1525,38 @@ function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal
 function resetJournal(){JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);renderTracker();}
 function removeFromJournal(i){JOURNAL.items.splice(i,1);saveJournal(JOURNAL);renderTracker();}
 
+/* ---------- Semaine -> journal du jour ----------
+   Dès que le jour de la semaine en cours a un menu prévu (via "Mes menus de la
+   semaine"), on le fait apparaître automatiquement dans "Mes recettes du jour",
+   comme si on l'avait ajouté à la main. On ne le refait qu'une fois par jour
+   (drapeau graille_week_synced_AAAA-MM-JJ) pour ne pas ré-ajouter un repas que
+   la personne a volontairement retiré de son journal en cours de journée.
+   saveWeek() efface ce drapeau à chaque modification de la semaine, pour que
+   le journal reprenne la nouvelle version au prochain affichage. */
+const FR_DAY_NAMES=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+function todayFrDayName(){ return FR_DAY_NAMES[new Date().getDay()]; }
+function syncWeekToJournalToday(){
+  try{
+    const flagKey='graille_week_synced_'+today();
+    if(localStorage.getItem(flagKey)) return;
+    localStorage.setItem(flagKey,'1');
+    const w=JSON.parse(localStorage.getItem('graille_week'));
+    if(!w || !w.menu) return;
+    const day=w.menu.find(d=>d.jour===todayFrDayName());
+    if(!day) return;
+    JOURNAL.items=JOURNAL.items.filter(it=>it.src!=='week');
+    day.repas.forEach(it=>{
+      let nom;
+      if(it.id==null) nom='🍽 Repas familial';
+      else{ const r=RECETTES.find(x=>x.id===it.id); nom=(it.isFam?'👪 ':'')+(r?nomL(r):'Recette'); }
+      JOURNAL.items.push({id:it.id, nom, kcal:it.kcal, src:'week'});
+    });
+    saveJournal(JOURNAL);
+  }catch(e){}
+}
+
 function renderTracker(){
+  syncWeekToJournalToday();
   const el=document.getElementById('perso');
   const p=loadProfile();
   el.classList.add('show');
@@ -1756,6 +1787,7 @@ let WEEK_MENU=null;
 
 function saveWeek(){
   try{
+    try{ localStorage.removeItem('graille_week_synced_'+today()); }catch(e2){}
     if(!WEEK_MENU){ localStorage.removeItem('graille_week'); return; }
     localStorage.setItem('graille_week', JSON.stringify({
       jours:[...weekDays], moments:[...weekMoments], frigo:weekFrigo, famOn:weekFamOn, famMoments:[...weekFamMoments],
@@ -1931,7 +1963,8 @@ function renderWeekResult(p){
           <button class="menu-recipe" data-d="${di}" data-r="${ri}">${it.isFam?'👪 ':''}${nomL(it.recipe)}</button>
           <span class="menu-kcal">${it.kcal} kcal${it.manque===0?' <b class="wk-ok">✓ frigo</b>':(it.manque>0?' <b class="wk-miss">'+it.manque+' à acheter</b>':'')}</span>
           <button class="menu-swap" data-d="${di}" data-r="${ri}" title="Changer">↻</button>
-        </div>`;
+        </div>
+        ${it.isFam && it.famPortion ? `<p class="fam-regime" style="margin:-6px 0 12px">🎯 Ta part · ~${it.recipe.plat_melange?it.famPortion.total+'g au total':it.famPortion.feculent+'g féculent + ~'+it.famPortion.autre+'g accompagnement'}</p>` : ''}`;
       }).join('')}
     </div>`;
   }).join('');
@@ -1947,7 +1980,7 @@ function renderWeekResult(p){
     const usedIds=new Set(WEEK_MENU[di].repas.filter(x=>x.recipe).map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
-    if(pool.length){ WEEK_MENU[di].repas[ri]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; saveWeek(); renderWeekResult(loadProfile()); }
+    if(pool.length){ WEEK_MENU[di].repas[ri]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; saveWeek(); renderWeekResult(loadProfile()); renderTracker(); }
   }));
   res.querySelectorAll('.fam-gen-btn').forEach(b=>b.addEventListener('click',()=>{
     const di=+b.dataset.d, ri=+b.dataset.r;
@@ -1967,7 +2000,8 @@ function renderWeekResult(p){
 
 function clearWeek(){
   WEEK_MENU=null;
-  try{ localStorage.removeItem('graille_week'); }catch(e){}
+  try{ localStorage.removeItem('graille_week'); localStorage.removeItem('graille_week_synced_'+today()); }catch(e){}
+  JOURNAL.items=JOURNAL.items.filter(it=>it.src!=='week'); saveJournal(JOURNAL);
   document.getElementById('menuWeekResult').innerHTML='';
   document.getElementById('menuWeekGen').textContent='Générer ma semaine';
   document.getElementById('menuWeekAdd').style.display='none';
@@ -2007,6 +2041,7 @@ function weekFamGenerate(di, ri, headcount){
   WEEK_MENU[di].repas[ri]={...it, recipe:r, famHead:n, famTotal, famPortion};
   saveWeek();
   renderWeekResult(loadProfile());
+  renderTracker();
 }
 
 document.getElementById('menuWeekClose').addEventListener('click',closeMenuWeek);
