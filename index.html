@@ -1022,8 +1022,17 @@ function macroState(){
   const newP=P0+delta, newC=C0-delta;
   return {P:newP, C:newC, F:F0, f, fProt:(P0>0?f*newP/P0:f), fCarb:(C0>0?f*newC/C0:f)};
 }
-function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
-function closeSheet(){overlay.classList.remove('open');document.body.style.overflow='';}
+/* Verrou de défilement de la page en pile (et non un simple booléen) : plusieurs
+   fenêtres peuvent s'ouvrir l'une par-dessus l'autre (ex: une fiche recette ouverte
+   depuis "Mes menus de la semaine"). Avec un simple booléen, fermer la fenêtre du
+   dessus réactivait le défilement alors que celle du dessous était encore ouverte,
+   ou inversement pouvait le bloquer définitivement. Avec un compteur, le défilement
+   ne revient que quand TOUTES les fenêtres ouvertes sont refermées. */
+let __scrollLockCount=0;
+function lockScroll(){ __scrollLockCount++; document.body.style.overflow='hidden'; }
+function unlockScroll(){ __scrollLockCount=Math.max(0,__scrollLockCount-1); if(__scrollLockCount===0) document.body.style.overflow=''; }
+function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');lockScroll();sheet.scrollTop=0;}
+function closeSheet(){overlay.classList.remove('open');unlockScroll();}
 function factorFor(r){return activeTarget/r.calories;}
 function heroHTML(r){
   if(r.image_url) return `<img src="${r.image_url}" alt="${nomL(r)}">`;
@@ -1175,9 +1184,9 @@ function openOnboard(){
     document.getElementById('obCible').value=p.poidsCible||'';
   }
   updateRythmeUI();
-  onboard.classList.add('open'); document.body.style.overflow='hidden';
+  onboard.classList.add('open'); lockScroll();
 }
-function closeOnboard(){onboard.classList.remove('open'); document.body.style.overflow='';}
+function closeOnboard(){onboard.classList.remove('open'); unlockScroll();}
 
 function calcProfile(p){
   const bmr = 10*p.poids + 6.25*p.taille - 5*p.age + (p.sexe==='homme'?5:-161); // Mifflin-St Jeor
@@ -1425,8 +1434,8 @@ function renderShop(){
   box.querySelectorAll('.shop-check').forEach(b=>b.addEventListener('click',()=>{SHOP[+b.dataset.i].got=!SHOP[+b.dataset.i].got;saveShop();renderShop();updateShopBadge();}));
   box.querySelectorAll('.shop-rm').forEach(b=>b.addEventListener('click',()=>{SHOP.splice(+b.dataset.i,1);saveShop();renderShop();updateShopBadge();}));
 }
-function openShop(){renderShop();document.getElementById('shop').classList.add('open');document.body.style.overflow='hidden';}
-function closeShop(){document.getElementById('shop').classList.remove('open');document.body.style.overflow='';}
+function openShop(){renderShop();document.getElementById('shop').classList.add('open');lockScroll();}
+function closeShop(){document.getElementById('shop').classList.remove('open');unlockScroll();}
 document.getElementById('shopFab').addEventListener('click',openShop);
 document.getElementById('shopClose').addEventListener('click',closeShop);
 document.getElementById('shopDone').addEventListener('click',closeShop);
@@ -1501,9 +1510,9 @@ function openMenu(){
   document.getElementById('menuResult').innerHTML='';
   document.getElementById('menuRegen').style.display='none';
   document.getElementById('menuGen').textContent='Générer mon menu';
-  document.getElementById('menu').classList.add('open'); document.body.style.overflow='hidden';
+  document.getElementById('menu').classList.add('open'); lockScroll();
 }
-function closeMenu(){ document.getElementById('menu').classList.remove('open'); document.body.style.overflow=''; }
+function closeMenu(){ document.getElementById('menu').classList.remove('open'); unlockScroll(); }
 document.getElementById('menuClose').addEventListener('click',closeMenu);
 document.getElementById('menuRegen').addEventListener('click',generateMenu);
 document.getElementById('menuGen').addEventListener('click',()=>{ if(menuDone) addMenuToDay(); else generateMenu(); });
@@ -1709,8 +1718,8 @@ function updateFridgeCount(){
   const go=document.getElementById('frGo');
   go.textContent = fridgeSel.size ? `Voir les recettes (${n})` : "Voir les recettes";
 }
-function openFridge(){ buildFridgeGroups(); document.getElementById('fridge').classList.add('open'); document.body.style.overflow='hidden'; }
-function closeFridge(){ document.getElementById('fridge').classList.remove('open'); document.body.style.overflow=''; }
+function openFridge(){ buildFridgeGroups(); document.getElementById('fridge').classList.add('open'); lockScroll(); }
+function closeFridge(){ document.getElementById('fridge').classList.remove('open'); unlockScroll(); }
 function renderFridgeActive(){
   const el=document.getElementById('fridgeActive');
   if(fridgeMode && fridgeSel.size){
@@ -1861,9 +1870,9 @@ function openMenuWeek(){
   document.getElementById('menuWeekAdd').style.display=WEEK_MENU?'':'none';
   if(WEEK_MENU){ const p=loadProfile(); if(p) renderWeekResult(p); }
   document.getElementById('menuWeek').classList.add('open');
-  document.body.style.overflow='hidden';
+  lockScroll();
 }
-function closeMenuWeek(){ document.getElementById('menuWeek').classList.remove('open'); document.body.style.overflow=''; }
+function closeMenuWeek(){ document.getElementById('menuWeek').classList.remove('open'); unlockScroll(); }
 
 function renderWeekPickers(){
   const d=document.getElementById('weekDays');
@@ -2157,8 +2166,8 @@ function buildFamFridgeGroups(){
     b.setAttribute('aria-pressed', famFridgeSel.has(l));
   }));
 }
-function openFamFridge(){ buildFamFridgeGroups(); document.getElementById('famFridge').classList.add('open'); document.body.style.overflow='hidden'; }
-function closeFamFridge(){ document.getElementById('famFridge').classList.remove('open'); document.body.style.overflow=''; }
+function openFamFridge(){ buildFamFridgeGroups(); document.getElementById('famFridge').classList.add('open'); lockScroll(); }
+function closeFamFridge(){ document.getElementById('famFridge').classList.remove('open'); unlockScroll(); }
 document.getElementById('famFrSkip').addEventListener('click',closeFamFridge);
 document.getElementById('famFrClear').addEventListener('click',()=>{ famFridgeSel.clear(); buildFamFridgeGroups(); });
 document.getElementById('famFrGo').addEventListener('click',()=>{ closeFamFridge(); renderFamillePickers(); });
@@ -2395,7 +2404,7 @@ function openFamilleSheet(r, totalKcal, regimeTarget, regimePortion){
       <ol class="steps">${steps}</ol>
     </div>`;
   document.getElementById('famSheetClose').addEventListener('click',closeSheet);
-  overlay.classList.add('open'); document.body.style.overflow='hidden'; sheet.scrollTop=0;
+  overlay.classList.add('open'); lockScroll(); sheet.scrollTop=0;
 }
 
 function addFamilleToShop(){
@@ -2414,9 +2423,9 @@ function openFamille(){
   document.getElementById('familleGen').textContent='Générer les repas';
   document.getElementById('familleAdd').style.display='none';
   FAMILLE_MENU=null;
-  document.getElementById('famille').classList.add('open'); document.body.style.overflow='hidden';
+  document.getElementById('famille').classList.add('open'); lockScroll();
 }
-function closeFamille(){ document.getElementById('famille').classList.remove('open'); document.body.style.overflow=''; }
+function closeFamille(){ document.getElementById('famille').classList.remove('open'); unlockScroll(); }
 document.getElementById('familleClose').addEventListener('click',closeFamille);
 document.getElementById('familleGen').addEventListener('click',generateFamille);
 document.getElementById('familleAdd').addEventListener('click',addFamilleToShop);
@@ -3036,10 +3045,10 @@ function openCoach(){
   document.getElementById('coachGen').textContent=COACH_PROG?'Regénérer':'Générer mon programme';
   document.getElementById('coachDel').style.display=COACH_PROG?'':'none';
   document.getElementById('coach').classList.add('open');
-  document.body.style.overflow='hidden';
+  lockScroll();
   if(COACH_PROG) renderCoachResult();
 }
-function closeCoach(){ document.getElementById('coach').classList.remove('open'); document.body.style.overflow=''; }
+function closeCoach(){ document.getElementById('coach').classList.remove('open'); unlockScroll(); }
 
 function chips(list,actif,onclick){
   return list.map(o=>{
