@@ -1784,6 +1784,9 @@ async function chargerRecettes(){
   const sr=document.getElementById('stat-recettes'); if(sr) sr.textContent = RECETTES.length;
   const sc=document.getElementById('stat-cats'); if(sc) sc.textContent = MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m))).length;
   buildPrimary(); buildBaseChips(); buildFecChips(); update();
+  /* les recettes viennent d'arriver : si la page calories s'est affichée avant
+     (noms "Recette" faute de mieux), on la redessine avec les vrais noms. */
+  try{ if(typeof renderTracker==='function') renderTracker(); }catch(e){}
 }
 
 /* ---------- Compteur de visites ---------- */
