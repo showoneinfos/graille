@@ -1002,6 +1002,15 @@ const PROT_KW=["poulet","dinde","boeuf","porc","saumon","thon","cabillaud","coli
 const CARB_KW=Object.values(FEC_KW).flat();
 function isProtIng(n){return PROT_KW.some(k=>frWm(n,k));}
 function isCarbIng(n){return CARB_KW.some(k=>frWm(n,k));}
+/* Un repas proposé (menu du jour, semaine ou famille) doit contenir une source de
+   protéines dès que le lot de recettes candidates en propose au moins une —
+   on ne renvoie le lot complet, sans filtrage, que s'il n'y a vraiment aucune
+   recette avec protéine disponible pour ce moment (cas rare, mieux vaut proposer
+   quelque chose que rien). */
+function preferProtPool(pool){
+  const prot=pool.filter(r=>recipeHasStarch(r,PROT_KW));
+  return prot.length ? prot : pool;
+}
 function recipeHasMacroToggle(r){
   return (r.proteines>=8 && r.glucides>=15);
 }
@@ -1449,6 +1458,7 @@ function generateMenu(){
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
     if(!pool.length) return;
+    pool=preferProtPool(pool);
     const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
     MENU.push({moment:m, recipe:r, kcal:alloc});
   });
@@ -1476,7 +1486,7 @@ function renderMenuResult(p){
     const usedIds=new Set(MENU.map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
-    if(pool.length){ MENU[i]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; renderMenuResult(loadProfile()); }
+    if(pool.length){ pool=preferProtPool(pool); MENU[i]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; renderMenuResult(loadProfile()); }
   }));
 }
 function addMenuToDay(){
@@ -1910,6 +1920,7 @@ function generateMenuWeek(){
       let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !used.has(r.id));
       if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m));
       if(!pool.length) return;
+      pool=preferProtPool(pool);
       let manque=0;
       if(weekFrigo && fridgeSel.size){
         /* on cherche d'abord ce qu'on peut faire sans rien acheter,
@@ -1980,7 +1991,7 @@ function renderWeekResult(p){
     const usedIds=new Set(WEEK_MENU[di].repas.filter(x=>x.recipe).map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
-    if(pool.length){ WEEK_MENU[di].repas[ri]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; saveWeek(); renderWeekResult(loadProfile()); renderTracker(); }
+    if(pool.length){ pool=preferProtPool(pool); WEEK_MENU[di].repas[ri]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; saveWeek(); renderWeekResult(loadProfile()); renderTracker(); }
   }));
   res.querySelectorAll('.fam-gen-btn').forEach(b=>b.addEventListener('click',()=>{
     const di=+b.dataset.d, ri=+b.dataset.r;
@@ -2064,6 +2075,7 @@ const LEGUME_KW = (FR_GROUPS.find(([g])=>g==="Légumes")||[null,[]])[1].flatMap(
    Si aucune recette ne coche les deux cases, on relâche progressivement la contrainte
    plutôt que de renvoyer une liste vide. */
 function famPoolPreferer(pool){
+  pool=preferProtPool(pool); // une recette famille doit avant tout contenir une protéine
   const avecLesDeux=pool.filter(r=>recipeHasStarch(r,CARB_KW) && recipeHasStarch(r,LEGUME_KW));
   if(avecLesDeux.length) return avecLesDeux;
   const avecFeculent=pool.filter(r=>recipeHasStarch(r,CARB_KW));
