@@ -1533,34 +1533,49 @@ document.getElementById('menuGen').addEventListener('click',()=>{ if(menuDone) a
 })();
 function consumed(){return JOURNAL.items.reduce((s,i)=>s+i.kcal,0);}
 function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal(JOURNAL);renderTracker();}
-function resetJournal(){JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);renderTracker();}
-function removeFromJournal(i){JOURNAL.items.splice(i,1);saveJournal(JOURNAL);renderTracker();}
+function resetJournal(){
+  JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);
+  try{ localStorage.removeItem('graille_week_removed_'+today()); }catch(e){}
+  renderTracker();
+}
+function removeFromJournal(i){
+  const it=JOURNAL.items[i];
+  if(it && it.src==='week' && it.moment) markWeekMomentRemoved(it.moment);
+  JOURNAL.items.splice(i,1);saveJournal(JOURNAL);renderTracker();
+}
 
 /* ---------- Semaine -> journal du jour ----------
    Dès que le jour de la semaine en cours a un menu prévu (via "Mes menus de la
    semaine"), on le fait apparaître automatiquement dans "Mes recettes du jour",
-   comme si on l'avait ajouté à la main. On ne le refait qu'une fois par jour
-   (drapeau graille_week_synced_AAAA-MM-JJ) pour ne pas ré-ajouter un repas que
-   la personne a volontairement retiré de son journal en cours de journée.
-   saveWeek() efface ce drapeau à chaque modification de la semaine, pour que
-   le journal reprenne la nouvelle version au prochain affichage. */
+   comme si on l'avait ajouté à la main. Cette synchro se refait à CHAQUE affichage
+   (jamais figée) pour toujours montrer les données à jour (nom, portion...) —
+   seul le fait qu'un repas ait été retiré à la main est mémorisé (par repas du
+   jour, pas par jour entier), pour ne pas le faire réapparaître tout seul. */
 const FR_DAY_NAMES=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 function todayFrDayName(){ return FR_DAY_NAMES[new Date().getDay()]; }
+function removedWeekMoments(){
+  try{ return new Set(JSON.parse(localStorage.getItem('graille_week_removed_'+today())||'[]')); }catch(e){ return new Set(); }
+}
+function markWeekMomentRemoved(moment){
+  try{
+    const s=removedWeekMoments(); s.add(moment);
+    localStorage.setItem('graille_week_removed_'+today(), JSON.stringify([...s]));
+  }catch(e){}
+}
 function syncWeekToJournalToday(){
   try{
-    const flagKey='graille_week_synced_'+today();
-    if(localStorage.getItem(flagKey)) return;
-    localStorage.setItem(flagKey,'1');
-    const w=JSON.parse(localStorage.getItem('graille_week'));
-    if(!w || !w.menu) return;
-    const day=w.menu.find(d=>d.jour===todayFrDayName());
-    if(!day) return;
     JOURNAL.items=JOURNAL.items.filter(it=>it.src!=='week');
+    const w=JSON.parse(localStorage.getItem('graille_week'));
+    if(!w || !w.menu){ saveJournal(JOURNAL); return; }
+    const day=w.menu.find(d=>d.jour===todayFrDayName());
+    if(!day){ saveJournal(JOURNAL); return; }
+    const removed=removedWeekMoments();
     day.repas.forEach(it=>{
+      if(removed.has(it.moment)) return;
       let nom, melange=false;
       if(it.id==null) nom='🍽 Repas familial';
       else{ const r=RECETTES.find(x=>x.id===it.id); nom=(it.isFam?'👪 ':'')+(r?nomL(r):'Recette'); melange=!!(r&&r.plat_melange); }
-      JOURNAL.items.push({id:it.id, nom, kcal:it.kcal, src:'week',
+      JOURNAL.items.push({id:it.id, nom, kcal:it.kcal, src:'week', moment:it.moment,
         famPortion: it.isFam ? (it.famPortion||null) : null, famTotal: it.isFam ? (it.famTotal||null) : null, melange});
     });
     saveJournal(JOURNAL);
@@ -1804,7 +1819,7 @@ let WEEK_MENU=null;
 
 function saveWeek(){
   try{
-    try{ localStorage.removeItem('graille_week_synced_'+today()); }catch(e2){}
+    try{ localStorage.removeItem('graille_week_removed_'+today()); }catch(e2){}
     if(!WEEK_MENU){ localStorage.removeItem('graille_week'); return; }
     localStorage.setItem('graille_week', JSON.stringify({
       jours:[...weekDays], moments:[...weekMoments], frigo:weekFrigo, famOn:weekFamOn, famMoments:[...weekFamMoments],
@@ -2018,7 +2033,7 @@ function renderWeekResult(p){
 
 function clearWeek(){
   WEEK_MENU=null;
-  try{ localStorage.removeItem('graille_week'); localStorage.removeItem('graille_week_synced_'+today()); }catch(e){}
+  try{ localStorage.removeItem('graille_week'); localStorage.removeItem('graille_week_removed_'+today()); }catch(e){}
   JOURNAL.items=JOURNAL.items.filter(it=>it.src!=='week'); saveJournal(JOURNAL);
   document.getElementById('menuWeekResult').innerHTML='';
   document.getElementById('menuWeekGen').textContent='Générer ma semaine';
