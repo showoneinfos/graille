@@ -262,6 +262,7 @@
   .trk-item .k{color:#FF7A45;font-weight:700;font-size:12.5px;white-space:nowrap}
   .trk-item .trk-rm{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .trk-item .trk-rm:hover{border-color:var(--gold);color:var(--gold)}
+  .trk-fam-part{font-size:11.5px;font-weight:700;color:var(--gold);margin:-4px 0 8px 2px}
   .trk-reset{display:inline-block;margin-top:14px;background:none;border:1px solid var(--line);border-radius:999px;padding:8px 16px;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
   .trk-reset:hover{border-color:var(--rust);color:var(--rust)}
   .trk-empty{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13.5px;color:var(--ink2)}
@@ -1556,10 +1557,11 @@ function syncWeekToJournalToday(){
     if(!day) return;
     JOURNAL.items=JOURNAL.items.filter(it=>it.src!=='week');
     day.repas.forEach(it=>{
-      let nom;
+      let nom, melange=false;
       if(it.id==null) nom='🍽 Repas familial';
-      else{ const r=RECETTES.find(x=>x.id===it.id); nom=(it.isFam?'👪 ':'')+(r?nomL(r):'Recette'); }
-      JOURNAL.items.push({id:it.id, nom, kcal:it.kcal, src:'week'});
+      else{ const r=RECETTES.find(x=>x.id===it.id); nom=(it.isFam?'👪 ':'')+(r?nomL(r):'Recette'); melange=!!(r&&r.plat_melange); }
+      JOURNAL.items.push({id:it.id, nom, kcal:it.kcal, src:'week',
+        famPortion: it.isFam ? (it.famPortion||null) : null, famTotal: it.isFam ? (it.famTotal||null) : null, melange});
     });
     saveJournal(JOURNAL);
   }catch(e){}
@@ -1581,7 +1583,8 @@ function renderTracker(){
   const over=reste<0;
   const n=JOURNAL.items.length;
   const liste = n ? `<div class="trk-list-title">Mes recettes du jour</div>`+
-    `<div class="trk-list">`+JOURNAL.items.map((it,i)=>`<div class="trk-item"><button class="nm" data-id="${it.id}" data-k="${it.kcal}">${it.nom}</button><span class="k">${it.kcal} kcal</span><button class="trk-rm" data-i="${i}" aria-label="Retirer">×</button></div>`).join('')+`</div>`+
+    `<div class="trk-list">`+JOURNAL.items.map((it,i)=>`<div class="trk-item"><button class="nm" data-i="${i}">${it.nom}</button><span class="k">${it.kcal} kcal</span><button class="trk-rm" data-i="${i}" aria-label="Retirer">×</button></div>`
+    +(it.famPortion?`<p class="trk-fam-part">🎯 Ta part · ~${it.melange?it.famPortion.total+'g au total':it.famPortion.feculent+'g féculent + ~'+it.famPortion.autre+'g accompagnement'}</p>`:'')).join('')+`</div>`+
     `<button class="trk-reset" id="trkReset">Vider mes recettes du jour</button>` : '';
   el.innerHTML=`<div class="trk">
     <div class="trk-top">
@@ -1615,8 +1618,12 @@ function renderTracker(){
   const rb=document.getElementById('trkReset'); if(rb) rb.addEventListener('click',resetJournal);
   el.querySelectorAll('.trk-rm').forEach(b=>b.addEventListener('click',()=>removeFromJournal(+b.dataset.i)));
   el.querySelectorAll('.trk-item .nm').forEach(b=>b.addEventListener('click',()=>{
-    const r=RECETTES.find(x=>x.id===b.dataset.id);
-    if(r) openSheet(r, +b.dataset.k);
+    const it=JOURNAL.items[+b.dataset.i];
+    if(!it || it.id==null) return;
+    const r=RECETTES.find(x=>x.id===it.id);
+    if(!r) return;
+    if(it.famPortion) openFamilleSheet(r, it.famTotal, it.kcal, it.famPortion);
+    else openSheet(r, it.kcal);
   }));
 }
 
