@@ -1031,12 +1031,19 @@ function macroState(){
 let __scrollLockCount=0;
 function lockScroll(){ __scrollLockCount++; document.body.style.overflow='hidden'; }
 function unlockScroll(){ __scrollLockCount=Math.max(0,__scrollLockCount-1); if(__scrollLockCount===0) document.body.style.overflow=''; }
-/* Sur ordinateur, la fiche recette est une carte centrée avec du fond assombri
-   tout autour. Si la souris n'est pas pile au-dessus du texte de la fiche mais
-   sur ce fond (très facile avec une souris, moins précis qu'au doigt), la
-   molette ne faisait rien : on relaie alors le défilement vers la fiche. */
+/* La fiche recette est une carte centrée avec du fond assombri tout autour :
+   avec certaines souris, le défilement natif au-dessus de la fiche était
+   très peu sensible (un cran de molette ne faisait bouger le texte que de
+   quelques pixels), et ne marchait pas du tout au-dessus du fond assombri.
+   On prend donc systématiquement la main sur le défilement dans toute la
+   fenêtre (fond ET fiche) avec un pas confortable, quelle que soit la souris. */
 overlay.addEventListener('wheel', function(e){
-  if(e.target===overlay){ sheet.scrollTop += e.deltaY; e.preventDefault(); }
+  if(!overlay.classList.contains('open')) return;
+  let dy=e.deltaY;
+  if(e.deltaMode===1) dy*=18;               // molette "à crans" (unité ligne) -> pixels
+  else if(e.deltaMode===2) dy*=sheet.clientHeight; // molette "page"
+  sheet.scrollTop += dy;
+  e.preventDefault();
 }, {passive:false});
 function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');lockScroll();sheet.scrollTop=0;}
 function closeSheet(){overlay.classList.remove('open');unlockScroll();}
