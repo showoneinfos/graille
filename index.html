@@ -668,7 +668,8 @@
     <div class="menu-moments" id="weekDays"></div>
     <div class="week-lbl">Repas de la journée</div>
     <div class="menu-moments" id="weekMoments"></div>
-    <div class="week-lbl" id="weekDinnerLbl" style="display:none">Repas en famille (pas de recette individuelle)</div>
+    <div class="week-lbl" id="weekDinnerLbl" style="display:none">Repas en famille</div>
+    <div class="menu-moments" id="weekFamOn" style="display:none"></div>
     <div class="menu-moments" id="weekDinnerMode" style="display:none"></div>
     <div class="week-lbl">Avec quoi</div>
     <div class="menu-moments" id="weekSource"></div>
@@ -1749,6 +1750,7 @@ const WEEK_DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanch
 let weekDays=new Set(["Lundi","Mardi","Mercredi","Jeudi","Vendredi"]);
 let weekMoments=new Set(["Petit-déj","Déjeuner","Dîner"]);
 let weekFrigo=false;
+let weekFamOn=false;
 let weekFamMoments=new Set();
 let WEEK_MENU=null;
 
@@ -1756,7 +1758,7 @@ function saveWeek(){
   try{
     if(!WEEK_MENU){ localStorage.removeItem('graille_week'); return; }
     localStorage.setItem('graille_week', JSON.stringify({
-      jours:[...weekDays], moments:[...weekMoments], frigo:weekFrigo, famMoments:[...weekFamMoments],
+      jours:[...weekDays], moments:[...weekMoments], frigo:weekFrigo, famOn:weekFamOn, famMoments:[...weekFamMoments],
       menu:WEEK_MENU.map(d=>({jour:d.jour, repas:d.repas.map(it=>({
         moment:it.moment, id:it.recipe?it.recipe.id:null, isFam:!!it.isFam,
         famHead:it.famHead||null, famTotal:it.famTotal||null, famPortion:it.famPortion||null, kcal:it.kcal
@@ -1771,6 +1773,7 @@ function loadWeek(){
     if(w.moments&&w.moments.length) weekMoments=new Set(w.moments);
     weekFrigo=!!w.frigo;
     weekFamMoments=new Set(w.famMoments||[]);
+    weekFamOn = w.famOn!=null ? !!w.famOn : weekFamMoments.size>0;
     const menu=(w.menu||[]).map(d=>({jour:d.jour, repas:(d.repas||[]).map(it=>{
       if(it.isFam){
         if(it.id==null) return {moment:it.moment, recipe:null, kcal:it.kcal, isFam:true};
@@ -1824,17 +1827,32 @@ function renderWeekPickers(){
   }));
 
   const dlbl=document.getElementById('weekDinnerLbl');
+  const famOnBox=document.getElementById('weekFamOn');
   const dm=document.getElementById('weekDinnerMode');
   const selMoments=MENU_MOMENTS.filter(x=>x!=='Petit-déj' && weekMoments.has(x));
   if(selMoments.length){
-    dlbl.style.display=''; dm.style.display='';
-    dm.innerHTML=selMoments.map(x=>`<button class="menu-chip" data-fm="${x}" aria-pressed="${weekFamMoments.has(x)}">${x}</button>`).join('');
-    dm.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
-      const x=b.dataset.fm; if(weekFamMoments.has(x)) weekFamMoments.delete(x); else weekFamMoments.add(x);
+    dlbl.style.display=''; famOnBox.style.display='';
+    famOnBox.innerHTML=`<button class="menu-chip" data-fo="0" aria-pressed="${!weekFamOn}">Non</button>
+                         <button class="menu-chip" data-fo="1" aria-pressed="${weekFamOn}">Oui</button>`;
+    famOnBox.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+      weekFamOn=b.dataset.fo==='1';
+      if(!weekFamOn) weekFamMoments.clear();
       renderWeekPickers();
     }));
+    if(weekFamOn){
+      dm.style.display='';
+      dm.innerHTML=`<div class="menu-hint" style="padding:0 0 8px;font-style:normal;font-size:12.5px">Pour quel(s) repas ?</div>`
+        +selMoments.map(x=>`<button class="menu-chip" data-fm="${x}" aria-pressed="${weekFamMoments.has(x)}">${x}</button>`).join('');
+      dm.querySelectorAll('.menu-chip').forEach(b=>b.addEventListener('click',()=>{
+        const x=b.dataset.fm; if(weekFamMoments.has(x)) weekFamMoments.delete(x); else weekFamMoments.add(x);
+        renderWeekPickers();
+      }));
+    } else {
+      dm.style.display='none'; dm.innerHTML='';
+    }
   } else {
-    dlbl.style.display='none'; dm.style.display='none'; dm.innerHTML='';
+    dlbl.style.display='none'; famOnBox.style.display='none'; famOnBox.innerHTML='';
+    dm.style.display='none'; dm.innerHTML='';
   }
 }
 
