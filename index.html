@@ -442,15 +442,19 @@
   .air-cta[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   .langsel{position:relative;flex:0 0 auto}
   .lang-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:800;
-    letter-spacing:1px;text-transform:uppercase;color:var(--ink2);background:none;border:1.5px solid var(--line);
-    border-radius:999px;padding:8px 13px;cursor:pointer;transition:border-color .15s,color .15s}
+    letter-spacing:1px;text-transform:uppercase;color:var(--ink);background:var(--card);border:1.5px solid var(--gold);
+    border-radius:999px;padding:8px 13px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
   .lang-btn svg{width:14px;height:14px;flex:0 0 auto}
+  .lang-btn .lang-flag{font-size:14px;line-height:1}
+  .lang-btn .lang-chevron{width:9px;height:9px;flex:0 0 auto;transition:transform .15s}
+  .langsel.open .lang-btn .lang-chevron{transform:rotate(180deg)}
   .lang-btn:hover,.langsel.open .lang-btn{border-color:var(--ink);color:var(--ink)}
-  .lang-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:70;min-width:172px;
+  .lang-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:70;min-width:190px;
     background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:6px;
     box-shadow:0 16px 40px rgba(14,16,19,.16)}
   .lang-menu button{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;font-family:inherit;
     background:none;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;color:var(--ink)}
+  .lang-menu button .lang-flag{font-size:16px;line-height:1;align-self:center}
   .lang-menu button b{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--ink2);min-width:20px}
   .lang-menu button span{font-size:14.5px;font-weight:600}
   .lang-menu button:hover{background:var(--paper)}
@@ -3263,7 +3267,7 @@ function trSerie(t){
     .replace(/\/ côté/g,'/ '+tr('côté'))
     .replace(/\bmax\b/g,tr('max'));
 }
-const LANGS=[{c:'fr',n:'FR',long:'Français'},{c:'en',n:'EN',long:'English'},{c:'es',n:'ES',long:'Español'},{c:'pt',n:'PT',long:'Português'},{c:'de',n:'DE',long:'Deutsch'}];
+const LANGS=[{c:'fr',n:'FR',long:'Français',f:'🇫🇷'},{c:'en',n:'EN',long:'English',f:'🇬🇧'},{c:'es',n:'ES',long:'Español',f:'🇪🇸'},{c:'pt',n:'PT',long:'Português',f:'🇵🇹'},{c:'de',n:'DE',long:'Deutsch',f:'🇩🇪'}];
 let LANG='fr', DICT=null;
 
 function detectLang(){
@@ -3378,8 +3382,22 @@ function majSelecteurLangue(){
   const el=document.getElementById('langSel'); if(!el) return;
   const act=LANGS.find(l=>l.c===LANG)||LANGS[0];
   const b=el.querySelector('.lang-btn');
-  if(b) b.querySelector('.lang-cur').textContent=act.n;
+  if(b){ b.querySelector('.lang-flag').textContent=act.f; b.querySelector('.lang-cur').textContent=act.n; }
   el.querySelectorAll('.lang-menu button').forEach(x=>x.setAttribute('aria-selected', x.dataset.l===LANG));
+}
+
+/* Positionne un élément flottant (menu ou bulle d'aide) juste sous un bouton,
+   en le gardant toujours entièrement visible même sur petit écran. */
+function placerSousBouton(flottant,btn){
+  const br=btn.getBoundingClientRect();
+  const fw=flottant.offsetWidth||220;
+  let left=br.right-fw;
+  if(left<8) left=8;
+  if(left+fw>window.innerWidth-8) left=Math.max(8,window.innerWidth-8-fw);
+  flottant.style.position='fixed';
+  flottant.style.left=left+'px';
+  flottant.style.right='auto';
+  flottant.style.top=(br.bottom+8)+'px';
 }
 
 function initLangue(){
@@ -3387,12 +3405,13 @@ function initLangue(){
   if(el){
     const act=LANGS.find(l=>l.c===LANG)||LANGS[0];
     el.innerHTML=`
-      <button class="lang-btn" aria-haspopup="true" aria-expanded="false" aria-label="Choisir la langue">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
+      <button class="lang-btn" aria-haspopup="true" aria-expanded="false" aria-label="Choisir la langue — ${LANGS.length} langues disponibles">
+        <span class="lang-flag">${act.f}</span>
         <span class="lang-cur">${act.n}</span>
+        <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="lang-menu" role="listbox" hidden>
-        ${LANGS.map(l=>`<button data-l="${l.c}" role="option" aria-selected="${l.c===LANG}"><b>${l.n}</b><span>${l.long}</span></button>`).join('')}
+        ${LANGS.map(l=>`<button data-l="${l.c}" role="option" aria-selected="${l.c===LANG}"><span class="lang-flag">${l.f}</span><b>${l.n}</b><span>${l.long}</span></button>`).join('')}
       </div>`;
     const btn=el.querySelector('.lang-btn'), menu=el.querySelector('.lang-menu');
     /* Sur petit écran, le bouton de langue peut se retrouver collé à gauche de
@@ -3402,17 +3421,7 @@ function initLangue(){
        reste toujours entièrement visible, quelle que soit la taille d'écran. */
     const ouvrir=(o)=>{
       menu.hidden=!o; btn.setAttribute('aria-expanded',o); el.classList.toggle('open',o);
-      if(o){
-        const br=btn.getBoundingClientRect();
-        const mw=menu.offsetWidth||172;
-        let left=br.right-mw;
-        if(left<8) left=8;
-        if(left+mw>window.innerWidth-8) left=Math.max(8,window.innerWidth-8-mw);
-        menu.style.position='fixed';
-        menu.style.left=left+'px';
-        menu.style.right='auto';
-        menu.style.top=(br.bottom+8)+'px';
-      }
+      if(o) placerSousBouton(menu,btn);
     };
     btn.addEventListener('click',e=>{ e.stopPropagation(); ouvrir(menu.hidden); });
     menu.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ ouvrir(false); changerLangue(b.dataset.l); }));
