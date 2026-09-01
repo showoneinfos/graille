@@ -441,6 +441,8 @@
   .air-cta:hover{border-color:var(--ink);color:var(--ink)}
   .air-cta[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   .langsel{position:relative;flex:0 0 auto}
+  .langsel.ob-langsel{position:absolute;top:20px;left:16px}
+  @media(max-width:600px){.langsel.ob-langsel{top:16px;left:14px}}
   .lang-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:800;
     letter-spacing:1px;text-transform:uppercase;color:var(--ink);background:var(--card);border:1.5px solid var(--gold);
     border-radius:999px;padding:8px 13px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
@@ -524,6 +526,7 @@
 
 <div class="onboard" id="onboard">
   <div class="onboard-inner">
+    <div class="langsel ob-langsel" id="langSelOnboard" data-noTr></div>
     <button class="ob-skip" id="obSkip">Voir les recettes →</button>
     <div id="obForm">
       <div class="ob-eyebrow">Bilan express</div>
@@ -3379,11 +3382,12 @@ function rafraichirRecettes(){
 }
 
 function majSelecteurLangue(){
-  const el=document.getElementById('langSel'); if(!el) return;
   const act=LANGS.find(l=>l.c===LANG)||LANGS[0];
-  const b=el.querySelector('.lang-btn');
-  if(b){ b.querySelector('.lang-flag').textContent=act.f; b.querySelector('.lang-cur').textContent=act.n; }
-  el.querySelectorAll('.lang-menu button').forEach(x=>x.setAttribute('aria-selected', x.dataset.l===LANG));
+  document.querySelectorAll('.langsel').forEach(el=>{
+    const b=el.querySelector('.lang-btn');
+    if(b){ b.querySelector('.lang-flag').textContent=act.f; b.querySelector('.lang-cur').textContent=act.n; }
+    el.querySelectorAll('.lang-menu button').forEach(x=>x.setAttribute('aria-selected', x.dataset.l===LANG));
+  });
 }
 
 /* Positionne un élément flottant (menu ou bulle d'aide) juste sous un bouton,
@@ -3400,34 +3404,44 @@ function placerSousBouton(flottant,btn){
   flottant.style.top=(br.bottom+8)+'px';
 }
 
+/* Construit un sélecteur de langue dans un conteneur donné. Il peut y en avoir
+   plusieurs sur la page (l'en-tête, mais aussi l'écran "Calcule tes besoins"
+   qui recouvre tout l'écran et cachait donc celui de l'en-tête). */
+function construireSelecteurLangue(el){
+  const act=LANGS.find(l=>l.c===LANG)||LANGS[0];
+  el.innerHTML=`
+    <button class="lang-btn" aria-haspopup="true" aria-expanded="false" aria-label="Choisir la langue — ${LANGS.length} langues disponibles">
+      <span class="lang-flag">${act.f}</span>
+      <span class="lang-cur">${act.n}</span>
+      <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="lang-menu" role="listbox" hidden>
+      ${LANGS.map(l=>`<button data-l="${l.c}" role="option" aria-selected="${l.c===LANG}"><span class="lang-flag">${l.f}</span><b>${l.n}</b><span>${l.long}</span></button>`).join('')}
+    </div>`;
+  const btn=el.querySelector('.lang-btn'), menu=el.querySelector('.lang-menu');
+  /* Sur petit écran, le bouton de langue peut se retrouver collé à gauche de
+     l'en-tête (qui s'empile sur mobile) : le menu, aligné par défaut sur son
+     bord droit, débordait alors hors de l'écran et on n'en voyait qu'une
+     fine tranche. On calcule sa position réelle à l'ouverture pour qu'il
+     reste toujours entièrement visible, quelle que soit la taille d'écran. */
+  const ouvrir=(o)=>{
+    menu.hidden=!o; btn.setAttribute('aria-expanded',o); el.classList.toggle('open',o);
+    if(o) placerSousBouton(menu,btn);
+  };
+  btn.addEventListener('click',e=>{ e.stopPropagation(); ouvrir(menu.hidden); });
+  menu.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ ouvrir(false); changerLangue(b.dataset.l); }));
+  el.__fermerLangue=()=>ouvrir(false);
+}
+
 function initLangue(){
-  const el=document.getElementById('langSel');
-  if(el){
-    const act=LANGS.find(l=>l.c===LANG)||LANGS[0];
-    el.innerHTML=`
-      <button class="lang-btn" aria-haspopup="true" aria-expanded="false" aria-label="Choisir la langue — ${LANGS.length} langues disponibles">
-        <span class="lang-flag">${act.f}</span>
-        <span class="lang-cur">${act.n}</span>
-        <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="lang-menu" role="listbox" hidden>
-        ${LANGS.map(l=>`<button data-l="${l.c}" role="option" aria-selected="${l.c===LANG}"><span class="lang-flag">${l.f}</span><b>${l.n}</b><span>${l.long}</span></button>`).join('')}
-      </div>`;
-    const btn=el.querySelector('.lang-btn'), menu=el.querySelector('.lang-menu');
-    /* Sur petit écran, le bouton de langue peut se retrouver collé à gauche de
-       l'en-tête (qui s'empile sur mobile) : le menu, aligné par défaut sur son
-       bord droit, débordait alors hors de l'écran et on n'en voyait qu'une
-       fine tranche. On calcule sa position réelle à l'ouverture pour qu'il
-       reste toujours entièrement visible, quelle que soit la taille d'écran. */
-    const ouvrir=(o)=>{
-      menu.hidden=!o; btn.setAttribute('aria-expanded',o); el.classList.toggle('open',o);
-      if(o) placerSousBouton(menu,btn);
-    };
-    btn.addEventListener('click',e=>{ e.stopPropagation(); ouvrir(menu.hidden); });
-    menu.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ ouvrir(false); changerLangue(b.dataset.l); }));
-    document.addEventListener('click',e=>{ if(!el.contains(e.target)) ouvrir(false); });
-    document.addEventListener('keydown',e=>{ if(e.key==='Escape') ouvrir(false); });
-  }
+  document.querySelectorAll('.langsel').forEach(el=>construireSelecteurLangue(el));
+  document.addEventListener('click',e=>{
+    document.querySelectorAll('.langsel').forEach(el=>{ if(!el.contains(e.target)&&el.__fermerLangue) el.__fermerLangue(); });
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape') return;
+    document.querySelectorAll('.langsel').forEach(el=>{ if(el.__fermerLangue) el.__fermerLangue(); });
+  });
   surveillerTraduction();
   const d=detectLang();
   if(d!=='fr') changerLangue(d,true);
