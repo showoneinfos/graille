@@ -274,7 +274,8 @@
   .onboard{position:fixed;inset:0;z-index:60;background:var(--paper);overflow-y:auto;display:none}
   .onboard.open{display:block}
   .onboard-inner{max-width:520px;margin:0 auto;padding:44px 22px 60px;position:relative}
-  .ob-skip{position:absolute;top:20px;right:16px;background:none;border:none;color:var(--ink2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+  .ob-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+  .ob-skip{background:none;border:none;color:var(--ink2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
   .ob-skip:hover{color:var(--rust)}
   .ob-eyebrow{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--rust);margin-bottom:12px}
   .ob-title{font-family:'Archivo','DM Sans',sans-serif;font-weight:900;font-size:36px;line-height:1;letter-spacing:-.5px;color:var(--ink)}
@@ -441,8 +442,6 @@
   .air-cta:hover{border-color:var(--ink);color:var(--ink)}
   .air-cta[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--gold)}
   .langsel{position:relative;flex:0 0 auto}
-  .langsel.ob-langsel{position:absolute;top:20px;left:16px}
-  @media(max-width:600px){.langsel.ob-langsel{top:16px;left:14px}}
   .lang-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:800;
     letter-spacing:1px;text-transform:uppercase;color:var(--ink);background:var(--card);border:1.5px solid var(--gold);
     border-radius:999px;padding:8px 13px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
@@ -526,8 +525,10 @@
 
 <div class="onboard" id="onboard">
   <div class="onboard-inner">
-    <div class="langsel ob-langsel" id="langSelOnboard" data-noTr></div>
-    <button class="ob-skip" id="obSkip">Voir les recettes →</button>
+    <div class="ob-topbar">
+      <div class="langsel" id="langSelOnboard" data-noTr></div>
+      <button class="ob-skip" id="obSkip">Voir les recettes →</button>
+    </div>
     <div id="obForm">
       <div class="ob-eyebrow">Bilan express</div>
       <h1 class="ob-title">Calcule tes besoins</h1>
