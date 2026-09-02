@@ -86,9 +86,18 @@
   .frow .flabel{flex:0 0 74px;padding-left:18px;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2);font-weight:700;position:relative}
   .frow .flabel::before{content:"";position:absolute;left:9px;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--rust)}
   .frow .chips{flex:1;min-width:0;padding:5px 16px 5px 0}
-  .frow .chips.scrollable{padding-right:30px;
+  /* Un dégradé indique qu'il y a d'autres boutons cachés : à droite s'il en
+     reste à découvrir, à gauche si on a déjà défilé (pour montrer qu'on peut
+     aussi revenir en arrière). Les deux ensemble si on est au milieu. */
+  .frow .chips.fade-r{padding-right:30px;
     -webkit-mask-image:linear-gradient(to right, #000 calc(100% - 34px), transparent 100%);
     mask-image:linear-gradient(to right, #000 calc(100% - 34px), transparent 100%)}
+  .frow .chips.fade-l{
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 30px);
+    mask-image:linear-gradient(to right, transparent 0, #000 30px)}
+  .frow .chips.fade-l.fade-r{padding-right:30px;
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 30px, #000 calc(100% - 34px), transparent 100%);
+    mask-image:linear-gradient(to right, transparent 0, #000 30px, #000 calc(100% - 34px), transparent 100%)}
   @media(max-width:600px){ .frow .flabel{flex:0 0 60px;font-size:9px;letter-spacing:.8px} .frow{gap:6px} }
   .chips::-webkit-scrollbar{display:none}
   .chips.base{padding-bottom:12px}
@@ -997,10 +1006,14 @@ function update(){ updateFiltersCount(); render(currentList()); updateChipsFade(
 sortSel.addEventListener('change',update);
 function updateChipsFade(){
   document.querySelectorAll('.frow .chips').forEach(el=>{
-    el.classList.toggle('scrollable', el.scrollWidth > el.clientWidth + 2);
+    el.classList.toggle('fade-r', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+    el.classList.toggle('fade-l', el.scrollLeft > 2);
   });
 }
 window.addEventListener('resize', updateChipsFade);
+/* On recalcule aussi pendant le défilement (molette, doigt, glissé à la souris),
+   pas seulement au chargement, sinon le dégradé de gauche n'apparaît jamais. */
+document.querySelectorAll('.frow .chips').forEach(el=>el.addEventListener('scroll', updateChipsFade, {passive:true}));
 
 /* MODAL */
 const overlay=document.getElementById('overlay');
