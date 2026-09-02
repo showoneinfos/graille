@@ -1044,19 +1044,28 @@ function unlockScroll(){ __scrollLockCount=Math.max(0,__scrollLockCount-1); if(_
    de molette, sur la bonne zone (la page, ou la fenêtre ouverte survolée). */
 function scrollableAncestor(el){
   while(el && el.nodeType===1 && el!==document.documentElement){
-    if(el.classList && el.classList.contains('overlay')) return sheet; // fond de la fiche recette -> vise la fiche elle-même
+    if(el.classList && el.classList.contains('overlay')) return {el:sheet,axe:'y'}; // fond de la fiche recette -> vise la fiche elle-même
+    /* Les rangées de filtres (Moment/Catégorie/Protéine/Féculent) défilent
+       horizontalement, sans barre visible : sur ordinateur la molette ne les
+       faisait donc pas bouger (elle faisait défiler la page derrière), et une
+       catégorie comme "Pâtes & pains maison" restait invisible, cachée hors
+       champ. On détecte ces rangées et on convertit le défilement vertical
+       de la molette en défilement horizontal sur la rangée survolée. */
+    if(el.classList && el.classList.contains('chips') && el.scrollWidth>el.clientWidth+2) return {el,axe:'x'};
     const cs=getComputedStyle(el);
-    if((cs.overflowY==='auto'||cs.overflowY==='scroll') && el.scrollHeight>el.clientHeight) return el;
+    if((cs.overflowY==='auto'||cs.overflowY==='scroll') && el.scrollHeight>el.clientHeight) return {el,axe:'y'};
     el=el.parentElement;
   }
-  return null; // aucune fenêtre ouverte concernée : c'est la page elle-même
+  return null; // aucune fenêtre ni rangée concernée : c'est la page elle-même
 }
 window.addEventListener('wheel', function(e){
-  const target=scrollableAncestor(e.target);
+  const cible=scrollableAncestor(e.target);
   let dy=e.deltaY;
   if(e.deltaMode===1) dy*=18;                                    // molette "à crans" (unité ligne) -> pixels
-  else if(e.deltaMode===2) dy*=(target?target.clientHeight:window.innerHeight); // molette "page"
-  if(target) target.scrollTop+=dy; else window.scrollBy(0,dy);
+  else if(e.deltaMode===2) dy*=(cible?cible.el.clientHeight:window.innerHeight); // molette "page"
+  if(cible && cible.axe==='x') cible.el.scrollLeft+=dy;
+  else if(cible) cible.el.scrollTop+=dy;
+  else window.scrollBy(0,dy);
   e.preventDefault();
 }, {passive:false});
 function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');lockScroll();sheet.scrollTop=0;}
