@@ -877,7 +877,7 @@ function buildCatChips(){
   chipsCat.innerHTML=all.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
   chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>onPrimaryClick(el.dataset.cat)));
 }
-const CAT_TYPES=[["Saveurs du monde","Monde"],["Fast food","Fast food"],["Bowls","Bowls"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Sauces","Sauce"]];
+const CAT_TYPES=[["Saveurs du monde","Monde"],["Fast food","Fast food"],["Bowls","Bowls"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Sauces","Sauce"],["Pâtes & pains maison","Pâtes & pains maison"]];
 function typePresent(v){
   if(v==="@snack") return RECETTES.some(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
   return RECETTES.some(r=>r.categorie===v);
@@ -910,7 +910,7 @@ function poolFor(sel){
   if(sel==="Desserts") return RECETTES.filter(r=>r.categorie==="Dessert");
   if(sel==="Snacking") return RECETTES.filter(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
   if(sel==="Saveurs du monde") return RECETTES.filter(r=>r.categorie==="Monde");
-  if(["Fast food","Bowls","Express","Végé","Légumes","Monde"].includes(sel)) return RECETTES.filter(r=>r.categorie===sel);
+  if(["Fast food","Bowls","Express","Végé","Légumes","Monde","Pâtes & pains maison"].includes(sel)) return RECETTES.filter(r=>r.categorie===sel);
   return RECETTES.filter(r=>(r.moment||[]).includes(sel));
 }
 function basesFor(sel){
