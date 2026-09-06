@@ -767,6 +767,7 @@
     <button class="fridge-cta" id="openFridge"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Mon frigo</button>
     <button class="air-cta" id="btnAir" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8"/><path d="M9 13h6"/><circle cx="17" cy="17.5" r="1"/></svg>Airfryer</button>
     <button class="air-cta" id="btnBarres" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="6" rx="2"/><path d="M8 9v6"/><path d="M12 9v6"/><path d="M16 9v6"/></svg>Barres protéinées</button>
+    <button class="air-cta" id="btnRepas4e" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Repas 4€</button>
     <div class="sort-inline">
       <select id="sort">
         <option value="default">Trier</option>
@@ -850,6 +851,7 @@ const sortSel=document.getElementById('sort');
 let activeCat="Tous", activeBase="Toutes", activeFec="Tous";
 let airMode=false;
 let barMode=false;
+let repas4Mode=false;
 const FEC_ORDER=["Riz","Pâtes","Pommes de terre","Patate douce","Quinoa","Semoule","Boulgour","Nouilles","Avoine","Lentilles","Pois chiches","Pain"];
 const FEC_KW={"Riz":["riz"],"Pâtes":["pates","macaroni"],"Pommes de terre":["pomme de terre","pommes de terre"],"Patate douce":["patate douce","patate"],"Quinoa":["quinoa"],"Semoule":["semoule"],"Boulgour":["boulgour"],"Nouilles":["nouille"],"Avoine":["avoine"],"Lentilles":["lentille"],"Pois chiches":["pois chiche"],"Pain":["pain","bagel","panini"]};
 
@@ -864,8 +866,12 @@ function roundQty(v,unite){
   return Math.max(1,Math.round(v));           // cuillères, pincées, pièces... -> entier, min 1
 }
 function displayQty(v,unite){return fmtQty(roundQty(v,unite));}
+window.imgFallback = function(el, catKey){
+  const t = CAT_TINT[catKey] || ["#EAE1CE","#DBCEB4"];
+  el.outerHTML = `<div class="ph" style="background:linear-gradient(140deg,${t[0]},${t[1]})">${ICON_PLATE}<span>Photo à venir</span></div>`;
+};
 function thumbHTML(r){
-  if(r.image_url) return `<img src="${r.image_url}" alt="${nomL(r)}" loading="lazy">`;
+  if(r.image_url) return `<img src="${r.image_url}" alt="${nomL(r)}" loading="lazy" onerror="window.imgFallback(this,'${(r.categorie||'').replace(/'/g,"\\'")}')">`;
   const t=CAT_TINT[r.categorie]||["#EAE1CE","#DBCEB4"];
   return `<div class="ph" style="background:linear-gradient(140deg,${t[0]},${t[1]})">${ICON_PLATE}<span>Photo à venir</span></div>`;
 }
@@ -886,7 +892,7 @@ function buildCatChips(){
   chipsCat.innerHTML=all.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
   chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>onPrimaryClick(el.dataset.cat)));
 }
-const CAT_TYPES=[["Saveurs du monde","Monde"],["Fast food","Fast food"],["Bowls","Bowls"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Sauces","Sauce"],["Pâtes & pains maison","Pâtes & pains maison"],["Repas 4€","Repas 4€"]];
+const CAT_TYPES=[["Saveurs du monde","Monde"],["Fast food","Fast food"],["Bowls","Bowls"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Sauces","Sauce"],["Pâtes & pains maison","Pâtes & pains maison"]];
 function typePresent(v){
   if(v==="@snack") return RECETTES.some(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
   return RECETTES.some(r=>r.categorie===v);
@@ -919,7 +925,7 @@ function poolFor(sel){
   if(sel==="Desserts") return RECETTES.filter(r=>r.categorie==="Dessert");
   if(sel==="Snacking") return RECETTES.filter(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
   if(sel==="Saveurs du monde") return RECETTES.filter(r=>r.categorie==="Monde");
-  if(["Fast food","Bowls","Express","Végé","Légumes","Monde","Pâtes & pains maison","Repas 4€"].includes(sel)) return RECETTES.filter(r=>r.categorie===sel);
+  if(["Fast food","Bowls","Express","Végé","Légumes","Monde","Pâtes & pains maison"].includes(sel)) return RECETTES.filter(r=>r.categorie===sel);
   return RECETTES.filter(r=>(r.moment||[]).includes(sel));
 }
 function basesFor(sel){
@@ -943,6 +949,7 @@ function currentList(){
   let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase)&&(activeFec==="Tous"||recipeHasStarch(r,FEC_KW[activeFec])));
   if(airMode) list=list.filter(r=>String(r.mode_cuisson||'').toLowerCase().includes('airfryer'));
   if(barMode) list=list.filter(r=>r.categorie==='Barres protéinées');
+  if(repas4Mode) list=list.filter(r=>r.categorie==='Repas 4€');
   if(fridgeMode){
     list=list.filter(r=>recipeMissing(r).length<=fridgeTol);
     list.sort((a,b)=>(recipeMissing(a).length-recipeMissing(b).length) || (fridgeUsed(b)-fridgeUsed(a)));
@@ -957,7 +964,7 @@ function currentList(){
 function render(list){
   if(!list.length){
     grid.innerHTML=`<div class="empty">Aucune recette pour cette combinaison.<br><button id="reset">Réinitialiser les filtres</button></div>`;
-    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;airMode=false;barMode=false;{const b=document.getElementById('btnAir');if(b)b.setAttribute('aria-pressed','false');}{const b=document.getElementById('btnBarres');if(b)b.setAttribute('aria-pressed','false');}renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
+    document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;airMode=false;barMode=false;repas4Mode=false;{const b=document.getElementById('btnAir');if(b)b.setAttribute('aria-pressed','false');}{const b=document.getElementById('btnBarres');if(b)b.setAttribute('aria-pressed','false');}{const b=document.getElementById('btnRepas4e');if(b)b.setAttribute('aria-pressed','false');}renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
   } else {
     grid.innerHTML=list.map(r=>`
       <button class="card" data-i="${RECETTES.indexOf(r)}" aria-label="${tr('Voir les recettes')} ${nomL(r)}">
@@ -1085,7 +1092,7 @@ function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CA
 function closeSheet(){overlay.classList.remove('open');unlockScroll();}
 function factorFor(r){return activeTarget/r.calories;}
 function heroHTML(r){
-  if(r.image_url) return `<img src="${r.image_url}" alt="${nomL(r)}">`;
+  if(r.image_url) return `<img src="${r.image_url}" alt="${nomL(r)}" onerror="window.imgFallback(this,'${(r.categorie||'').replace(/'/g,"\\'")}')">`;
   const t=CAT_TINT[r.categorie]||["#EAE1CE","#DBCEB4"];
   return `<div class="ph" style="background:linear-gradient(140deg,${t[0]},${t[1]})">${ICON_PLATE}<span>Photo à venir</span></div>`;
 }
@@ -1803,6 +1810,16 @@ function renderFridgeActive(){
     barMode=!barMode;
     b.setAttribute('aria-pressed',barMode);
     if(typeof gtag==='function' && barMode) gtag('event','filtre_barres_proteinees');
+    update();
+  });
+})();
+(function(){
+  const b=document.getElementById('btnRepas4e');
+  if(!b) return;
+  b.addEventListener('click',()=>{
+    repas4Mode=!repas4Mode;
+    b.setAttribute('aria-pressed',repas4Mode);
+    if(typeof gtag==='function' && repas4Mode) gtag('event','filtre_repas_4e');
     update();
   });
 })();
