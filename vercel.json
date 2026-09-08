@@ -1,4 +1,7 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/:lang(en|es|pt|de)/recette/:slug", "destination": "/api/recette?lang=:lang&slug=:slug" }
+  ]
 }
