@@ -771,27 +771,27 @@
       <div class="tiles">
         <button class="tile" id="openCalc">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="3"/><path d="M8 7h8M8 12h2M8 16.5h2M14 12h2M14 16.5h2"/></svg></span>
-          <span>Calculateur<br>de calories</span>
+          <span>Calculateur de calories</span>
         </button>
         <button class="tile" id="tileMenuDay">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 3v7a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V3"/><path d="M6.5 3v18"/><path d="M19 14V3a4 4 0 0 0-3 3.8V11a2 2 0 0 0 2 2h1zm0 0v8"/></svg></span>
-          <span>Mon menu<br>du jour</span>
+          <span>Mon menu du jour</span>
         </button>
         <button class="tile" id="tileWeek">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M3 10h18M8 2.5v4M16 2.5v4"/></svg></span>
-          <span>Mes repas<br>de la semaine</span>
+          <span>Mes repas de la semaine</span>
         </button>
         <button class="tile" id="openFridge">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M5 10h14M8.5 6v2M8.5 13.5v2.5"/></svg></span>
-          <span>Mon<br>frigo</span>
+          <span>Mon frigo</span>
         </button>
         <button class="tile" id="tileShop">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.4 11.4a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21 7H6"/></svg></span>
-          <span>Ma liste<br>de courses</span>
+          <span>Ma liste de courses</span>
         </button>
         <button class="tile" id="tileFam">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="17" cy="9.5" r="2.4"/><path d="M2.5 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 14.4c2.5.4 4.4 2.6 4.4 5.2"/></svg></span>
-          <span>Repas<br>en famille</span>
+          <span>Repas en famille</span>
         </button>
       </div>
     </div>
@@ -1466,7 +1466,7 @@ function drawSheet(){
         <div class="sep"></div>
         ${modeChip}
       </div>
-      <button class="sheet-close-b" id="closeBtnBas">✕ Fermer la recette</button>
+      <button class="sheet-close-b" id="closeBtnBas">Fermer la recette</button>
     </div>`;
   document.getElementById('closeBtn').addEventListener('click',closeSheet);
   const cbb=document.getElementById('closeBtnBas'); if(cbb) cbb.addEventListener('click',closeSheet);
@@ -2012,7 +2012,7 @@ function renderTracker(){
 function initProfile(){
   renderTracker();
   const p=loadProfile();
-  if(!p){ let seen; try{seen=localStorage.getItem('graille_seen');}catch(e){} if(!seen){ const w=document.getElementById('welcome'); if(w) w.classList.add('open'); try{localStorage.setItem('graille_seen','1');}catch(e){} } }
+  if(!p){ let seen; try{seen=localStorage.getItem('graille_seen');}catch(e){} if(!seen){ const w=document.getElementById('welcome'); if(w) w.classList.add('open'); } }
 }
 
 /* ---------- Mon frigo (filtre par ingrédients) ---------- */
@@ -3376,6 +3376,306 @@ function detectLang(){
   return 'fr';
 }
 
+/* traductions de l'interface du nouveau design (les fichiers lang-XX.js gardent la priorite) */
+const UI_I18N = {
+ "en": {
+  "Mieux manger": "Eat better",
+  "pour aller": "to go",
+  "plus loin": "further",
+  "Des centaines de recettes light et gourmandes": "Hundreds of light, tasty recipes",
+  "Tes calories calculées pour ton objectif": "Your calories worked out for your goal",
+  "Ton menu, ta semaine et ta liste de courses": "Your menu, your week and your shopping list",
+  "Commencer →": "Get started →",
+  "Voir les recettes d'abord": "Browse recipes first",
+  "Ta santé, notre priorité": "Your health, our priority",
+  "Des recettes simples,": "Simple recipes,",
+  "healthy & gourmandes": "healthy & delicious",
+  "Mange ce que tu aimes, atteins ton objectif.": "Eat what you love, reach your goal.",
+  "Rechercher une recette, un ingrédient…": "Search a recipe, an ingredient…",
+  "Rechercher une recette…": "Search a recipe…",
+  "Calculateur de calories": "Calorie calculator",
+  "Mon menu du jour": "My menu for today",
+  "Mes repas de la semaine": "My meals for the week",
+  "Mon frigo": "My fridge",
+  "Ma liste de courses": "My shopping list",
+  "Repas en famille": "Family meals",
+  "Ta journée": "Your day",
+  "Ton objectif du jour": "Your goal for today",
+  "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Answer 4 questions, we work out your calories and you track your day.",
+  "Des plats savoureux, pour tous tes objectifs.": "Tasty dishes, for every goal.",
+  "recettes": "recipes",
+  "Trier :": "Sort:",
+  "Populaires": "Popular",
+  "Plus de protéines": "More protein",
+  "Moins de calories": "Fewer calories",
+  "Plus rapide": "Quickest",
+  "Accueil": "Home",
+  "Recettes": "Recipes",
+  "Semaine": "Week",
+  "Coach": "Coach",
+  "Profil": "Profile",
+  "Filtres": "Filters",
+  "Catégorie": "Category",
+  "Protéine": "Protein",
+  "Féculent": "Starch",
+  "Mode de cuisson": "Cooking method",
+  "Recettes airfryer uniquement": "Air fryer recipes only",
+  "Appliquer": "Apply",
+  "Réinitialiser": "Reset",
+  "Tes infos et tes outils.": "Your info and your tools.",
+  "Mon profil": "My profile",
+  "Calcule tes calories pour personnaliser GrailleLight.": "Work out your calories to personalise GrailleLight.",
+  "Mes calories": "My calories",
+  "Langue": "Language",
+  "Installer l'application": "Install the app",
+  "Nous contacter": "Contact us",
+  "Mentions légales": "Legal notice",
+  "Recettes du jour": "Today's recipes",
+  "Objectif kcal": "Calorie goal",
+  "Poids (kg)": "Weight (kg)",
+  "visites": "visits",
+  "Ton coach à tes côtés": "Your coach by your side",
+  "Des programmes adaptés à ton objectif et à ton niveau.": "Programmes matched to your goal and your level.",
+  "Fermer la recette": "Close recipe",
+  "Ajouter à ma liste": "Add to my list",
+  "Menu personnalisé": "Custom menu",
+  "Étape 1 sur 4": "Step 1 of 4",
+  "Étape 2 sur 4": "Step 2 of 4",
+  "Étape 3 sur 4": "Step 3 of 4",
+  "Suivant →": "Next →",
+  "Créer un déficit calorique pour perdre du poids progressivement": "Create a calorie deficit to lose weight steadily",
+  "Perdre de la masse grasse tout en conservant le muscle": "Lose fat while keeping your muscle",
+  "Garder votre poids actuel et stabiliser votre énergie": "Keep your current weight and steady energy",
+  "Augmenter votre apport calorique pour un gain de poids sain": "Increase your intake for healthy weight gain",
+  "Peu ou pas d'activité physique": "Little or no physical activity",
+  "3 à 4 séances par semaine": "3 to 4 sessions a week",
+  "5 séances et plus par semaine": "5 or more sessions a week",
+  "calories / jour": "calories / day"
+ },
+ "es": {
+  "Mieux manger": "Comer mejor",
+  "pour aller": "para llegar",
+  "plus loin": "más lejos",
+  "Des centaines de recettes light et gourmandes": "Cientos de recetas ligeras y sabrosas",
+  "Tes calories calculées pour ton objectif": "Tus calorías calculadas para tu objetivo",
+  "Ton menu, ta semaine et ta liste de courses": "Tu menú, tu semana y tu lista de la compra",
+  "Commencer →": "Empezar →",
+  "Voir les recettes d'abord": "Ver las recetas primero",
+  "Ta santé, notre priorité": "Tu salud, nuestra prioridad",
+  "Des recettes simples,": "Recetas sencillas,",
+  "healthy & gourmandes": "sanas y deliciosas",
+  "Mange ce que tu aimes, atteins ton objectif.": "Come lo que te gusta, alcanza tu objetivo.",
+  "Rechercher une recette, un ingrédient…": "Buscar una receta, un ingrediente…",
+  "Rechercher une recette…": "Buscar una receta…",
+  "Calculateur de calories": "Calculadora de calorías",
+  "Mon menu du jour": "Mi menú del día",
+  "Mes repas de la semaine": "Mis comidas de la semana",
+  "Mon frigo": "Mi nevera",
+  "Ma liste de courses": "Mi lista de la compra",
+  "Repas en famille": "Comidas en familia",
+  "Ta journée": "Tu día",
+  "Ton objectif du jour": "Tu objetivo del día",
+  "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Responde a 4 preguntas, calculamos tus calorías y sigues tu día.",
+  "Des plats savoureux, pour tous tes objectifs.": "Platos sabrosos, para todos tus objetivos.",
+  "recettes": "recetas",
+  "Trier :": "Ordenar:",
+  "Populaires": "Populares",
+  "Plus de protéines": "Más proteínas",
+  "Moins de calories": "Menos calorías",
+  "Plus rapide": "Más rápido",
+  "Accueil": "Inicio",
+  "Recettes": "Recetas",
+  "Semaine": "Semana",
+  "Coach": "Entrenador",
+  "Profil": "Perfil",
+  "Filtres": "Filtros",
+  "Catégorie": "Categoría",
+  "Protéine": "Proteína",
+  "Féculent": "Fécula",
+  "Mode de cuisson": "Modo de cocción",
+  "Recettes airfryer uniquement": "Solo recetas para freidora de aire",
+  "Appliquer": "Aplicar",
+  "Réinitialiser": "Restablecer",
+  "Tes infos et tes outils.": "Tus datos y tus herramientas.",
+  "Mon profil": "Mi perfil",
+  "Calcule tes calories pour personnaliser GrailleLight.": "Calcula tus calorías para personalizar GrailleLight.",
+  "Mes calories": "Mis calorías",
+  "Langue": "Idioma",
+  "Installer l'application": "Instalar la aplicación",
+  "Nous contacter": "Contáctanos",
+  "Mentions légales": "Aviso legal",
+  "Recettes du jour": "Recetas del día",
+  "Objectif kcal": "Objetivo kcal",
+  "Poids (kg)": "Peso (kg)",
+  "visites": "visitas",
+  "Ton coach à tes côtés": "Tu entrenador a tu lado",
+  "Des programmes adaptés à ton objectif et à ton niveau.": "Programas adaptados a tu objetivo y a tu nivel.",
+  "Fermer la recette": "Cerrar la receta",
+  "Ajouter à ma liste": "Añadir a mi lista",
+  "Menu personnalisé": "Menú personalizado",
+  "Étape 1 sur 4": "Paso 1 de 4",
+  "Étape 2 sur 4": "Paso 2 de 4",
+  "Étape 3 sur 4": "Paso 3 de 4",
+  "Suivant →": "Siguiente →",
+  "Créer un déficit calorique pour perdre du poids progressivement": "Crear un déficit calórico para perder peso progresivamente",
+  "Perdre de la masse grasse tout en conservant le muscle": "Perder grasa conservando el músculo",
+  "Garder votre poids actuel et stabiliser votre énergie": "Mantener tu peso actual y estabilizar tu energía",
+  "Augmenter votre apport calorique pour un gain de poids sain": "Aumentar tu aporte calórico para ganar peso de forma sana",
+  "Peu ou pas d'activité physique": "Poca o ninguna actividad física",
+  "3 à 4 séances par semaine": "3 a 4 sesiones por semana",
+  "5 séances et plus par semaine": "5 sesiones o más por semana",
+  "calories / jour": "calorías / día"
+ },
+ "pt": {
+  "Mieux manger": "Comer melhor",
+  "pour aller": "para ir",
+  "plus loin": "mais longe",
+  "Des centaines de recettes light et gourmandes": "Centenas de receitas leves e saborosas",
+  "Tes calories calculées pour ton objectif": "As tuas calorias calculadas para o teu objetivo",
+  "Ton menu, ta semaine et ta liste de courses": "O teu menu, a tua semana e a tua lista de compras",
+  "Commencer →": "Começar →",
+  "Voir les recettes d'abord": "Ver as receitas primeiro",
+  "Ta santé, notre priorité": "A tua saúde, a nossa prioridade",
+  "Des recettes simples,": "Receitas simples,",
+  "healthy & gourmandes": "saudáveis e deliciosas",
+  "Mange ce que tu aimes, atteins ton objectif.": "Come o que gostas, atinge o teu objetivo.",
+  "Rechercher une recette, un ingrédient…": "Procurar uma receita, um ingrediente…",
+  "Rechercher une recette…": "Procurar uma receita…",
+  "Calculateur de calories": "Calculadora de calorias",
+  "Mon menu du jour": "O meu menu do dia",
+  "Mes repas de la semaine": "As minhas refeições da semana",
+  "Mon frigo": "O meu frigorífico",
+  "Ma liste de courses": "A minha lista de compras",
+  "Repas en famille": "Refeições em família",
+  "Ta journée": "O teu dia",
+  "Ton objectif du jour": "O teu objetivo do dia",
+  "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Responde a 4 perguntas, calculamos as tuas calorias e acompanhas o teu dia.",
+  "Des plats savoureux, pour tous tes objectifs.": "Pratos saborosos, para todos os teus objetivos.",
+  "recettes": "receitas",
+  "Trier :": "Ordenar:",
+  "Populaires": "Populares",
+  "Plus de protéines": "Mais proteínas",
+  "Moins de calories": "Menos calorias",
+  "Plus rapide": "Mais rápido",
+  "Accueil": "Início",
+  "Recettes": "Receitas",
+  "Semaine": "Semana",
+  "Coach": "Treinador",
+  "Profil": "Perfil",
+  "Filtres": "Filtros",
+  "Catégorie": "Categoria",
+  "Protéine": "Proteína",
+  "Féculent": "Fécula",
+  "Mode de cuisson": "Modo de cozedura",
+  "Recettes airfryer uniquement": "Apenas receitas para air fryer",
+  "Appliquer": "Aplicar",
+  "Réinitialiser": "Repor",
+  "Tes infos et tes outils.": "As tuas informações e ferramentas.",
+  "Mon profil": "O meu perfil",
+  "Calcule tes calories pour personnaliser GrailleLight.": "Calcula as tuas calorias para personalizar o GrailleLight.",
+  "Mes calories": "As minhas calorias",
+  "Langue": "Idioma",
+  "Installer l'application": "Instalar a aplicação",
+  "Nous contacter": "Contacta-nos",
+  "Mentions légales": "Aviso legal",
+  "Recettes du jour": "Receitas do dia",
+  "Objectif kcal": "Objetivo kcal",
+  "Poids (kg)": "Peso (kg)",
+  "visites": "visitas",
+  "Ton coach à tes côtés": "O teu treinador ao teu lado",
+  "Des programmes adaptés à ton objectif et à ton niveau.": "Programas adaptados ao teu objetivo e ao teu nível.",
+  "Fermer la recette": "Fechar a receita",
+  "Ajouter à ma liste": "Adicionar à minha lista",
+  "Menu personnalisé": "Menu personalizado",
+  "Étape 1 sur 4": "Passo 1 de 4",
+  "Étape 2 sur 4": "Passo 2 de 4",
+  "Étape 3 sur 4": "Passo 3 de 4",
+  "Suivant →": "Seguinte →",
+  "Créer un déficit calorique pour perdre du poids progressivement": "Criar um défice calórico para perder peso gradualmente",
+  "Perdre de la masse grasse tout en conservant le muscle": "Perder gordura mantendo o músculo",
+  "Garder votre poids actuel et stabiliser votre énergie": "Manter o teu peso atual e estabilizar a tua energia",
+  "Augmenter votre apport calorique pour un gain de poids sain": "Aumentar o aporte calórico para ganhar peso de forma saudável",
+  "Peu ou pas d'activité physique": "Pouca ou nenhuma atividade física",
+  "3 à 4 séances par semaine": "3 a 4 sessões por semana",
+  "5 séances et plus par semaine": "5 sessões ou mais por semana",
+  "calories / jour": "calorias / dia"
+ },
+ "de": {
+  "Mieux manger": "Besser essen",
+  "pour aller": "um",
+  "plus loin": "weiterzukommen",
+  "Des centaines de recettes light et gourmandes": "Hunderte leichte und leckere Rezepte",
+  "Tes calories calculées pour ton objectif": "Deine Kalorien für dein Ziel berechnet",
+  "Ton menu, ta semaine et ta liste de courses": "Dein Menü, deine Woche und deine Einkaufsliste",
+  "Commencer →": "Loslegen →",
+  "Voir les recettes d'abord": "Zuerst Rezepte ansehen",
+  "Ta santé, notre priorité": "Deine Gesundheit, unsere Priorität",
+  "Des recettes simples,": "Einfache Rezepte,",
+  "healthy & gourmandes": "gesund & lecker",
+  "Mange ce que tu aimes, atteins ton objectif.": "Iss, was du magst, erreiche dein Ziel.",
+  "Rechercher une recette, un ingrédient…": "Rezept oder Zutat suchen…",
+  "Rechercher une recette…": "Rezept suchen…",
+  "Calculateur de calories": "Kalorienrechner",
+  "Mon menu du jour": "Mein Tagesmenü",
+  "Mes repas de la semaine": "Meine Mahlzeiten der Woche",
+  "Mon frigo": "Mein Kühlschrank",
+  "Ma liste de courses": "Meine Einkaufsliste",
+  "Repas en famille": "Familienessen",
+  "Ta journée": "Dein Tag",
+  "Ton objectif du jour": "Dein Tagesziel",
+  "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Beantworte 4 Fragen, wir berechnen deine Kalorien und du verfolgst deinen Tag.",
+  "Des plats savoureux, pour tous tes objectifs.": "Leckere Gerichte, für jedes Ziel.",
+  "recettes": "Rezepte",
+  "Trier :": "Sortieren:",
+  "Populaires": "Beliebt",
+  "Plus de protéines": "Mehr Protein",
+  "Moins de calories": "Weniger Kalorien",
+  "Plus rapide": "Am schnellsten",
+  "Accueil": "Start",
+  "Recettes": "Rezepte",
+  "Semaine": "Woche",
+  "Coach": "Coach",
+  "Profil": "Profil",
+  "Filtres": "Filter",
+  "Catégorie": "Kategorie",
+  "Protéine": "Protein",
+  "Féculent": "Beilage",
+  "Mode de cuisson": "Garmethode",
+  "Recettes airfryer uniquement": "Nur Heißluftfritteusen-Rezepte",
+  "Appliquer": "Übernehmen",
+  "Réinitialiser": "Zurücksetzen",
+  "Tes infos et tes outils.": "Deine Infos und Werkzeuge.",
+  "Mon profil": "Mein Profil",
+  "Calcule tes calories pour personnaliser GrailleLight.": "Berechne deine Kalorien, um GrailleLight anzupassen.",
+  "Mes calories": "Meine Kalorien",
+  "Langue": "Sprache",
+  "Installer l'application": "App installieren",
+  "Nous contacter": "Kontakt",
+  "Mentions légales": "Impressum",
+  "Recettes du jour": "Rezepte heute",
+  "Objectif kcal": "Kalorienziel",
+  "Poids (kg)": "Gewicht (kg)",
+  "visites": "Besuche",
+  "Ton coach à tes côtés": "Dein Coach an deiner Seite",
+  "Des programmes adaptés à ton objectif et à ton niveau.": "Programme passend zu deinem Ziel und Niveau.",
+  "Fermer la recette": "Rezept schließen",
+  "Ajouter à ma liste": "Zur Liste hinzufügen",
+  "Menu personnalisé": "Eigenes Menü",
+  "Étape 1 sur 4": "Schritt 1 von 4",
+  "Étape 2 sur 4": "Schritt 2 von 4",
+  "Étape 3 sur 4": "Schritt 3 von 4",
+  "Suivant →": "Weiter →",
+  "Créer un déficit calorique pour perdre du poids progressivement": "Ein Kaloriendefizit schaffen, um schrittweise abzunehmen",
+  "Perdre de la masse grasse tout en conservant le muscle": "Fett verlieren und Muskeln erhalten",
+  "Garder votre poids actuel et stabiliser votre énergie": "Dein Gewicht halten und deine Energie stabilisieren",
+  "Augmenter votre apport calorique pour un gain de poids sain": "Kalorienzufuhr erhöhen für gesunden Gewichtszuwachs",
+  "Peu ou pas d'activité physique": "Wenig oder keine Bewegung",
+  "3 à 4 séances par semaine": "3 bis 4 Einheiten pro Woche",
+  "5 séances et plus par semaine": "5 oder mehr Einheiten pro Woche",
+  "calories / jour": "Kalorien / Tag"
+ }
+};
+
 /* traduit un texte s'il figure dans le dictionnaire, sinon le laisse tel quel */
 function tr(t){
   if(!DICT||LANG==='fr') return t;
@@ -3458,6 +3758,7 @@ async function changerLangue(code,auto){
     }).catch(()=>{});
   }
   DICT=(window.GRAILLE_DICT&&window.GRAILLE_DICT.__lang===code)?window.GRAILLE_DICT:null;
+  DICT=Object.assign({}, (typeof UI_I18N!=='undefined' && UI_I18N[code]) || {}, DICT || {});
   document.documentElement.lang=code;
   appliquerLangue();
   majSelecteurLangue();
@@ -3567,6 +3868,10 @@ initLangue();
 
 
 
+
+
+
+
 <!-- NAV-START -->
 <script>
 /* ================= NAVIGATION PAR ONGLETS ================= */
@@ -3668,7 +3973,10 @@ if(typeof sheet !== 'undefined' && sheet){
 
 /* ================= ÉCRAN DE BIENVENUE ================= */
 const welEl = document.getElementById('welcome');
-const hideWelcome = ()=>{ if(welEl) welEl.classList.remove('open'); };
+const hideWelcome = ()=>{
+  if(welEl) welEl.classList.remove('open');
+  try{ localStorage.setItem('graille_seen','1'); }catch(e){}
+};
 bind('welStart', ()=>{ hideWelcome(); openOnboard(); });
 bind('welSkip', ()=>{ hideWelcome(); showTab('recipes'); });
 
