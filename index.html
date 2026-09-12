@@ -405,7 +405,7 @@
     backdrop-filter:blur(3px);align-items:flex-end;justify-content:center}
   .overlay.open{display:flex}
   @media(min-width:700px){.overlay{align-items:center}}
-  .sheet{background:var(--bg);width:100%;max-width:620px;max-height:94vh;overflow-y:auto;
+  .sheet{background:var(--bg);width:100%;max-width:620px;max-height:90vh;overflow-y:auto;
     border-radius:24px 24px 0 0;animation:slideup .3s cubic-bezier(.2,.8,.2,1)}
   @media(min-width:700px){.sheet{border-radius:22px;animation:pop .22s ease}}
   @keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -413,9 +413,16 @@
   .sheet-hero{position:relative;aspect-ratio:16/11;display:flex;align-items:center;justify-content:center;
     overflow:hidden;background:var(--green-tint)}
   .sheet-hero img{width:100%;height:100%;object-fit:cover}
-  .closebtn{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;
-    background:rgba(255,255,255,.92);color:var(--ink);font-size:18px;display:flex;
-    align-items:center;justify-content:center;line-height:1;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+  /* barre collante : la croix reste visible pendant qu'on descend dans la recette */
+  .sheet-bar{position:sticky;top:0;height:0;z-index:8;overflow:visible}
+  .closebtn{position:absolute;top:12px;right:14px;width:44px;height:44px;border-radius:50%;
+    background:rgba(255,255,255,.95);color:var(--ink);font-size:19px;font-weight:700;display:flex;
+    align-items:center;justify-content:center;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+  .closebtn:hover{background:#fff}
+  .sheet-close-b{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    margin-top:24px;padding:16px;border-radius:14px;background:var(--surface);
+    border:1.5px solid var(--line);color:var(--ink2);font-weight:700;font-size:15px}
+  .sheet-close-b:hover{border-color:var(--green);color:var(--green)}
   .sheet-tags{position:absolute;bottom:14px;left:16px;display:flex;gap:7px;flex-wrap:wrap}
   .sheet-tags span{background:rgba(14,26,20,.78);color:#fff;font-size:10px;font-weight:700;
     letter-spacing:.6px;text-transform:uppercase;padding:6px 12px;border-radius:999px;backdrop-filter:blur(4px)}
@@ -1424,8 +1431,8 @@ function drawSheet(){
         <div class="cal-hint">Glisse pour plus de protéines et moins de glucides (ou l'inverse), à calories constantes.</div>
       </div>` : '';
   sheet.innerHTML=`
+    <div class="sheet-bar"><button class="closebtn" id="closeBtn" aria-label="Fermer">✕</button></div>
     <div class="sheet-hero">
-      <button class="closebtn" id="closeBtn" aria-label="Fermer">✕</button>
       ${heroHTML(r)}
       <div class="sheet-tags"><span>${r.categorie}</span><span>${BASE_LABEL[r.base]}</span></div>
     </div>
@@ -1459,8 +1466,10 @@ function drawSheet(){
         <div class="sep"></div>
         ${modeChip}
       </div>
+      <button class="sheet-close-b" id="closeBtnBas">✕ Fermer la recette</button>
     </div>`;
   document.getElementById('closeBtn').addEventListener('click',closeSheet);
+  const cbb=document.getElementById('closeBtnBas'); if(cbb) cbb.addEventListener('click',closeSheet);
   const slider=document.getElementById('calSlider');
   slider.addEventListener('input',()=>{activeTarget=+slider.value;updateValues();});
   const mslider=document.getElementById('macroSlider');
@@ -3556,6 +3565,8 @@ initLangue();
 
 
 
+
+
 <!-- NAV-START -->
 <script>
 /* ================= NAVIGATION PAR ONGLETS ================= */
@@ -3642,6 +3653,18 @@ if(homeSearch) homeSearch.addEventListener('focus', ()=>{
   showTab('recipes');
   setTimeout(()=>{ const r = document.getElementById('recSearch'); if(r) r.focus(); }, 80);
 });
+
+/* ================= FICHE RECETTE : GLISSER POUR FERMER ================= */
+let _sy = null;
+if(typeof sheet !== 'undefined' && sheet){
+  sheet.addEventListener('touchstart', e=>{
+    _sy = (sheet.scrollTop <= 0) ? e.touches[0].clientY : null;
+  }, {passive:true});
+  sheet.addEventListener('touchmove', e=>{
+    if(_sy !== null && e.touches[0].clientY - _sy > 90){ _sy = null; closeSheet(); }
+  }, {passive:true});
+  sheet.addEventListener('touchend', ()=>{ _sy = null; }, {passive:true});
+}
 
 /* ================= ÉCRAN DE BIENVENUE ================= */
 const welEl = document.getElementById('welcome');
