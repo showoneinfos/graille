@@ -718,6 +718,28 @@
     fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
   .wel-lang .lang-menu{right:0;left:auto}
 
+  /* ============ INVITATION A INSTALLER L'APPLICATION ============ */
+  .installbar{display:flex;align-items:center;gap:12px;margin-top:18px;padding:13px 14px;
+    border-radius:16px;background:rgba(139,221,79,.12);border:1px solid rgba(139,221,79,.32)}
+  .installbar[hidden]{display:none}
+  .ib-ic{width:38px;height:38px;flex:0 0 auto;border-radius:12px;background:rgba(139,221,79,.18);
+    display:flex;align-items:center;justify-content:center}
+  .ib-ic svg{width:19px;height:19px;stroke:var(--lime);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  .ib-tx{flex:1;min-width:0}
+  .ib-tx b{display:block;font-size:13px;font-weight:700;color:#fff;line-height:1.3}
+  .ib-tx span{display:block;font-size:11.5px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.35}
+  .ib-go{flex:0 0 auto;background:var(--lime);color:#08240F;font-weight:800;font-size:12.5px;
+    padding:10px 15px;border-radius:999px;white-space:nowrap}
+  .ib-go:hover{background:#7BCF3F}
+  .ib-no{flex:0 0 auto;width:28px;height:28px;border-radius:50%;color:rgba(255,255,255,.45);
+    font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .ib-no:hover{color:#fff;background:rgba(255,255,255,.1)}
+  @media(max-width:420px){
+    .ib-tx span{display:none}
+    .installbar{gap:10px;padding:12px}
+  }
+
 </style>
 </head>
 <body>
@@ -793,6 +815,12 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="17" cy="9.5" r="2.4"/><path d="M2.5 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 14.4c2.5.4 4.4 2.6 4.4 5.2"/></svg></span>
           <span>Repas en famille</span>
         </button>
+      </div>
+      <div class="installbar" id="installBar" hidden>
+        <span class="ib-ic"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/><path d="M12 6.5v6"/><path d="m9.5 10 2.5 2.5L14.5 10"/></svg></span>
+        <span class="ib-tx"><b>Ajoute GrailleLight à ton écran d'accueil</b><span>Tu le retrouveras comme une application, sans passer par Google.</span></span>
+        <button class="ib-go" id="ibGo" type="button">Ajouter</button>
+        <button class="ib-no" id="ibNo" type="button" aria-label="Non merci">✕</button>
       </div>
     </div>
   </div>
@@ -3379,6 +3407,9 @@ function detectLang(){
 /* traductions de l'interface du nouveau design (les fichiers lang-XX.js gardent la priorite) */
 const UI_I18N = {
  "en": {
+  "Ajoute GrailleLight à ton écran d'accueil": "Add GrailleLight to your home screen",
+  "Tu le retrouveras comme une application, sans passer par Google.": "You'll find it like an app, without going through Google.",
+  "Ajouter": "Add",
   "Mieux manger": "Eat better",
   "pour aller": "to go",
   "plus loin": "further",
@@ -3453,6 +3484,9 @@ const UI_I18N = {
   "calories / jour": "calories / day"
  },
  "es": {
+  "Ajoute GrailleLight à ton écran d'accueil": "Añade GrailleLight a tu pantalla de inicio",
+  "Tu le retrouveras comme une application, sans passer par Google.": "Lo encontrarás como una aplicación, sin pasar por Google.",
+  "Ajouter": "Añadir",
   "Mieux manger": "Comer mejor",
   "pour aller": "para llegar",
   "plus loin": "más lejos",
@@ -3527,6 +3561,9 @@ const UI_I18N = {
   "calories / jour": "calorías / día"
  },
  "pt": {
+  "Ajoute GrailleLight à ton écran d'accueil": "Adiciona o GrailleLight ao teu ecrã principal",
+  "Tu le retrouveras comme une application, sans passer par Google.": "Vais encontrá-lo como uma aplicação, sem passar pelo Google.",
+  "Ajouter": "Adicionar",
   "Mieux manger": "Comer melhor",
   "pour aller": "para ir",
   "plus loin": "mais longe",
@@ -3601,6 +3638,9 @@ const UI_I18N = {
   "calories / jour": "calorias / dia"
  },
  "de": {
+  "Ajoute GrailleLight à ton écran d'accueil": "Füge GrailleLight zu deinem Startbildschirm hinzu",
+  "Tu le retrouveras comme une application, sans passer par Google.": "Du findest es wie eine App, ganz ohne Google.",
+  "Ajouter": "Hinzufügen",
   "Mieux manger": "Besser essen",
   "pour aller": "um",
   "plus loin": "weiterzukommen",
@@ -3838,10 +3878,12 @@ let invitationInstall=null;
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault(); invitationInstall=e;
   const b=document.getElementById('btnInstall'); if(b) b.style.display='inline-flex';
+  if(typeof montrerInstallBar==='function') montrerInstallBar();
   if(typeof gtag==='function') gtag('event','install_proposee');
 });
 window.addEventListener('appinstalled',()=>{
   const b=document.getElementById('btnInstall'); if(b) b.style.display='none';
+  if(typeof cacherInstallBar==='function') cacherInstallBar();
   if(typeof gtag==='function') gtag('event','app_installee');
 });
 async function lancerInstall(){
@@ -3851,6 +3893,7 @@ async function lancerInstall(){
   if(typeof gtag==='function') gtag('event','install_reponse',{choix:r.outcome});
   invitationInstall=null;
   const b=document.getElementById('btnInstall'); if(b) b.style.display='none';
+  if(typeof cacherInstallBar==='function') cacherInstallBar();
 }
 
 /* init */
@@ -3860,6 +3903,8 @@ initProfile();
 compterVisite();
 initLangue();
 </script>
+
+
 
 
 
@@ -3957,6 +4002,22 @@ const homeSearch = document.getElementById('homeSearch');
 if(homeSearch) homeSearch.addEventListener('focus', ()=>{
   showTab('recipes');
   setTimeout(()=>{ const r = document.getElementById('recSearch'); if(r) r.focus(); }, 80);
+});
+
+/* ================= INVITATION A INSTALLER L'APPLICATION ================= */
+const ibar = document.getElementById('installBar');
+function montrerInstallBar(){
+  if(!ibar) return;
+  let refus = null;
+  try{ refus = localStorage.getItem('graille_install_no'); }catch(e){}
+  if(refus) return;
+  ibar.hidden = false;
+}
+function cacherInstallBar(){ if(ibar) ibar.hidden = true; }
+bind('ibGo', ()=>{ if(typeof lancerInstall === 'function') lancerInstall(); });
+bind('ibNo', ()=>{
+  cacherInstallBar();
+  try{ localStorage.setItem('graille_install_no','1'); }catch(e){}
 });
 
 /* ================= FICHE RECETTE : GLISSER POUR FERMER ================= */
