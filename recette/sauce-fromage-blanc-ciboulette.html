@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sauce fromage blanc-ciboulette — Recette light 50 kcal | GrailleLight</title>
-<meta name="description" content="Sauce fromage blanc-ciboulette. Version allégée et savoureuse, pour accompagner tes plats. · 50 kcal · 7 g de protéines · prête en 5 min. Ingrédients, étapes et macros sur GrailleLight.">
+<title>Sauce fromage blanc ciboulette légère — 50 kcal | GrailleLight</title>
+<meta name="description" content="La sauce fromage blanc ciboulette maison, prête en 5 minutes et 50 kcal la portion. Proportions exactes, variantes au yaourt grec ou au skyr, conservation, comment la rattraper si elle est trop liquide, et avec quoi la servir.">
 <link rel="canonical" href="https://www.graillelight.com/recette/sauce-fromage-blanc-ciboulette">
 <meta name="robots" content="index,follow">
 <meta name="theme-color" content="#BB5028">
@@ -12,9 +12,8 @@
 <meta property="og:site_name" content="GrailleLight">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:url" content="https://www.graillelight.com/recette/sauce-fromage-blanc-ciboulette">
-<meta property="og:title" content="Sauce fromage blanc-ciboulette — Recette light 50 kcal">
-<meta property="og:description" content="Sauce fromage blanc-ciboulette. Version allégée et savoureuse, pour accompagner tes plats. · 50 kcal · 7 g de protéines · prête en 5 min. Ingrédients, étapes et macros sur GrailleLight.">
-
+<meta property="og:title" content="Sauce fromage blanc ciboulette légère — 50 kcal">
+<meta property="og:description" content="La sauce fromage blanc ciboulette maison, prête en 5 minutes et 50 kcal la portion. Proportions, variantes, conservation et rattrapages.">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +22,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
 .wrap{max-width:760px;margin:0 auto;padding:20px 18px 60px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:22px}
 .logo{font-family:'Fraunces',serif;font-weight:900;font-size:26px;color:var(--ink);text-decoration:none;letter-spacing:-.4px}
 .logo b{color:var(--rust)} .logo span{color:var(--olive)}
 .back{font-size:13px;font-weight:700;color:var(--rust);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:8px 14px;white-space:nowrap}
@@ -38,21 +37,37 @@ h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(28px,7vw,44px);l
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
 .tag{font-size:12.5px;font-weight:700;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 13px;color:var(--ink2)}
 h2{font-family:'Fraunces',serif;font-size:23px;font-weight:600;margin:30px 0 12px}
+h3{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin:20px 0 6px}
+p{margin-bottom:12px;font-size:15.5px}
 ul.ing{list-style:none} ul.ing li{padding:11px 2px;border-bottom:1px solid var(--line);font-size:15.5px}
 ol.steps{padding-left:22px} ol.steps li{margin-bottom:13px;font-size:15.5px}
+ul.pts{padding-left:20px;margin-bottom:12px} ul.pts li{margin-bottom:8px;font-size:15.5px}
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--olive);border-radius:12px;padding:14px 16px;margin:18px 0}
+.note p:last-child{margin-bottom:0}
+.tblbox{overflow-x:auto;margin:16px 0}
+table{border-collapse:collapse;width:100%;min-width:460px;font-size:14.5px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);font-weight:700;background:#F2EDE0}
+td b{font-weight:700}
+tr:last-child td{border-bottom:none}
+.faq{border-top:1px solid var(--line);padding-top:6px;margin-top:8px}
+.faq h3{margin-top:18px}
 .also{margin-top:40px;padding-top:22px;border-top:1px solid var(--line)}
 .also a{display:block;padding:11px 2px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:500;font-size:15px}
 .also a:hover{color:var(--rust)}
+a.inl{color:var(--rust);font-weight:500}
 .cta{display:block;text-align:center;background:var(--rust);color:#fff;text-decoration:none;font-weight:700;border-radius:999px;padding:16px;margin-top:32px}
 footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink2)}
-footer a{color:var(--ink2)}</style>
+footer a{color:var(--ink2)}
+@media(max-width:430px){.logo{font-size:21px}.back{font-size:12px;padding:7px 11px}
+table{min-width:0;font-size:13px}th,td{padding:9px 7px}th{font-size:10px;letter-spacing:.5px}}</style>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
  "@type": "Recipe",
- "name": "Sauce fromage blanc-ciboulette",
+ "name": "Sauce fromage blanc ciboulette",
  "url": "https://www.graillelight.com/recette/sauce-fromage-blanc-ciboulette",
- "description": "Sauce fromage blanc-ciboulette. Version allégée et savoureuse, pour accompagner tes plats. · 50 kcal · 7 g de protéines · prête en 5 min. Ingrédients, étapes et macros sur GrailleLight.",
+ "description": "Sauce fromage blanc ciboulette maison, prête en 5 minutes, 50 kcal et 7 g de protéines la portion. Une alternative légère à la mayonnaise et à la sauce blanche du kebab.",
  "inLanguage": "fr-FR",
  "author": {
   "@type": "Organization",
@@ -60,42 +75,70 @@ footer a{color:var(--ink2)}</style>
  },
  "recipeYield": "1 portion",
  "recipeCategory": "Sauce",
+ "recipeCuisine": "Française",
  "prepTime": "PT5M",
  "totalTime": "PT5M",
+ "cookTime": "PT0M",
+ "suitableForDiet": "https://schema.org/LowFatDiet",
  "recipeIngredient": [
-  "100 g Fromage blanc 0%",
-  "1 c. à soupe Ciboulette",
-  "1 pincée Ail",
-  "0.25 pièce Citron"
+  "100 g de fromage blanc 0%",
+  "1 c. à soupe de ciboulette ciselée",
+  "1 pincée d'ail en poudre ou 1/4 de gousse d'ail écrasée",
+  "1/4 de citron (le jus)",
+  "Sel, poivre"
  ],
  "recipeInstructions": [
   {
    "@type": "HowToStep",
    "position": 1,
-   "text": "Mélange fromage blanc et ciboulette."
+   "name": "Égoutter le fromage blanc",
+   "text": "Verse le fromage blanc dans un bol. S'il rend beaucoup d'eau, incline le bol et retire le liquide clair à la cuillère : c'est ce qui rend la sauce liquide."
   },
   {
    "@type": "HowToStep",
    "position": 2,
-   "text": "Assaisonne."
+   "name": "Ciseler la ciboulette",
+   "text": "Coupe la ciboulette aux ciseaux, directement au-dessus du bol, en petits tronçons. Évite le couteau, qui écrase les brins et fait noircir l'herbe."
+  },
+  {
+   "@type": "HowToStep",
+   "position": 3,
+   "name": "Assaisonner",
+   "text": "Ajoute l'ail, le jus de citron, le sel et le poivre. Mélange à la fourchette une trentaine de secondes, jusqu'à ce que la sauce devienne lisse et brillante."
+  },
+  {
+   "@type": "HowToStep",
+   "position": 4,
+   "name": "Laisser reposer",
+   "text": "Laisse reposer 10 minutes au réfrigérateur avant de servir. L'ail et la ciboulette ont besoin de ce temps pour parfumer la sauce. Goûte et rectifie le sel à ce moment-là seulement."
   }
  ],
  "nutrition": {
   "@type": "NutritionInformation",
-  "servingSize": "1 portion",
+  "servingSize": "1 portion (environ 100 g)",
   "calories": "50 kcal",
   "proteinContent": "7 g",
   "carbohydrateContent": "4 g",
   "fatContent": "1 g"
  },
- "keywords": "Sauce"
+ "keywords": "sauce fromage blanc, sauce ciboulette, sauce blanche légère, sauce light, sauce sans mayonnaise"
 }
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
  {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.graillelight.com/"},
  {"@type":"ListItem","position":2,"name":"Recettes","item":"https://www.graillelight.com/recettes"},
- {"@type":"ListItem","position":3,"name":"Sauce fromage blanc-ciboulette"}]}
+ {"@type":"ListItem","position":3,"name":"Sauce fromage blanc ciboulette"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+ {"@type":"Question","name":"Combien de calories dans une sauce au fromage blanc et à la ciboulette ?","acceptedAnswer":{"@type":"Answer","text":"Environ 50 kcal pour une portion de 100 g préparée avec du fromage blanc 0%. À titre de comparaison, la même quantité de mayonnaise approche les 680 kcal et une sauce blanche de kebab industrielle tourne autour de 400 kcal."}},
+ {"@type":"Question","name":"Peut-on la préparer à l'avance ?","acceptedAnswer":{"@type":"Answer","text":"Oui, et c'est même conseillé : elle est meilleure après 10 minutes de repos au frais. Elle se garde 2 à 3 jours au réfrigérateur dans un bocal fermé. Au-delà, elle rend de l'eau et l'ail devient dominant."}},
+ {"@type":"Question","name":"Ma sauce est trop liquide, comment la rattraper ?","acceptedAnswer":{"@type":"Answer","text":"Retire le petit-lait qui remonte à la surface, puis ajoute une cuillère de fromage blanc bien égoutté ou de yaourt grec. Ne rajoute jamais de farine ni de fécule : la sauce est servie froide, elles ne se dissolvent pas."}},
+ {"@type":"Question","name":"Peut-on la faire avec du yaourt à la place du fromage blanc ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Le yaourt nature donne une sauce plus liquide et plus acide, le yaourt grec une sauce plus épaisse et plus grasse, le skyr une sauce très épaisse et la plus riche en protéines. Le fromage blanc reste le meilleur compromis entre texture et calories."}},
+ {"@type":"Question","name":"Avec de la ciboulette surgelée ou séchée, est-ce que ça marche ?","acceptedAnswer":{"@type":"Answer","text":"La ciboulette surgelée fonctionne très bien, à ajouter encore gelée. La ciboulette séchée est un dépannage : compte une cuillère à café pour une cuillère à soupe de fraîche, et laisse reposer 15 minutes pour qu'elle se réhydrate."}},
+ {"@type":"Question","name":"Est-ce que cette sauce convient pour un régime ou une sèche ?","acceptedAnswer":{"@type":"Answer","text":"C'est une des sauces les plus intéressantes dans ce cadre : 7 g de protéines et 1 g de lipides par portion, contre 75 g de lipides pour la même quantité de mayonnaise. Elle permet de garder du goût sur des plats simples sans peser sur le total de la journée."}}
+]}
 </script>
 </head>
 <body>
@@ -106,9 +149,8 @@ footer a{color:var(--ink2)}</style>
   </div>
 
   <div class="eyebrow">Sauce</div>
-  <h1>Sauce fromage blanc-ciboulette</h1>
-  <p class="lede">Sauce fromage blanc-ciboulette. Version allégée et savoureuse, pour accompagner tes plats.</p>
-  
+  <h1>Sauce fromage blanc ciboulette</h1>
+  <p class="lede">La sauce blanche que tu peux mettre partout sans culpabiliser : 5 minutes, 4 ingrédients, 50 kcal la portion. Treize fois moins calorique que la mayonnaise, et la seule sauce blanche qui apporte de vraies protéines.</p>
 
   <div class="macros">
     <div class="macro"><b>50</b><span>kcal</span></div>
@@ -123,12 +165,117 @@ footer a{color:var(--ink2)}</style>
     <span class="tag">Sauce</span><span class="tag">Sans cuisson</span>
   </div>
 
-  <h2>Ingrédients</h2><ul class="ing"><li>100 g Fromage blanc 0%</li><li>1 c. à soupe Ciboulette</li><li>1 pincée Ail</li><li>0.25 pièce Citron</li></ul>
-  <h2>Préparation</h2><ol class="steps"><li>Mélange fromage blanc et ciboulette.</li><li>Assaisonne.</li></ol>
+  <h2>Ingrédients</h2>
+  <ul class="ing">
+    <li>100 g de fromage blanc 0%</li>
+    <li>1 c. à soupe de ciboulette ciselée</li>
+    <li>1 pincée d'ail en poudre, ou 1/4 de gousse d'ail écrasée</li>
+    <li>1/4 de citron (le jus)</li>
+    <li>Sel, poivre</li>
+  </ul>
+
+  <p>Pour quatre personnes, multiplie simplement par quatre : 400 g de fromage blanc, 4 cuillères à soupe de ciboulette, 1 gousse d'ail, le jus d'un citron entier. Rien ne change dans la méthode.</p>
+
+  <h2>Préparation</h2>
+  <ol class="steps">
+    <li><b>Égoutte le fromage blanc.</b> Verse-le dans un bol. S'il rend beaucoup d'eau, incline le bol et retire le liquide clair à la cuillère. C'est lui, et lui seul, qui rend les sauces au fromage blanc décevantes.</li>
+    <li><b>Cisèle la ciboulette aux ciseaux</b>, directement au-dessus du bol, en petits tronçons. Le couteau écrase les brins, fait sortir l'eau et noircit l'herbe au bout de quelques minutes.</li>
+    <li><b>Assaisonne.</b> Ail, jus de citron, sel, poivre. Mélange à la fourchette une trentaine de secondes : la sauce doit devenir lisse et légèrement brillante.</li>
+    <li><b>Laisse reposer 10 minutes au frais.</b> L'ail et la ciboulette ont besoin de ce temps pour diffuser. Goûte et rectifie le sel à ce moment-là seulement — avant, tu sales toujours trop.</li>
+  </ol>
+
+  <div class="note">
+    <p><b>Le détail qui change tout :</b> sale en deux fois. Une pincée au mélange, puis une deuxième après le repos. Le fromage blanc froid masque le sel, et c'est comme ça qu'on se retrouve avec une sauce immangeable une fois qu'elle revient à température.</p>
+  </div>
+
+  <h2>Combien de calories, vraiment</h2>
+  <p>L'intérêt de cette sauce n'apparaît qu'en comparaison. Voici ce que représentent 100 g de chaque sauce blanche, c'est-à-dire à peu près ce qu'on met sur une assiette de crudités ou dans un wrap.</p>
+
+  <div class="tblbox">
+  <table>
+    <thead>
+      <tr><th>Pour 100 g</th><th>Calories</th><th>Lipides</th><th>Protéines</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>Fromage blanc-ciboulette</b></td><td><b>50 kcal</b></td><td>1 g</td><td>7 g</td></tr>
+      <tr><td>Yaourt grec + herbes</td><td>~120 kcal</td><td>8 g</td><td>6 g</td></tr>
+      <tr><td>Crème fraîche 30%</td><td>~290 kcal</td><td>30 g</td><td>2 g</td></tr>
+      <tr><td>Sauce blanche kebab industrielle</td><td>~400 kcal</td><td>40 g</td><td>1 g</td></tr>
+      <tr><td>Mayonnaise</td><td>~680 kcal</td><td>75 g</td><td>1 g</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Autrement dit, remplacer la sauce blanche d'un kebab par celle-ci fait économiser environ 350 calories sur un seul repas, sans rien enlever d'autre à l'assiette. C'est le genre de changement qui tient dans la durée, parce qu'il ne demande aucun effort de volonté.</p>
+
+  <h2>Les variantes</h2>
+
+  <h3>Fromage blanc 0% ou 3% ?</h3>
+  <p>Le 3% donne une sauce plus ronde, moins acide, plus agréable si tu la sers seule. Il coûte environ 20 kcal de plus pour 100 g. Sur une sauce, la différence de goût se sent réellement — c'est l'un des rares endroits où payer ces 20 calories vaut le coup.</p>
+
+  <h3>Au yaourt grec</h3>
+  <p>Plus épaisse, plus grasse, plus onctueuse. C'est la version à choisir quand la sauce doit tenir sur une brochette ou dans un pain sans couler. Compte environ 120 kcal pour 100 g.</p>
+
+  <h3>Au skyr</h3>
+  <p>La plus protéinée et la plus épaisse des trois : autour de 60 kcal et 11 g de protéines. Elle est aussi la plus acide, donc allège le citron de moitié.</p>
+
+  <h3>Sans lactose ou végétale</h3>
+  <p>Un yaourt de soja nature épais fonctionne, à condition de le choisir non sucré. Ajoute une demi-cuillère à café de moutarde pour compenser le goût de soja.</p>
+
+  <h3>Version « sauce blanche kebab »</h3>
+  <p>Remplace la ciboulette par de la menthe, ajoute une pointe de cumin et une cuillère à café de vinaigre blanc. Tu retrouves le profil de la sauce du grec, à un dixième des calories. La recette détaillée est là : <a class="inl" href="/recette/sauce-blanche-kebab-allegee">sauce blanche kebab allégée</a>.</p>
+
+  <h2>Avec quoi la servir</h2>
+  <p>Cette sauce est faite pour les plats croustillants, secs ou épicés, auxquels il manque quelque chose de frais.</p>
+  <ul class="pts">
+    <li>Avec des <a class="inl" href="/recette/nuggets-de-poulet-maison">nuggets de poulet maison</a> ou des <a class="inl" href="/recette/tenders-de-poulet-croustillants">tenders de poulet croustillants</a>, à la place du ketchup.</li>
+    <li>Dans un <a class="inl" href="/recette/wrap-croustillant-au-poulet">wrap croustillant au poulet</a> : étale-la sur la galette avant de garnir, elle empêche le pain de sécher.</li>
+    <li>Avec des <a class="inl" href="/recette/frites-de-patate-douce-croustillantes">frites de patate douce</a> ou des <a class="inl" href="/recette/frites-de-courgette-panees">frites de courgette panées</a>.</li>
+    <li>Sur du <a class="inl" href="/recette/chou-fleur-roti-epice">chou-fleur rôti épicé</a>, où l'acidité fait ressortir les épices.</li>
+    <li>Avec des <a class="inl" href="/recette/falafels-croustillants">falafels croustillants</a> ou en trempette sur un plateau de <a class="inl" href="/recette/houmous-batonnets-de-legumes">bâtonnets de légumes</a>.</li>
+    <li>En remplacement de la vinaigrette sur une salade composée : une cuillère détendue avec un peu d'eau suffit pour tout un saladier.</li>
+  </ul>
+
+  <h2>Combien de temps elle se garde</h2>
+  <p>Deux à trois jours au réfrigérateur, dans un bocal fermé. Au-delà, deux choses arrivent : elle rend de l'eau, et l'ail prend toute la place. Si tu prépares un gros bol pour la semaine, garde l'ail et le citron pour le moment de servir — la base fromage blanc-ciboulette seule tient quatre jours sans bouger.</p>
+  <p>Elle ne se congèle pas. Le fromage blanc se sépare en décongelant et ne revient jamais lisse.</p>
+
+  <h2>Comment la rattraper</h2>
+  <ul class="pts">
+    <li><b>Trop liquide :</b> retire le petit-lait remonté en surface, puis ajoute une cuillère de fromage blanc bien égoutté ou de yaourt grec. Jamais de farine ni de fécule : à froid, elles ne se dissolvent pas et laissent un goût de colle.</li>
+    <li><b>Trop épaisse :</b> une cuillère à café d'eau froide, pas de lait — le lait affadit.</li>
+    <li><b>Trop acide :</b> une demi-cuillère à café de miel ou une pincée de sucre annule l'excès de citron en quelques secondes.</li>
+    <li><b>Fade :</b> ce n'est presque jamais un manque de ciboulette, c'est un manque de sel ou d'acidité. Ajoute du sel d'abord, du citron ensuite, et seulement après de l'herbe.</li>
+    <li><b>Granuleuse :</b> ton fromage blanc était en grains. Deux tours de fouet, ou dix secondes de mixeur plongeant, et elle redevient lisse.</li>
+  </ul>
+
+  <h2>Les erreurs classiques</h2>
+  <ul class="pts">
+    <li>Mixer la ciboulette avec la sauce : elle libère sa chlorophylle, la sauce vire au vert-gris et prend un goût d'herbe coupée.</li>
+    <li>Saler trop tôt et trop fort, en goûtant le mélange encore froid et non reposé.</li>
+    <li>Utiliser un fromage blanc en faisselle sans l'égoutter : la sauce sera systématiquement trop liquide.</li>
+    <li>Mettre une gousse d'ail entière pour une portion. L'ail cru monte en puissance au frais ; ce qui est correct à la préparation devient agressif une heure plus tard.</li>
+    <li>La servir glacée, sortie du frigo à l'instant. Cinq minutes à température ambiante et elle a deux fois plus de goût.</li>
+  </ul>
+
+  <h2>Questions fréquentes</h2>
+  <div class="faq">
+    <h3>Peut-on la préparer à l'avance ?</h3>
+    <p>Oui, et c'est même mieux. Elle a besoin de dix minutes de repos minimum, et elle est à son meilleur entre une et vingt-quatre heures après préparation.</p>
+
+    <h3>Ça marche avec de la ciboulette surgelée ou séchée ?</h3>
+    <p>La surgelée, très bien : ajoute-la encore gelée, elle décongèle dans la sauce. La séchée est un dépannage acceptable — une cuillère à café pour une cuillère à soupe de fraîche, et quinze minutes de repos pour qu'elle se réhydrate.</p>
+
+    <h3>Est-ce que ça convient pendant une sèche ou un rééquilibrage ?</h3>
+    <p>C'est une des sauces les plus intéressantes qui soient dans ce cadre : 7 g de protéines, 1 g de lipides, et assez de goût pour rendre mangeable une assiette de légumes et de blanc de poulet. Le vrai piège d'un régime, ce n'est pas la sauce, c'est de finir par ne plus rien avoir envie de manger.</p>
+
+    <h3>Et pour les enfants ?</h3>
+    <p>Retire l'ail et le citron, ajoute une pointe de moutarde douce. Servie avec des bâtonnets de carotte ou de concombre, c'est la trempette la moins chère et la plus saine du rayon.</p>
+  </div>
 
   <a class="cta" href="/">Calculer mes calories et composer mon menu →</a>
 
-  <div class="also"><h2>À découvrir aussi</h2><a href="/recette/sauce-hoisin-maison">Sauce hoisin maison · 60 kcal</a><a href="/recette/sauce-cacahuete-satay">Sauce cacahuète satay · 120 kcal</a><a href="/recette/sauce-gochujang">Sauce gochujang · 60 kcal</a><a href="/recette/sauce-aigre-douce">Sauce aigre-douce · 80 kcal</a><a href="/recette/chimichurri-rouge">Chimichurri rouge · 90 kcal</a><a href="/recette/sauce-au-poivre-allegee">Sauce au poivre allégée · 80 kcal</a></div>
+  <div class="also"><h2>À découvrir aussi</h2><a href="/recette/sauce-blanche-kebab-allegee">Sauce blanche kebab allégée · 60 kcal</a><a href="/recette/sauce-yaourt-herbes">Sauce yaourt-herbes · 45 kcal</a><a href="/recette/sauce-hoisin-maison">Sauce hoisin maison · 60 kcal</a><a href="/recette/sauce-honey-mustard">Sauce honey mustard · 70 kcal</a><a href="/recette/ketchup-maison-leger">Ketchup maison léger · 40 kcal</a><a href="/recette/sauce-samourai-light">Sauce samouraï light · 80 kcal</a></div>
 
   <footer>
     <a href="/">GrailleLight</a> — Mange ce que tu aimes, atteins ton objectif.<br>
