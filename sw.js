@@ -1,5 +1,5 @@
 /* GrailleLight — permet à l'app de s'ouvrir vite, même avec une mauvaise connexion */
-const CACHE = 'graille-v1';
+const CACHE = 'graille-v2';
 const BASE = ['/', '/index.html', '/icone-192.png', '/icone-512.png'];
 
 self.addEventListener('install', e => {
@@ -42,20 +42,35 @@ self.addEventListener('fetch', e => {
   // on ne touche pas à la mesure d'audience ni aux services extérieurs
   if (url.hostname.includes('googletagmanager') || url.hostname.includes('google-analytics')) return;
 
-  // pages et fichiers du site : on sert la copie locale d'abord (rapide),
-  // et on met à jour en arrière-plan
-  if (url.origin === location.origin) {
+  if (url.origin !== location.origin) return;
+
+  // LA PAGE ELLE-MÊME : on va toujours chercher la version du serveur en premier.
+  // C'est ce qui garantit qu'une mise en ligne est visible immédiatement.
+  // La copie locale ne sert que si la connexion est coupée.
+  const estUnePage = req.mode === 'navigate'
+    || (req.headers.get('accept') || '').includes('text/html');
+
+  if (estUnePage) {
     e.respondWith(
-      caches.match(req).then(cache => {
-        const reseau = fetch(req).then(r => {
+      fetch(req)
+        .then(r => {
           if (r && r.status === 200) {
             const copie = r.clone();
             caches.open(CACHE).then(c => c.put(req, copie)).catch(() => {});
           }
           return r;
-        }).catch(() => cache);
-        return cache || reseau;
-      })
+        })
+        .catch(() => caches.match(req).then(c => c || caches.match('/index.html')))
     );
+    return;
   }
-});
+
+  // le reste (icônes, images, fichiers) : copie locale d'abord pour la vitesse,
+  // mise à jour en arrière-plan
+  e.respondWith(
+    caches.match(req).then(cache => {
+      const reseau = fetch(req).then(r => {
+        if (r && r.status === 200) {
+          const copie = r.clone();
+          caches.open(CACHE).then(c => c.put(req, copie)).catch(() => {});
+        }
