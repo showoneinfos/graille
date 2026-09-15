@@ -1355,19 +1355,49 @@ function searchHay(r){
     (ingL(r)||[]).forEach(i=>{ const o=normIng(i); if(o && o.nom) bouts.push(o.nom); });
     r.__hay = frNorm(bouts.filter(Boolean).join(' '));
     r.__hayLg = lg;
+    r.__motsLg = null;
   }
   return r.__hay;
 }
 function searchTokens(q){
   return frNorm(String(q||'')).split(/[^a-z0-9]+/).filter(t=>t.length>1 && !SEARCH_STOP.has(t));
 }
+/* deux mots se ressemblent s'il n'y a qu'une lettre d'ecart (mc/mac, pate/pates, chevre/chevres) */
+function unEdit(a,b){
+  const la=a.length, lb=b.length;
+  if(Math.abs(la-lb)>1) return false;
+  if(a===b) return true;
+  let i=0,j=0,diff=0;
+  while(i<la && j<lb){
+    if(a[i]===b[j]){ i++; j++; continue; }
+    if(++diff>1) return false;
+    if(la>lb) i++; else if(lb>la) j++; else { i++; j++; }
+  }
+  if(i<la || j<lb) diff++;
+  return diff<=1;
+}
+function searchWords(r){
+  const lg = (typeof LANG!=='undefined') ? LANG : 'fr';
+  if(r.__motsLg !== lg){
+    r.__mots = searchHay(r).split(/[^a-z0-9]+/).filter(m=>m.length>1);
+    r.__motsLg = lg;
+  }
+  return r.__mots;
+}
 function searchMatch(r,tokens){
   const h = searchHay(r);
-  return tokens.every(t =>
-       h.includes(t)                                              // le mot exact
-    || (t.length>3 && h.includes(t.replace(/s$/,'')))              // pluriel tolere
-    || (t.length>=5 && h.includes(t.slice(0,t.length-2)))          // orthographe approchee
-  );
+  return tokens.every(t=>{
+    if(h.includes(t)) return true;                                   // le mot exact
+    if(t.length>3 && h.includes(t.replace(/s$/,''))) return true;     // pluriel tolere
+    const mots = searchWords(r);
+    for(let k=0;k<mots.length;k++){
+      const m = mots[k];
+      if(m.indexOf(t)===0) return true;                              // debut de mot : prima -> primavera
+      if(unEdit(t,m)) return true;                                   // une lettre d'ecart : mc -> mac
+      if(t.length>=5 && m.indexOf(t.slice(0,t.length-2))===0) return true; // fromagere -> fromage
+    }
+    return false;
+  });
 }
 function currentList(){
   const tokens=searchTokens(window.__q);
