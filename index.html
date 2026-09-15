@@ -721,6 +721,24 @@
   .wel-lang .lang-menu{right:0;left:auto}
 
   /* ============ INVITATION A INSTALLER L'APPLICATION ============ */
+  /* ============ CE QU'IL TE RESTE ============ */
+  .reste{background:var(--green-tint);border:1px solid #CDE7D7;border-radius:var(--r);
+    padding:14px 16px;margin-bottom:10px}
+  .reste.over{background:#FFF3E2;border-color:#F3DCB6}
+  .reste-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .reste-num{font-size:30px;font-weight:800;color:var(--green-dark);line-height:1;
+    letter-spacing:-1px;font-variant-numeric:tabular-nums}
+  .reste.over .reste-num{color:#A9611A}
+  .reste-top small{font-size:12px;font-weight:600;color:var(--ink2)}
+  .reste-bar{height:7px;border-radius:999px;background:rgba(14,26,20,.09);
+    overflow:hidden;margin:10px 0 8px}
+  .reste-bar i{display:block;height:100%;width:0;background:var(--green);
+    border-radius:999px;transition:width .25s}
+  .reste.over .reste-bar i{background:var(--amber)}
+  .reste-sub{font-size:11.5px;color:var(--ink2);font-weight:600}
+  .reste-sub b{color:var(--ink);font-variant-numeric:tabular-nums}
+  #sidesReste{color:var(--green-dark);font-weight:700}
+
   /* ============ ACCOMPAGNEMENTS ============ */
   .sides{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
     padding:16px;box-shadow:var(--shadow)}
@@ -1596,6 +1614,34 @@ function sideTotals(){
   });
   return {k:Math.round(k), p, c, l};
 }
+/* bandeau : ce qu'il te restera pour aujourd'hui une fois ce repas compté */
+function resteHTML(){
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(!p) return '';
+  return `<div class="reste" id="resteBox">
+    <div class="reste-top"><span class="reste-num" id="resteNum">0</span><small id="resteLbl">kcal restantes après ce repas</small></div>
+    <div class="reste-bar"><i id="resteFill"></i></div>
+    <div class="reste-sub">Objectif <b id="resteObj">${p.calories}</b> · déjà mangé <b id="resteMange">0</b> · ce repas <b id="resteRepas">0</b></div>
+  </div>`;
+}
+function majReste(kcalRepas){
+  const box=document.getElementById('resteBox'); if(!box) return;
+  const p=loadProfile(); if(!p) return;
+  const mange=consumed();
+  const reste=p.calories-mange-kcalRepas;
+  const num=document.getElementById('resteNum');
+  const lbl=document.getElementById('resteLbl');
+  if(num) num.textContent = reste>=0 ? reste : '+'+Math.abs(reste);
+  if(lbl) lbl.textContent = reste>=0 ? 'kcal restantes après ce repas' : 'kcal au-dessus de ton objectif';
+  box.classList.toggle('over', reste<0);
+  const f=document.getElementById('resteFill');
+  if(f) f.style.width = Math.max(0,Math.min(100,Math.round((mange+kcalRepas)/p.calories*100)))+'%';
+  const a=document.getElementById('resteMange'); if(a) a.textContent=mange;
+  const b=document.getElementById('resteRepas'); if(b) b.textContent=kcalRepas;
+  const c=document.getElementById('resteObj'); if(c) c.textContent=p.calories;
+  const s=document.getElementById('sidesReste');
+  if(s) s.textContent = reste>=0 ? ('· il te restera '+reste+' kcal') : ('· '+Math.abs(reste)+' kcal de trop');
+}
 function sidesHTML(){
   const chips=ACCOMP_GROUPES.map((grp,gi)=>{
     const liste=ACCOMP.filter(a=>a.g===grp);
@@ -1627,7 +1673,7 @@ function sidesSelHTML(){
       <input type="range" data-sl="${i}" min="${a.min}" max="${a.max}" step="${a.pas}" value="${s.g}">
       <div class="side-q"><b>${s.g}</b> g</div>
     </div>`;
-  }).join('')+`<div class="sides-total">Total du repas <b id="sidesTotal">0</b> kcal</div>`;
+  }).join('')+`<div class="sides-total">Total du repas <b id="sidesTotal">0</b> kcal <span id="sidesReste"></span></div>`;
 }
 function renderSidesSel(){
   const box=document.getElementById('sidesSel');
@@ -1727,6 +1773,7 @@ function drawSheet(){
         <div class="macro"><div class="val" id="mGluc">${Math.round(ms.C)}</div><div class="lbl">Gluc.</div></div>
         <div class="macro"><div class="val" id="mLip">${Math.round(ms.F)}</div><div class="lbl">Lip.</div></div>
       </div>
+      ${resteHTML()}
       <div class="block-title">Ajuste tes calories</div>
       <div class="cal-adjust">
         <div class="cal-readout"><span class="cal-num" id="calNum">${activeTarget}</span><span class="cal-unit">kcal</span></div>
@@ -1755,6 +1802,7 @@ function drawSheet(){
   document.getElementById('closeBtn').addEventListener('click',closeSheet);
   const cbb=document.getElementById('closeBtnBas'); if(cbb) cbb.addEventListener('click',closeSheet);
   brancherSides();
+  updateValues();
   const slider=document.getElementById('calSlider');
   slider.addEventListener('input',()=>{activeTarget=+slider.value;updateValues();});
   const mslider=document.getElementById('macroSlider');
@@ -1788,6 +1836,7 @@ function updateValues(){
     el.textContent=`${displayQty(base*fac,el.dataset.unite)} ${el.dataset.unite}`;
   });
   const ak=document.getElementById('addKcal'); if(ak) ak.textContent=activeTarget+st.k;
+  if(typeof majReste==='function') majReste(activeTarget+st.k);
 }
 overlay.addEventListener('click',e=>{if(e.target===overlay)closeSheet();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))closeSheet();});
@@ -3673,6 +3722,11 @@ function detectLang(){
 /* traductions de l'interface du nouveau design (les fichiers lang-XX.js gardent la priorite) */
 const UI_I18N = {
  "en": {
+  "kcal restantes après ce repas": "kcal left after this meal",
+  "kcal au-dessus de ton objectif": "kcal over your goal",
+  "Objectif": "Goal",
+  "déjà mangé": "already eaten",
+  "ce repas": "this meal",
   "Protéines": "Proteins",
   "Masquer la liste": "Hide the list",
   "+ Choisir un accompagnement": "+ Choose a side dish",
@@ -3759,6 +3813,11 @@ const UI_I18N = {
   "calories / jour": "calories / day"
  },
  "es": {
+  "kcal restantes après ce repas": "kcal restantes tras esta comida",
+  "kcal au-dessus de ton objectif": "kcal por encima de tu objetivo",
+  "Objectif": "Objetivo",
+  "déjà mangé": "ya comido",
+  "ce repas": "esta comida",
   "Protéines": "Proteínas",
   "Masquer la liste": "Ocultar la lista",
   "+ Choisir un accompagnement": "+ Elegir una guarnición",
@@ -3845,6 +3904,11 @@ const UI_I18N = {
   "calories / jour": "calorías / día"
  },
  "pt": {
+  "kcal restantes après ce repas": "kcal restantes após esta refeição",
+  "kcal au-dessus de ton objectif": "kcal acima do teu objetivo",
+  "Objectif": "Objetivo",
+  "déjà mangé": "já comido",
+  "ce repas": "esta refeição",
   "Protéines": "Proteínas",
   "Masquer la liste": "Ocultar a lista",
   "+ Choisir un accompagnement": "+ Escolher um acompanhamento",
@@ -3931,6 +3995,11 @@ const UI_I18N = {
   "calories / jour": "calorias / dia"
  },
  "de": {
+  "kcal restantes après ce repas": "kcal übrig nach dieser Mahlzeit",
+  "kcal au-dessus de ton objectif": "kcal über deinem Ziel",
+  "Objectif": "Ziel",
+  "déjà mangé": "schon gegessen",
+  "ce repas": "diese Mahlzeit",
   "Protéines": "Proteine",
   "Masquer la liste": "Liste ausblenden",
   "+ Choisir un accompagnement": "+ Beilage wählen",
