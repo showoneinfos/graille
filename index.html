@@ -1529,6 +1529,26 @@ function macroState(){
    comme le reste des valeurs du site.
    cru = ce qu'il faut acheter pour obtenir 100 g cuits (le riz gonfle). */
 const ACCOMP=[
+ {g:'Protéines', id:'poulet-g',   nom:'Blanc de poulet grillé',  k:165, p:31, c:0,  l:3.6, def:130, min:50, max:350, pas:10, cru:1.3, achat:'Blanc de poulet'},
+ {g:'Protéines', id:'dinde-g',    nom:'Escalope de dinde',       k:135, p:30, c:0,  l:1.5, def:130, min:50, max:350, pas:10, cru:1.3, achat:'Escalope de dinde'},
+ {g:'Protéines', id:'boeuf-5',    nom:'Steak haché 5%',          k:140, p:21, c:0,  l:5,   def:130, min:50, max:350, pas:10, cru:1.25, achat:'Steak haché 5%'},
+ {g:'Protéines', id:'jambon-d',   nom:'Jambon de dinde',         k:105, p:20, c:1,  l:2,   def:80,  min:20, max:250, pas:10, cru:1.0, achat:'Jambon de dinde'},
+ {g:'Protéines', id:'saumon',     nom:'Saumon',                  k:200, p:22, c:0,  l:12,  def:130, min:50, max:350, pas:10, cru:1.2, achat:'Pavé de saumon'},
+ {g:'Protéines', id:'cabillaud',  nom:'Cabillaud',               k:90,  p:20, c:0,  l:0.8, def:150, min:50, max:350, pas:10, cru:1.2, achat:'Cabillaud'},
+ {g:'Protéines', id:'colin',      nom:'Colin',                   k:85,  p:18, c:0,  l:1,   def:150, min:50, max:350, pas:10, cru:1.2, achat:'Colin'},
+ {g:'Protéines', id:'thon-nat',   nom:'Thon au naturel',         k:110, p:25, c:0,  l:1,   def:100, min:30, max:300, pas:10, cru:1.0, achat:'Thon au naturel'},
+ {g:'Protéines', id:'crevettes',  nom:'Crevettes',               k:100, p:20, c:0,  l:1,   def:120, min:50, max:300, pas:10, cru:1.15, achat:'Crevettes'},
+ {g:'Protéines', id:'oeufs-a',    nom:'Œufs',                    k:145, p:13, c:1,  l:10,  def:120, min:50, max:300, pas:10, cru:1.0, achat:'Œufs'},
+ {g:'Protéines', id:'tofu',       nom:'Tofu ferme',              k:145, p:16, c:2,  l:9,   def:150, min:50, max:350, pas:10, cru:1.0, achat:'Tofu ferme'},
+ {g:'Protéines', id:'tempeh',     nom:'Tempeh',                  k:190, p:19, c:8,  l:11,  def:130, min:50, max:300, pas:10, cru:1.0, achat:'Tempeh'},
+ {g:'Protéines', id:'steak-soja', nom:'Steak de soja',           k:170, p:17, c:8,  l:7,   def:100, min:50, max:300, pas:10, cru:1.0, achat:'Steak de soja'},
+ {g:'Protéines', id:'falafels-a', nom:'Falafels',                k:220, p:7,  c:20, l:13,  def:120, min:50, max:300, pas:10, cru:1.0, achat:'Falafels'},
+ {g:'Protéines', id:'haricots-r', nom:'Haricots rouges',         k:120, p:8,  c:18, l:0.5, def:150, min:50, max:350, pas:10, cru:0.45, achat:'Haricots rouges'},
+ {g:'Protéines', id:'fb-0',       nom:'Fromage blanc 0%',        k:47,  p:8,  c:4,  l:0.2, def:150, min:50, max:400, pas:10, cru:1.0, achat:'Fromage blanc 0%'},
+ {g:'Protéines', id:'skyr-a',     nom:'Skyr',                    k:60,  p:11, c:4,  l:0.2, def:150, min:50, max:400, pas:10, cru:1.0, achat:'Skyr'},
+ {g:'Protéines', id:'halloumi',   nom:'Halloumi',                k:320, p:22, c:2,  l:25,  def:80,  min:20, max:200, pas:10, cru:1.0, achat:'Halloumi'},
+ {g:'Protéines', id:'whey-a',     nom:'Whey',                    k:380, p:80, c:7,  l:5,   def:30,  min:10, max:100, pas:5,  cru:1.0, achat:'Whey'},
+
  {g:'Féculents', id:'riz',        nom:'Riz blanc',            k:130, p:2.4, c:28, l:0.3, def:150, min:50, max:400, pas:10, cru:0.33, achat:'Riz'},
  {g:'Féculents', id:'riz-complet',nom:'Riz complet',          k:120, p:2.6, c:23, l:1.0, def:150, min:50, max:400, pas:10, cru:0.33, achat:'Riz complet'},
  {g:'Féculents', id:'pates',      nom:'Pâtes',                k:130, p:5.0, c:25, l:0.6, def:150, min:50, max:400, pas:10, cru:0.40, achat:'Pâtes'},
@@ -1561,7 +1581,7 @@ const ACCOMP=[
  {g:'Sauces', id:'s-bbq',       nom:'Sauce barbecue',         k:150, p:1.0, c:35, l:0.5, def:30, min:10, max:120, pas:5, cru:1.0, achat:'Sauce barbecue'},
  {g:'Sauces', id:'s-pesto',     nom:'Pesto',                  k:380, p:5.0, c:5,  l:38,  def:25, min:5,  max:100, pas:5, cru:1.0, achat:'Pesto'}
 ];
-const ACCOMP_GROUPES=['Féculents','Légumes','Sauces'];
+const ACCOMP_GROUPES=['Protéines','Féculents','Légumes','Sauces'];
 let sideSel=[];   /* [{id, g}] — les accompagnements choisis pour la fiche ouverte */
 
 function accompPar(id){ return ACCOMP.find(a=>a.id===id); }
@@ -3646,6 +3666,7 @@ function detectLang(){
 /* traductions de l'interface du nouveau design (les fichiers lang-XX.js gardent la priorite) */
 const UI_I18N = {
  "en": {
+  "Protéines": "Proteins",
   "Masquer la liste": "Hide the list",
   "+ Choisir un accompagnement": "+ Choose a side dish",
   "Accompagnement": "Side dish",
@@ -3731,6 +3752,7 @@ const UI_I18N = {
   "calories / jour": "calories / day"
  },
  "es": {
+  "Protéines": "Proteínas",
   "Masquer la liste": "Ocultar la lista",
   "+ Choisir un accompagnement": "+ Elegir una guarnición",
   "Accompagnement": "Guarnición",
@@ -3816,6 +3838,7 @@ const UI_I18N = {
   "calories / jour": "calorías / día"
  },
  "pt": {
+  "Protéines": "Proteínas",
   "Masquer la liste": "Ocultar a lista",
   "+ Choisir un accompagnement": "+ Escolher um acompanhamento",
   "Accompagnement": "Acompanhamento",
@@ -3901,6 +3924,7 @@ const UI_I18N = {
   "calories / jour": "calorias / dia"
  },
  "de": {
+  "Protéines": "Proteine",
   "Masquer la liste": "Liste ausblenden",
   "+ Choisir un accompagnement": "+ Beilage wählen",
   "Accompagnement": "Beilage",
