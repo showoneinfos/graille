@@ -719,6 +719,39 @@
   .wel-lang .lang-menu{right:0;left:auto}
 
   /* ============ INVITATION A INSTALLER L'APPLICATION ============ */
+  /* ============ ACCOMPAGNEMENTS ============ */
+  .sides{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:16px;box-shadow:var(--shadow)}
+  .side-open{width:100%;padding:13px;border-radius:13px;border:1.5px dashed var(--line);
+    background:var(--surface2);color:var(--green-dark);font-weight:700;font-size:14px}
+  .side-open:hover{border-color:var(--green);background:var(--green-tint)}
+  .sides-list[hidden]{display:none}
+  .sides-list{margin-top:14px}
+  .sides-hint{font-size:12.5px;color:var(--ink2);margin-bottom:14px;line-height:1.5}
+  .sides-grp{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);
+    font-weight:800;margin:14px 0 8px}
+  .sides-grp.first{margin-top:0}
+  .sides-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .side-chip{padding:8px 13px;border-radius:999px;border:1.5px solid var(--line);
+    background:var(--surface);font-size:12.5px;font-weight:600;color:var(--ink);transition:all .15s}
+  .side-chip:hover{border-color:var(--green);color:var(--green)}
+  .side-chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+  .side-row{border-top:1px solid var(--line2);padding-top:14px;margin-top:14px}
+  .side-row:first-child{border-top:none;padding-top:0;margin-top:0}
+  .side-row-h{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700}
+  .side-row-h .side-k{margin-left:auto;color:var(--green);font-weight:800;white-space:nowrap;
+    font-variant-numeric:tabular-nums}
+  .side-rm{width:26px;height:26px;flex:0 0 auto;border-radius:50%;border:1px solid var(--line);
+    color:var(--ink2);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .side-rm:hover{border-color:var(--danger);color:var(--danger)}
+  .side-q{font-size:12.5px;color:var(--ink2);font-weight:600;margin-top:4px}
+  .side-q b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .sides-sel{margin-top:4px}
+  .sides-total{display:flex;align-items:baseline;gap:8px;margin-top:16px;padding-top:14px;
+    border-top:1px solid var(--line);font-size:12.5px;color:var(--ink2)}
+  .sides-total b{font-size:20px;color:var(--green);font-weight:800;letter-spacing:-.5px;
+    font-variant-numeric:tabular-nums}
+
   .installbar{display:flex;align-items:center;gap:12px;margin-top:18px;padding:13px 14px;
     border-radius:16px;background:rgba(139,221,79,.12);border:1px solid rgba(139,221,79,.32)}
   .installbar[hidden]{display:none}
@@ -1491,7 +1524,140 @@ function macroState(){
   const newP=P0+delta, newC=C0-delta;
   return {P:newP, C:newC, F:F0, f, fProt:(P0>0?f*newP/P0:f), fCarb:(C0>0?f*newC/C0:f)};
 }
-function openSheet(r,forced){activeRecipe=r;macroBias=0;activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
+/* ================= ACCOMPAGNEMENTS =================
+   Valeurs pour 100 g, prêt à manger (cuit). Ce sont des estimations,
+   comme le reste des valeurs du site.
+   cru = ce qu'il faut acheter pour obtenir 100 g cuits (le riz gonfle). */
+const ACCOMP=[
+ {g:'Féculents', id:'riz',        nom:'Riz blanc',            k:130, p:2.4, c:28, l:0.3, def:150, min:50, max:400, pas:10, cru:0.33, achat:'Riz'},
+ {g:'Féculents', id:'riz-complet',nom:'Riz complet',          k:120, p:2.6, c:23, l:1.0, def:150, min:50, max:400, pas:10, cru:0.33, achat:'Riz complet'},
+ {g:'Féculents', id:'pates',      nom:'Pâtes',                k:130, p:5.0, c:25, l:0.6, def:150, min:50, max:400, pas:10, cru:0.40, achat:'Pâtes'},
+ {g:'Féculents', id:'semoule',    nom:'Semoule',              k:120, p:4.0, c:25, l:0.2, def:150, min:50, max:400, pas:10, cru:0.35, achat:'Semoule'},
+ {g:'Féculents', id:'quinoa',     nom:'Quinoa',               k:120, p:4.4, c:21, l:1.9, def:150, min:50, max:400, pas:10, cru:0.35, achat:'Quinoa'},
+ {g:'Féculents', id:'boulgour',   nom:'Boulgour',             k:110, p:3.0, c:23, l:0.2, def:150, min:50, max:400, pas:10, cru:0.35, achat:'Boulgour'},
+ {g:'Féculents', id:'pdt',        nom:'Pommes de terre vapeur',k:85, p:2.0, c:18, l:0.1, def:200, min:50, max:500, pas:10, cru:1.05, achat:'Pommes de terre'},
+ {g:'Féculents', id:'puree',      nom:'Purée maison',         k:90,  p:2.0, c:15, l:2.0, def:200, min:50, max:500, pas:10, cru:1.0,  achat:'Pommes de terre'},
+ {g:'Féculents', id:'lentilles',  nom:'Lentilles',            k:115, p:9.0, c:17, l:0.4, def:150, min:50, max:400, pas:10, cru:0.40, achat:'Lentilles'},
+ {g:'Féculents', id:'pois-chiches',nom:'Pois chiches',        k:140, p:8.0, c:20, l:2.6, def:150, min:50, max:400, pas:10, cru:0.45, achat:'Pois chiches'},
+ {g:'Féculents', id:'pain',       nom:'Pain complet',         k:250, p:9.0, c:45, l:3.0, def:50,  min:20, max:200, pas:5,  cru:1.0,  achat:'Pain complet'},
+
+ {g:'Légumes', id:'frites-pd',  nom:'Frites de patate douce', k:120, p:1.6, c:22, l:3.0, def:150, min:50, max:400, pas:10, cru:1.1, achat:'Patate douce'},
+ {g:'Légumes', id:'frites-four',nom:'Frites au four',         k:150, p:2.5, c:26, l:4.0, def:150, min:50, max:400, pas:10, cru:1.1, achat:'Pommes de terre'},
+ {g:'Légumes', id:'legumes-rotis',nom:'Légumes rôtis',        k:75,  p:2.0, c:8,  l:3.5, def:200, min:50, max:500, pas:10, cru:1.2, achat:'Légumes à rôtir'},
+ {g:'Légumes', id:'ratatouille',nom:'Ratatouille',            k:60,  p:1.3, c:6,  l:3.5, def:200, min:50, max:500, pas:10, cru:1.2, achat:'Légumes à ratatouille'},
+ {g:'Légumes', id:'haricots',   nom:'Haricots verts',         k:30,  p:2.0, c:4,  l:0.2, def:200, min:50, max:500, pas:10, cru:1.0, achat:'Haricots verts'},
+ {g:'Légumes', id:'brocoli',    nom:'Brocoli vapeur',         k:35,  p:2.8, c:4,  l:0.4, def:200, min:50, max:500, pas:10, cru:1.0, achat:'Brocoli'},
+ {g:'Légumes', id:'courgettes', nom:'Courgettes poêlées',     k:45,  p:1.2, c:3,  l:3.0, def:200, min:50, max:500, pas:10, cru:1.1, achat:'Courgette'},
+ {g:'Légumes', id:'carottes',   nom:'Carottes',               k:35,  p:0.8, c:8,  l:0.2, def:200, min:50, max:500, pas:10, cru:1.0, achat:'Carotte'},
+ {g:'Légumes', id:'epinards',   nom:'Épinards',               k:25,  p:2.9, c:1,  l:0.4, def:150, min:50, max:400, pas:10, cru:1.3, achat:'Épinards'},
+ {g:'Légumes', id:'salade',     nom:'Salade verte',           k:15,  p:1.0, c:1,  l:0.2, def:100, min:30, max:300, pas:10, cru:1.0, achat:'Salade'},
+ {g:'Légumes', id:'poelee',     nom:'Poêlée de légumes',      k:55,  p:1.8, c:6,  l:2.5, def:200, min:50, max:500, pas:10, cru:1.1, achat:'Légumes en poêlée'},
+
+ {g:'Sauces', id:'s-tomate',    nom:'Sauce tomate',           k:45,  p:1.6, c:7,  l:1.0, def:80, min:20, max:200, pas:5, cru:1.0, achat:'Sauce tomate'},
+ {g:'Sauces', id:'s-fb',        nom:'Sauce fromage blanc-ciboulette', k:50, p:7.0, c:4, l:1.0, def:40, min:10, max:150, pas:5, cru:1.0, achat:'Fromage blanc 0%'},
+ {g:'Sauces', id:'s-kebab',     nom:'Sauce blanche allégée',  k:60,  p:6.0, c:5,  l:2.0, def:40, min:10, max:150, pas:5, cru:1.0, achat:'Yaourt grec'},
+ {g:'Sauces', id:'s-curry',     nom:'Sauce curry légère',     k:70,  p:4.0, c:6,  l:3.0, def:40, min:10, max:150, pas:5, cru:1.0, achat:'Yaourt nature'},
+ {g:'Sauces', id:'s-soja',      nom:'Sauce soja',             k:60,  p:6.0, c:5,  l:0.1, def:20, min:5,  max:80,  pas:5, cru:1.0, achat:'Sauce soja'},
+ {g:'Sauces', id:'s-bbq',       nom:'Sauce barbecue',         k:150, p:1.0, c:35, l:0.5, def:30, min:10, max:120, pas:5, cru:1.0, achat:'Sauce barbecue'},
+ {g:'Sauces', id:'s-pesto',     nom:'Pesto',                  k:380, p:5.0, c:5,  l:38,  def:25, min:5,  max:100, pas:5, cru:1.0, achat:'Pesto'}
+];
+const ACCOMP_GROUPES=['Féculents','Légumes','Sauces'];
+let sideSel=[];   /* [{id, g}] — les accompagnements choisis pour la fiche ouverte */
+
+function accompPar(id){ return ACCOMP.find(a=>a.id===id); }
+function sideTotals(){
+  let k=0,p=0,c=0,l=0;
+  sideSel.forEach(s=>{
+    const a=accompPar(s.id); if(!a) return;
+    const f=s.g/100;
+    k+=a.k*f; p+=a.p*f; c+=a.c*f; l+=a.l*f;
+  });
+  return {k:Math.round(k), p, c, l};
+}
+function sidesHTML(){
+  const chips=ACCOMP_GROUPES.map((grp,gi)=>{
+    const liste=ACCOMP.filter(a=>a.g===grp);
+    return `<div class="sides-grp${gi===0?' first':''}">${grp}</div>
+      <div class="sides-chips">`+liste.map(a=>
+        `<button type="button" class="side-chip" data-side="${a.id}" aria-pressed="${sideSel.some(s=>s.id===a.id)}">${a.nom}</button>`
+      ).join('')+`</div>`;
+  }).join('');
+  return `<div class="sides">
+    <button type="button" class="side-open" id="sidesOpen">+ Choisir un accompagnement</button>
+    <div class="sides-list" id="sidesList" hidden>
+      <p class="sides-hint">Ajoute un féculent, un légume ou une sauce. Les calories et la liste de courses suivent.</p>
+      ${chips}
+    </div>
+    <div class="sides-sel" id="sidesSel"></div>
+  </div>`;
+}
+function sidesSelHTML(){
+  if(!sideSel.length) return '';
+  return sideSel.map((s,i)=>{
+    const a=accompPar(s.id); if(!a) return '';
+    const k=Math.round(a.k*s.g/100);
+    return `<div class="side-row">
+      <div class="side-row-h">
+        <span>${a.nom}</span>
+        <span class="side-k">${k} kcal</span>
+        <button type="button" class="side-rm" data-rm="${i}" aria-label="Retirer">×</button>
+      </div>
+      <input type="range" data-sl="${i}" min="${a.min}" max="${a.max}" step="${a.pas}" value="${s.g}">
+      <div class="side-q"><b>${s.g}</b> g</div>
+    </div>`;
+  }).join('')+`<div class="sides-total">Total du repas <b id="sidesTotal">0</b> kcal</div>`;
+}
+function renderSidesSel(){
+  const box=document.getElementById('sidesSel');
+  if(!box) return;
+  box.innerHTML=sidesSelHTML();
+  box.querySelectorAll('[data-sl]').forEach(sl=>sl.addEventListener('input',()=>{
+    const i=+sl.dataset.sl; sideSel[i].g=+sl.value;
+    const row=sl.closest('.side-row');
+    const a=accompPar(sideSel[i].id);
+    row.querySelector('.side-q b').textContent=sideSel[i].g;
+    row.querySelector('.side-k').textContent=Math.round(a.k*sideSel[i].g/100)+' kcal';
+    updateValues();
+  }));
+  box.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{
+    sideSel.splice(+b.dataset.rm,1);
+    majChipsSides(); renderSidesSel(); updateValues();
+  }));
+  updateValues();
+}
+function majChipsSides(){
+  document.querySelectorAll('.side-chip').forEach(c=>
+    c.setAttribute('aria-pressed', sideSel.some(s=>s.id===c.dataset.side)));
+}
+function brancherSides(){
+  const bt=document.getElementById('sidesOpen'), li=document.getElementById('sidesList');
+  if(bt && li) bt.addEventListener('click',()=>{
+    li.hidden=!li.hidden;
+    bt.textContent = li.hidden ? '+ Choisir un accompagnement' : 'Masquer la liste';
+  });
+  document.querySelectorAll('.side-chip').forEach(c=>c.addEventListener('click',()=>{
+    const id=c.dataset.side, i=sideSel.findIndex(s=>s.id===id);
+    if(i>=0) sideSel.splice(i,1);
+    else { const a=accompPar(id); if(a) sideSel.push({id, g:a.def}); }
+    majChipsSides(); renderSidesSel();
+  }));
+  renderSidesSel();
+}
+/* les accompagnements partent aussi dans la liste de courses */
+function ajouterSidesAuxCourses(){
+  sideSel.forEach(s=>{
+    const a=accompPar(s.id); if(!a) return;
+    const gAchat=Math.max(1, Math.round(s.g*(a.cru||1)));
+    mergeShop(a.achat, gAchat, 'g', false);
+  });
+  if(sideSel.length) saveShop();
+}
+function nomAvecSides(r){
+  if(!sideSel.length) return nomL(r);
+  return nomL(r)+' + '+sideSel.map(s=>(accompPar(s.id)||{}).nom).filter(Boolean).join(' + ');
+}
+
+function openSheet(r,forced){activeRecipe=r;macroBias=0;sideSel=[];activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
 function closeSheet(){overlay.classList.remove('open');document.body.style.overflow='';}
 function factorFor(r){return activeTarget/r.calories;}
 function heroHTML(r){
@@ -1547,6 +1713,8 @@ function drawSheet(){
         <div class="cal-hint">Les quantités et les macros s'ajustent automatiquement.</div>
       </div>
       ${macroBlock}
+      <div class="block-title">Accompagnement</div>
+      ${sidesHTML()}
       <button class="add-day" id="addDay">Ajouter à ma journée · +<span id="addKcal">${activeTarget}</span> kcal</button>
       <div class="block-title">Ingrédients</div>
       <div class="serve-note">Quantités pour 1 personne · ajustées à tes réglages</div>
@@ -1564,6 +1732,7 @@ function drawSheet(){
     </div>`;
   document.getElementById('closeBtn').addEventListener('click',closeSheet);
   const cbb=document.getElementById('closeBtnBas'); if(cbb) cbb.addEventListener('click',closeSheet);
+  brancherSides();
   const slider=document.getElementById('calSlider');
   slider.addEventListener('input',()=>{activeTarget=+slider.value;updateValues();});
   const mslider=document.getElementById('macroSlider');
@@ -1571,8 +1740,10 @@ function drawSheet(){
   const addBtn=document.getElementById('addDay');
   addBtn.addEventListener('click',()=>{
     if(!loadProfile()){ closeSheet(); openOnboard(); return; }
-    addToJournal(activeRecipe.id, activeRecipe.nom, activeTarget);
+    const st=sideTotals();
+    addToJournal(activeRecipe.id, nomAvecSides(activeRecipe), activeTarget+st.k);
     addRecipeToShop(activeRecipe);
+    ajouterSidesAuxCourses();
     updateShopBadge();
     addBtn.textContent='Ajouté à ta journée + liste ✓'; addBtn.classList.add('done');
     setTimeout(closeSheet, 650);
@@ -1580,18 +1751,20 @@ function drawSheet(){
 }
 function updateValues(){
   const r=activeRecipe, ms=macroState();
+  const st=(typeof sideTotals==='function')?sideTotals():{k:0,p:0,c:0,l:0};
   document.getElementById('calNum').textContent=activeTarget;
-  document.getElementById('mKcal').textContent=activeTarget;
-  document.getElementById('mProt').textContent=Math.round(ms.P);
-  document.getElementById('mGluc').textContent=Math.round(ms.C);
-  document.getElementById('mLip').textContent=Math.round(ms.F);
+  document.getElementById('mKcal').textContent=activeTarget+st.k;
+  document.getElementById('mProt').textContent=Math.round(ms.P+st.p);
+  document.getElementById('mGluc').textContent=Math.round(ms.C+st.c);
+  document.getElementById('mLip').textContent=Math.round(ms.F+st.l);
+  const tot=document.getElementById('sidesTotal'); if(tot) tot.textContent=activeTarget+st.k;
   document.querySelectorAll('.ingredients .qty').forEach(el=>{
     const base=parseFloat(el.dataset.base);
     const cat=el.dataset.cat;
     const fac=cat==='prot'?ms.fProt:(cat==='carb'?ms.fCarb:ms.f);
     el.textContent=`${displayQty(base*fac,el.dataset.unite)} ${el.dataset.unite}`;
   });
-  const ak=document.getElementById('addKcal'); if(ak) ak.textContent=activeTarget;
+  const ak=document.getElementById('addKcal'); if(ak) ak.textContent=activeTarget+st.k;
 }
 overlay.addEventListener('click',e=>{if(e.target===overlay)closeSheet();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))closeSheet();});
@@ -3473,6 +3646,14 @@ function detectLang(){
 /* traductions de l'interface du nouveau design (les fichiers lang-XX.js gardent la priorite) */
 const UI_I18N = {
  "en": {
+  "Masquer la liste": "Hide the list",
+  "+ Choisir un accompagnement": "+ Choose a side dish",
+  "Accompagnement": "Side dish",
+  "Ajoute un féculent, un légume ou une sauce. Les calories et la liste de courses suivent.": "Add a starch, a vegetable or a sauce. Calories and shopping list follow.",
+  "Féculents": "Starches",
+  "Légumes": "Vegetables",
+  "Sauces": "Sauces",
+  "Total du repas": "Meal total",
   "Ajoute GrailleLight à ton écran d'accueil": "Add GrailleLight to your home screen",
   "Tu le retrouveras comme une application, sans passer par Google.": "You'll find it like an app, without going through Google.",
   "Ajouter": "Add",
@@ -3550,6 +3731,14 @@ const UI_I18N = {
   "calories / jour": "calories / day"
  },
  "es": {
+  "Masquer la liste": "Ocultar la lista",
+  "+ Choisir un accompagnement": "+ Elegir una guarnición",
+  "Accompagnement": "Guarnición",
+  "Ajoute un féculent, un légume ou une sauce. Les calories et la liste de courses suivent.": "Añade una fécula, una verdura o una salsa. Las calorías y la lista de la compra se ajustan solas.",
+  "Féculents": "Féculas",
+  "Légumes": "Verduras",
+  "Sauces": "Salsas",
+  "Total du repas": "Total de la comida",
   "Ajoute GrailleLight à ton écran d'accueil": "Añade GrailleLight a tu pantalla de inicio",
   "Tu le retrouveras comme une application, sans passer par Google.": "Lo encontrarás como una aplicación, sin pasar por Google.",
   "Ajouter": "Añadir",
@@ -3627,6 +3816,14 @@ const UI_I18N = {
   "calories / jour": "calorías / día"
  },
  "pt": {
+  "Masquer la liste": "Ocultar a lista",
+  "+ Choisir un accompagnement": "+ Escolher um acompanhamento",
+  "Accompagnement": "Acompanhamento",
+  "Ajoute un féculent, un légume ou une sauce. Les calories et la liste de courses suivent.": "Adiciona um hidrato, um legume ou um molho. As calorias e a lista de compras acompanham.",
+  "Féculents": "Hidratos",
+  "Légumes": "Legumes",
+  "Sauces": "Molhos",
+  "Total du repas": "Total da refeição",
   "Ajoute GrailleLight à ton écran d'accueil": "Adiciona o GrailleLight ao teu ecrã principal",
   "Tu le retrouveras comme une application, sans passer par Google.": "Vais encontrá-lo como uma aplicação, sem passar pelo Google.",
   "Ajouter": "Adicionar",
@@ -3704,6 +3901,14 @@ const UI_I18N = {
   "calories / jour": "calorias / dia"
  },
  "de": {
+  "Masquer la liste": "Liste ausblenden",
+  "+ Choisir un accompagnement": "+ Beilage wählen",
+  "Accompagnement": "Beilage",
+  "Ajoute un féculent, un légume ou une sauce. Les calories et la liste de courses suivent.": "Füge eine Beilage, ein Gemüse oder eine Sauce hinzu. Kalorien und Einkaufsliste passen sich an.",
+  "Féculents": "Beilagen",
+  "Légumes": "Gemüse",
+  "Sauces": "Saucen",
+  "Total du repas": "Mahlzeit gesamt",
   "Ajoute GrailleLight à ton écran d'accueil": "Füge GrailleLight zu deinem Startbildschirm hinzu",
   "Tu le retrouveras comme une application, sans passer par Google.": "Du findest es wie eine App, ganz ohne Google.",
   "Ajouter": "Hinzufügen",
