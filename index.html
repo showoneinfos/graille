@@ -197,6 +197,8 @@
   .trk-item:last-child{border-bottom:none}
   .trk-item .nm{flex:1;color:#fff;font-weight:600;text-align:left;font-size:inherit}
   .trk-item .nm:hover{text-decoration:underline}
+  .trk-item .nm small{display:block;font-weight:600;font-size:11.5px;line-height:1.35;
+    color:rgba(255,255,255,.7);margin-top:3px}
   .trk-item .k{color:rgba(255,255,255,.8);font-weight:700;font-size:12.5px;white-space:nowrap}
   .trk-item .trk-rm{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.3);
     color:#fff;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -1677,7 +1679,7 @@ function nomAvecSides(r){
   return nomL(r)+' + '+sideSel.map(s=>(accompPar(s.id)||{}).nom).filter(Boolean).join(' + ');
 }
 
-function openSheet(r,forced){activeRecipe=r;macroBias=0;sideSel=[];activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
+function openSheet(r,forced,sides){activeRecipe=r;macroBias=0;sideSel=(sides||[]).map(s=>({id:s.id,g:s.g}));activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
 function closeSheet(){overlay.classList.remove('open');document.body.style.overflow='';}
 function factorFor(r){return activeTarget/r.calories;}
 function heroHTML(r){
@@ -1761,7 +1763,8 @@ function drawSheet(){
   addBtn.addEventListener('click',()=>{
     if(!loadProfile()){ closeSheet(); openOnboard(); return; }
     const st=sideTotals();
-    addToJournal(activeRecipe.id, nomAvecSides(activeRecipe), activeTarget+st.k);
+    addToJournal(activeRecipe.id, nomL(activeRecipe), activeTarget+st.k, activeTarget,
+                 sideSel.map(s=>({id:s.id, g:s.g})));
     addRecipeToShop(activeRecipe);
     ajouterSidesAuxCourses();
     updateShopBadge();
@@ -2238,7 +2241,7 @@ document.getElementById('menuGen').addEventListener('click',()=>{ if(menuDone) a
   }
 })();
 function consumed(){return JOURNAL.items.reduce((s,i)=>s+i.kcal,0);}
-function addToJournal(id,nom,kcal){JOURNAL.items.push({id,nom,kcal});saveJournal(JOURNAL);renderTracker();}
+function addToJournal(id,nom,kcal,base,sides){JOURNAL.items.push({id,nom,kcal,base:(base!=null?base:kcal),sides:(sides||[])});saveJournal(JOURNAL);renderTracker();}
 function resetJournal(){JOURNAL={date:today(),items:[]};saveJournal(JOURNAL);renderTracker();}
 function removeFromJournal(i){JOURNAL.items.splice(i,1);saveJournal(JOURNAL);renderTracker();}
 
@@ -2257,7 +2260,10 @@ function renderTracker(){
   const over=reste<0;
   const n=JOURNAL.items.length;
   const liste = n ? `<div class="trk-list-title">Mes recettes du jour</div>`+
-    `<div class="trk-list">`+JOURNAL.items.map((it,i)=>`<div class="trk-item"><button class="nm" data-id="${it.id}" data-k="${it.kcal}">${it.nom}</button><span class="k">${it.kcal} kcal</span><button class="trk-rm" data-i="${i}" aria-label="Retirer">×</button></div>`).join('')+`</div>`+
+    `<div class="trk-list">`+JOURNAL.items.map((it,i)=>{
+      const det=(it.sides||[]).map(s=>{const a=accompPar(s.id); return a? a.nom+' '+s.g+' g':'';}).filter(Boolean).join(' · ');
+      return `<div class="trk-item"><button class="nm" data-j="${i}">${it.nom}${det?`<small>${det}</small>`:''}</button><span class="k">${it.kcal} kcal</span><button class="trk-rm" data-i="${i}" aria-label="Retirer">×</button></div>`;
+    }).join('')+`</div>`+
     `<button class="trk-reset" id="trkReset">Vider mes recettes du jour</button>` : '';
   el.innerHTML=`<div class="trk">
     <div class="trk-top">
@@ -2291,8 +2297,9 @@ function renderTracker(){
   const rb=document.getElementById('trkReset'); if(rb) rb.addEventListener('click',resetJournal);
   el.querySelectorAll('.trk-rm').forEach(b=>b.addEventListener('click',()=>removeFromJournal(+b.dataset.i)));
   el.querySelectorAll('.trk-item .nm').forEach(b=>b.addEventListener('click',()=>{
-    const r=RECETTES.find(x=>x.id===b.dataset.id);
-    if(r) openSheet(r, +b.dataset.k);
+    const it=JOURNAL.items[+b.dataset.j]; if(!it) return;
+    const r=RECETTES.find(x=>x.id===it.id);
+    if(r) openSheet(r, (it.base!=null?it.base:it.kcal), it.sides||[]);
   }));
 }
 
