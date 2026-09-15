@@ -1529,6 +1529,7 @@ sortSel.addEventListener('change',update);
 const overlay=document.getElementById('overlay');
 const sheet=document.getElementById('sheet');
 let activeRecipe=null, activeTarget=0, macroBias=0;
+let journalIdx=null;   /* index de la ligne de "Ma journee" en cours de modification */
 const CAL_MIN=100,CAL_MAX=1200,CAL_STEP=5;
 const PROT_KW=["poulet","dinde","boeuf","saumon","thon","cabillaud","colin","crevette","oeuf","tofu","halloumi","jambon","bacon de dinde","whey","saucisse","falafel","chorizo","fromage","cottage","skyr","ricotta","feta","mozzarella","cheddar","parmesan","emmental","chevre","yaourt","lentille","pois chiche","haricots rouge","haricots noir","edamame","proteine"];
 const CARB_KW=Object.values(FEC_KW).flat();
@@ -1725,7 +1726,7 @@ function nomAvecSides(r){
   return nomL(r)+' + '+sideSel.map(s=>(accompPar(s.id)||{}).nom).filter(Boolean).join(' + ');
 }
 
-function openSheet(r,forced,sides){activeRecipe=r;macroBias=0;sideSel=(sides||[]).map(s=>({id:s.id,g:s.g}));activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
+function openSheet(r,forced,sides,idxJournal){activeRecipe=r;macroBias=0;journalIdx=(idxJournal==null?null:idxJournal);sideSel=(sides||[]).map(s=>({id:s.id,g:s.g}));activeTarget=Math.min(CAL_MAX,Math.max(CAL_MIN, forced || userMealTarget || r.calories));drawSheet();overlay.classList.add('open');document.body.style.overflow='hidden';sheet.scrollTop=0;}
 function closeSheet(){overlay.classList.remove('open');document.body.style.overflow='';}
 function factorFor(r){return activeTarget/r.calories;}
 function heroHTML(r){
@@ -1784,7 +1785,7 @@ function drawSheet(){
       ${macroBlock}
       <div class="block-title">Accompagnement</div>
       ${sidesHTML()}
-      <button class="add-day" id="addDay">Ajouter à ma journée · +<span id="addKcal">${activeTarget}</span> kcal</button>
+      <button class="add-day" id="addDay">${journalIdx!=null?'Mettre à jour ma journée · ':'Ajouter à ma journée · +'}<span id="addKcal">${activeTarget}</span> kcal</button>
       <div class="block-title">Ingrédients</div>
       <div class="serve-note">Quantités pour 1 personne · ajustées à tes réglages</div>
       <ul class="ingredients">${ingList}</ul>
@@ -1811,12 +1812,23 @@ function drawSheet(){
   addBtn.addEventListener('click',()=>{
     if(!loadProfile()){ closeSheet(); openOnboard(); return; }
     const st=sideTotals();
-    addToJournal(activeRecipe.id, nomL(activeRecipe), activeTarget+st.k, activeTarget,
-                 sideSel.map(s=>({id:s.id, g:s.g})));
-    addRecipeToShop(activeRecipe);
-    ajouterSidesAuxCourses();
+    const lignes=sideSel.map(s=>({id:s.id, g:s.g}));
+    const enModif = (journalIdx!=null && JOURNAL.items[journalIdx] && JOURNAL.items[journalIdx].id===activeRecipe.id);
+    if(enModif){
+      /* on remplace la ligne d'ou l'on vient, sans la dupliquer.
+         La liste de courses a deja recu les ingredients : on n'y retouche pas. */
+      JOURNAL.items[journalIdx]={id:activeRecipe.id, nom:nomL(activeRecipe), kcal:activeTarget+st.k,
+                                 base:activeTarget, sides:lignes};
+      saveJournal(JOURNAL); renderTracker();
+      addBtn.textContent='Journée mise à jour ✓';
+    } else {
+      addToJournal(activeRecipe.id, nomL(activeRecipe), activeTarget+st.k, activeTarget, lignes);
+      addRecipeToShop(activeRecipe);
+      ajouterSidesAuxCourses();
+      addBtn.textContent='Ajouté à ta journée + liste ✓';
+    }
     updateShopBadge();
-    addBtn.textContent='Ajouté à ta journée + liste ✓'; addBtn.classList.add('done');
+    addBtn.classList.add('done');
     setTimeout(closeSheet, 650);
   });
 }
@@ -2348,7 +2360,7 @@ function renderTracker(){
   el.querySelectorAll('.trk-item .nm').forEach(b=>b.addEventListener('click',()=>{
     const it=JOURNAL.items[+b.dataset.j]; if(!it) return;
     const r=RECETTES.find(x=>x.id===it.id);
-    if(r) openSheet(r, (it.base!=null?it.base:it.kcal), it.sides||[]);
+    if(r) openSheet(r, (it.base!=null?it.base:it.kcal), it.sides||[], +b.dataset.j);
   }));
 }
 
@@ -3722,6 +3734,7 @@ function detectLang(){
 /* traductions de l'interface du nouveau design (les fichiers lang-XX.js gardent la priorite) */
 const UI_I18N = {
  "en": {
+  "Mettre à jour ma journée ·": "Update my day ·",
   "kcal restantes après ce repas": "kcal left after this meal",
   "kcal au-dessus de ton objectif": "kcal over your goal",
   "Objectif": "Goal",
@@ -3813,6 +3826,7 @@ const UI_I18N = {
   "calories / jour": "calories / day"
  },
  "es": {
+  "Mettre à jour ma journée ·": "Actualizar mi día ·",
   "kcal restantes après ce repas": "kcal restantes tras esta comida",
   "kcal au-dessus de ton objectif": "kcal por encima de tu objetivo",
   "Objectif": "Objetivo",
@@ -3904,6 +3918,7 @@ const UI_I18N = {
   "calories / jour": "calorías / día"
  },
  "pt": {
+  "Mettre à jour ma journée ·": "Atualizar o meu dia ·",
   "kcal restantes après ce repas": "kcal restantes após esta refeição",
   "kcal au-dessus de ton objectif": "kcal acima do teu objetivo",
   "Objectif": "Objetivo",
@@ -3995,6 +4010,7 @@ const UI_I18N = {
   "calories / jour": "calorias / dia"
  },
  "de": {
+  "Mettre à jour ma journée ·": "Meinen Tag aktualisieren ·",
   "kcal restantes après ce repas": "kcal übrig nach dieser Mahlzeit",
   "kcal au-dessus de ton objectif": "kcal über deinem Ziel",
   "Objectif": "Ziel",
