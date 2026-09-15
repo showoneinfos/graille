@@ -1346,12 +1346,35 @@ function buildBaseChips(){
   }));
 }
 
+/* ---------- Recherche : on cherche chaque mot separement ---------- */
+const SEARCH_STOP = new Set(['de','du','des','la','le','les','un','une','au','aux','et','en','avec','pour','sans','a','l','d','the','my']);
+function searchHay(r){
+  const lg = (typeof LANG!=='undefined') ? LANG : 'fr';
+  if(r.__hayLg !== lg){
+    const bouts = [nomL(r), descL(r), r.categorie, r.base, r.mode_cuisson];
+    (ingL(r)||[]).forEach(i=>{ const o=normIng(i); if(o && o.nom) bouts.push(o.nom); });
+    r.__hay = frNorm(bouts.filter(Boolean).join(' '));
+    r.__hayLg = lg;
+  }
+  return r.__hay;
+}
+function searchTokens(q){
+  return frNorm(String(q||'')).split(/[^a-z0-9]+/).filter(t=>t.length>1 && !SEARCH_STOP.has(t));
+}
+function searchMatch(r,tokens){
+  const h = searchHay(r);
+  return tokens.every(t =>
+       h.includes(t)                                              // le mot exact
+    || (t.length>3 && h.includes(t.replace(/s$/,'')))              // pluriel tolere
+    || (t.length>=5 && h.includes(t.slice(0,t.length-2)))          // orthographe approchee
+  );
+}
 function currentList(){
-  let list=poolFor(activeCat).filter(r=>(activeBase==="Toutes"||r.base===activeBase)&&(activeFec==="Tous"||recipeHasStarch(r,FEC_KW[activeFec])));
-  const q=frNorm(String(window.__q||'').trim());
-  if(q) list=list.filter(r=>frNorm(String(nomL(r)||'')).includes(q)
-      || frNorm(String(descL(r)||'')).includes(q)
-      || (r.ingredients||[]).some(i=>frNorm(String(i.nom||'')).includes(q)));
+  const tokens=searchTokens(window.__q);
+  /* quand on cherche vraiment quelque chose, on cherche partout — sauces comprises */
+  const pool=(tokens.length && activeCat==="Tous") ? RECETTES : poolFor(activeCat);
+  let list=pool.filter(r=>(activeBase==="Toutes"||r.base===activeBase)&&(activeFec==="Tous"||recipeHasStarch(r,FEC_KW[activeFec])));
+  if(tokens.length) list=list.filter(r=>searchMatch(r,tokens));
   if(airMode) list=list.filter(r=>String(r.mode_cuisson||'').toLowerCase().includes('airfryer'));
   if(fridgeMode){
     list=list.filter(r=>recipeMissing(r).length<=fridgeTol);
@@ -1366,6 +1389,19 @@ function currentList(){
 }
 function render(list){
   if(!list.length){
+    const qTxt=String(window.__q||'').trim();
+    if(qTxt){
+      const sur=qTxt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      grid.innerHTML=`<div class="empty">Aucune recette ne correspond à « ${sur} ».<br><button id="clearSearch">Effacer la recherche</button></div>`;
+      document.getElementById('clearSearch').addEventListener('click',()=>{
+        window.__q='';
+        const a=document.getElementById('recSearch'); if(a) a.value='';
+        const b=document.getElementById('homeSearch'); if(b) b.value='';
+        update();
+      });
+      document.getElementById('count').textContent=0;
+      return;
+    }
     grid.innerHTML=`<div class="empty">Aucune recette pour cette combinaison.<br><button id="reset">Réinitialiser les filtres</button></div>`;
     document.getElementById('reset').addEventListener('click',()=>{activeCat="Tous";activeBase="Toutes";activeFec="Tous";fridgeMode=false;airMode=false;{const b=document.getElementById('btnAir');if(b)b.setAttribute('aria-pressed','false');}renderFridgeActive();buildPrimary();buildBaseChips();buildFecChips();update();});
   } else {
@@ -3999,10 +4035,20 @@ bind('filtersReset', ()=>{
 const recSearch = document.getElementById('recSearch');
 if(recSearch) recSearch.addEventListener('input', e=>{ window.__q = e.target.value; update(); });
 const homeSearch = document.getElementById('homeSearch');
-if(homeSearch) homeSearch.addEventListener('focus', ()=>{
-  showTab('recipes');
-  setTimeout(()=>{ const r = document.getElementById('recSearch'); if(r) r.focus(); }, 80);
-});
+if(homeSearch){
+  homeSearch.addEventListener('focus', ()=>{
+    showTab('recipes');
+    setTimeout(()=>{ const r = document.getElementById('recSearch'); if(r) r.focus(); }, 80);
+  });
+  /* filet de securite : si le clavier reste sur l'accueil, la frappe filtre quand meme */
+  homeSearch.addEventListener('input', e=>{
+    const v = e.target.value;
+    const r = document.getElementById('recSearch'); if(r) r.value = v;
+    window.__q = v;
+    if(currentTab !== 'recipes') showTab('recipes');
+    update();
+  });
+}
 
 /* ================= INVITATION A INSTALLER L'APPLICATION ================= */
 const ibar = document.getElementById('installBar');
