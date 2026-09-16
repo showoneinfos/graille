@@ -746,6 +746,91 @@
   .wel-lang .lang-menu{right:0;left:auto}
 
   /* ============ INVITATION A INSTALLER L'APPLICATION ============ */
+  /* ============ MODE ENTRAINEMENT ============ */
+  .seance{background:linear-gradient(170deg,#16241C 0%,var(--dark) 55%,#05100A 100%);color:#fff;z-index:110}
+  .sx-top{display:flex;align-items:center;gap:12px;padding:14px 16px calc(6px + env(safe-area-inset-top));
+    max-width:620px;margin:0 auto}
+  .sx-close,.sx-son{flex:0 0 auto;border-radius:999px;border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.07);color:#fff;font-weight:700}
+  .sx-close{width:38px;height:38px;font-size:16px;line-height:1}
+  .sx-son{padding:9px 13px;font-size:11.5px;white-space:nowrap}
+  .sx-close:hover,.sx-son:hover{background:rgba(139,221,79,.18);border-color:rgba(139,221,79,.45)}
+  .sx-prog{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
+  .sx-prog i{display:block;height:100%;width:0;background:var(--lime);border-radius:999px;transition:width .3s}
+  .sx-body{max-width:620px;margin:0 auto;padding:10px 22px calc(34px + env(safe-area-inset-bottom));
+    min-height:calc(100dvh - 70px);display:flex;flex-direction:column;justify-content:center;text-align:center}
+
+  .sx-etape{font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;font-weight:800;
+    color:rgba(255,255,255,.45)}
+  .sx-nom{font-size:clamp(26px,7.5vw,38px);font-weight:800;letter-spacing:-1px;line-height:1.1;
+    margin:10px 0 6px;text-wrap:balance}
+  .sx-note{display:inline-block;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;
+    font-weight:800;color:#08240F;background:var(--lime);border-radius:999px;padding:4px 10px;margin-bottom:8px}
+  .sx-kg{font-size:23px;font-weight:800;color:var(--lime);letter-spacing:-.5px;margin-bottom:14px;
+    font-variant-numeric:tabular-nums}
+  .sx-serie{font-size:15px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:4px}
+  .sx-serie b{font-size:30px;color:#fff;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+  .sx-detail{font-size:19px;font-weight:700;color:#fff;margin-bottom:26px}
+  .sx-go{width:100%;max-width:380px;margin:0 auto;padding:20px;border-radius:18px;background:var(--lime);
+    color:#08240F;font-weight:800;font-size:17px;box-shadow:0 14px 34px rgba(139,221,79,.22)}
+  .sx-go:hover{background:#7BCF3F}
+  .sx-next{font-size:12.5px;color:rgba(255,255,255,.45);margin-top:18px;line-height:1.5}
+  .sx-next b{color:rgba(255,255,255,.75);font-weight:700}
+
+  .sx-ring{position:relative;width:min(232px,62vw);aspect-ratio:1;margin:0 auto 18px}
+  .sx-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .sx-ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+  .sx-ring .r-bg{stroke:rgba(255,255,255,.13)}
+  .sx-ring .r-fg{stroke:var(--lime);transition:stroke-dashoffset .95s linear}
+  .sx-sec{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:56px;font-weight:800;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+  .sx-reposlbl{font-size:11px;letter-spacing:2.4px;text-transform:uppercase;font-weight:800;
+    color:var(--lime);margin-bottom:22px}
+  .sx-skip{width:100%;max-width:380px;margin:0 auto;padding:16px;border-radius:16px;
+    border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);color:#fff;
+    font-weight:700;font-size:15px}
+  .sx-skip:hover{border-color:var(--lime);color:var(--lime)}
+  .seance.repos{background:linear-gradient(170deg,#12331E 0%,#0B1F13 55%,#050D08 100%)}
+
+  .sx-fin h1{font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+  .sx-fin .sx-sub{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:20px}
+  .sx-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:22px}
+  .sx-st{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px 6px}
+  .sx-st b{display:block;font-size:22px;font-weight:800;color:var(--lime);letter-spacing:-.6px;
+    font-variant-numeric:tabular-nums}
+  .sx-st span{display:block;font-size:10px;color:rgba(255,255,255,.55);font-weight:700;margin-top:4px;line-height:1.3}
+  .sx-form{text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;padding:16px;margin-bottom:16px}
+  .sx-lbl{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.5);
+    font-weight:800;margin:0 0 9px}
+  .sx-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+  .sx-chip{padding:9px 13px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.05);color:#fff;font-size:12.5px;font-weight:700}
+  .sx-chip[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:#08240F}
+  .sx-p{display:flex;align-items:center;gap:10px;font-size:13.5px;margin-bottom:8px;color:rgba(255,255,255,.85)}
+  .sx-p span{flex:1;min-width:0}
+  .sx-p input{width:76px;flex:0 0 auto;padding:9px 6px;border-radius:10px;border:1.5px solid rgba(255,255,255,.2);
+    background:rgba(0,0,0,.25);color:#fff;font-weight:700;font-size:14px;text-align:center;-moz-appearance:textfield}
+  .sx-p input::-webkit-outer-spin-button,.sx-p input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .sx-p input:focus{outline:none;border-color:var(--lime)}
+  .sx-p em{font-style:normal;font-size:12px;color:rgba(255,255,255,.5);font-weight:700}
+  .sx-coach{display:flex;gap:12px;text-align:left;background:rgba(139,221,79,.12);
+    border:1px solid rgba(139,221,79,.32);border-radius:18px;padding:16px;margin-bottom:16px}
+  .sx-coach .av{width:40px;height:40px;flex:0 0 auto;border-radius:50%;background:var(--lime);
+    display:flex;align-items:center;justify-content:center}
+  .sx-coach .av svg{width:20px;height:20px;stroke:#08240F;fill:none;stroke-width:2.2;
+    stroke-linecap:round;stroke-linejoin:round}
+  .sx-coach p{font-size:14px;line-height:1.5;color:#fff;margin:0}
+  .sx-coach b{color:var(--lime);font-weight:800}
+  .sx-coach .qui{display:block;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
+    font-weight:800;color:rgba(255,255,255,.45);margin-bottom:5px}
+  .seance.fini{background:linear-gradient(170deg,#12331E 0%,#0B1F13 60%,#050D08 100%)}
+  .sx-demarrer{width:100%;margin-top:12px;padding:15px;border-radius:14px;background:var(--dark);
+    color:#fff;font-weight:800;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:9px}
+  .sx-demarrer:hover{background:var(--green-dark)}
+  .sx-demarrer svg{width:17px;height:17px;stroke:var(--lime);fill:none;stroke-width:2.2;
+    stroke-linecap:round;stroke-linejoin:round}
+
   /* ============ SUIVI DES SEANCES ============ */
   .sv{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
   .sv-open{width:100%;padding:12px;border-radius:12px;border:1.5px dashed var(--line);
@@ -1169,6 +1254,7 @@
           </div>
         </div>
         <div class="ob-row">
+          <div class="ob-field" style="grid-column:1/-1"><label>Prénom <span class="ob-opt">· facultatif</span></label><input id="obPrenom" type="text" autocomplete="given-name" placeholder="Pour que le coach te parle par ton prénom"></div>
           <div class="ob-field"><label>Âge</label><input id="obAge" type="number" inputmode="numeric" placeholder="30"></div>
           <div class="ob-field"><label>Poids (kg)</label><input id="obPoids" type="number" inputmode="numeric" placeholder="75"></div>
           <div class="ob-field"><label>Taille (cm)</label><input id="obTaille" type="number" inputmode="numeric" placeholder="178"></div>
@@ -1315,6 +1401,16 @@
     <button class="fr-clear" id="familleAdd" style="display:none">Ajouter à ma liste</button>
     <button class="fr-go" id="familleGen">Générer les repas</button>
   </div></div>
+</div>
+
+<!-- ==================== MODE ENTRAINEMENT ==================== -->
+<div class="panel seance" id="seance">
+  <div class="sx-top">
+    <button class="sx-close" id="sxClose" aria-label="Quitter la séance">✕</button>
+    <div class="sx-prog"><i id="sxProg"></i></div>
+    <button class="sx-son" id="sxSonBtn" type="button">Son + vibration</button>
+  </div>
+  <div class="sx-body" id="sxBody"></div>
 </div>
 
 <!-- ==================== FICHE RECETTE ==================== -->
@@ -2016,6 +2112,7 @@ function openOnboard(){
     document.getElementById('obPoids').value=p.poids;
     document.getElementById('obTaille').value=p.taille;
     document.getElementById('obCible').value=p.poidsCible||'';
+    document.getElementById('obPrenom').value=p.prenom||'';
   }
   updateRythmeUI();
   goStep(1);
@@ -2062,7 +2159,8 @@ document.getElementById('obCalc').addEventListener('click',()=>{
   const cfg=RATES[OB.objectif];
   const rate = cfg ? cfg.opts[(OB.rythme!=null?OB.rythme:cfg.def)][2] : null;
   const cible = +document.getElementById('obCible').value || null;
-  const prof=calcProfile({objectif:OB.objectif,sexe:OB.sexe,age,poids,taille,activite:OB.activite,rate,rythme:OB.rythme,poidsCible:cible});
+  const prenom=(document.getElementById('obPrenom').value||'').trim().slice(0,24);
+  const prof=calcProfile({objectif:OB.objectif,sexe:OB.sexe,age,poids,taille,activite:OB.activite,rate,rythme:OB.rythme,poidsCible:cible,prenom});
   window._tmpProfile=prof;
   document.getElementById('obGoalLabel').textContent='Objectif : '+OBJ_LABEL[prof.objectif];
   document.getElementById('obCalNum').textContent=prof.calories;
@@ -3606,7 +3704,289 @@ let coachState={sport:'muscu',obj:'Prise de masse',niveau:'int',lieu:'Salle',dur
 let COACH_PROG=null;
 let coachGraine=Date.now()%10000;
 
-/* ================= SUIVI DES SUIVI =================
+/* ================= MODE ENTRAINEMENT =================
+   Un exercice a la fois, serie par serie, avec le chrono de repos.
+   Tout se passe sur l'appareil : aucun compte, aucun serveur. */
+
+let SX = null;        /* la seance en cours */
+let sxTimer = null;
+let sxWake = null;
+
+function sxSon(){ try{ return localStorage.getItem('graille_chrono') || 'son'; }catch(e){ return 'son'; } }
+function sxSonSuivant(){
+  const ordre=['son','vibration','silence'];
+  const i=(ordre.indexOf(sxSon())+1) % ordre.length;
+  try{ localStorage.setItem('graille_chrono', ordre[i]); }catch(e){}
+  return ordre[i];
+}
+function sxSonLibelle(){
+  const m=sxSon();
+  return m==='son' ? 'Son + vibration' : (m==='vibration' ? 'Vibration' : 'Silencieux');
+}
+function sxBip(){
+  const m=sxSon();
+  if(m==='son'){
+    try{
+      const A=window.AudioContext||window.webkitAudioContext;
+      if(A){
+        const ctx=new A(), o=ctx.createOscillator(), g=ctx.createGain();
+        o.type='sine'; o.frequency.value=880;
+        g.gain.setValueAtTime(0.0001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.42);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime+0.45);
+        setTimeout(function(){ try{ ctx.close(); }catch(e){} }, 900);
+      }
+    }catch(e){}
+  }
+  if(m!=='silence'){ try{ if(navigator.vibrate) navigator.vibrate([90,70,90]); }catch(e){} }
+}
+
+/* "4 × 8" -> 4 series de "8 répétitions" ; "6 min" -> un bloc unique */
+function sxLireSeries(txt){
+  const t=String(txt||'').trim();
+  const m=t.match(/^(\d+)\s*[×x]\s*(.+)$/);
+  if(m){
+    const n=Math.max(1, Math.min(12, parseInt(m[1],10)));
+    let det=m[2].trim();
+    if(/^\d+$/.test(det)) det=det+' répétitions';
+    return {n:n, detail:det};
+  }
+  if(!t || t==='—') return {n:1, detail:'À ton rythme'};
+  return {n:1, detail:t};
+}
+function sxLireRepos(txt){
+  const t=String(txt||'').trim();
+  if(!t || t==='—') return 0;
+  const m=t.match(/^(\d+)\s*(min|s)/i);
+  if(!m) return 0;
+  const v=parseInt(m[1],10);
+  return /min/i.test(m[2]) ? v*60 : v;
+}
+function sxReps(detail){
+  const m=String(detail||'').match(/^(\d+)/);
+  return m? parseInt(m[1],10) : null;
+}
+function sxKg(txt){
+  const m=String(txt||'').match(/([\d.,]+)/);
+  return m? parseFloat(m[1].replace(',','.')) : null;
+}
+function sxDuree(ms){
+  const min=Math.max(1, Math.round(ms/60000));
+  if(min<60) return min+' min';
+  return Math.floor(min/60)+'h'+String(min%60).padStart(2,'0');
+}
+function sxPrenom(){
+  try{ const p=loadProfile(); return (p && p.prenom) ? p.prenom : ''; }catch(e){ return ''; }
+}
+
+function ouvrirSeance(di){
+  const d=COACH_PROG && COACH_PROG[di];
+  if(!d) return;
+  const etapes=[];
+  d.ex.forEach(function(e,ei){
+    const s=sxLireSeries(e.s), rep=sxLireRepos(e.r);
+    for(let k=0;k<s.n;k++) etapes.push({ei:ei, e:e, serie:k+1, total:s.n, detail:s.detail, repos:rep});
+  });
+  if(!etapes.length) return;
+  SX={di:di, d:d, etapes:etapes, i:0, mode:'exo', debut:Date.now(), restant:0};
+  try{
+    if(navigator.wakeLock && navigator.wakeLock.request)
+      navigator.wakeLock.request('screen').then(function(w){ sxWake=w; }).catch(function(){});
+  }catch(e){}
+  document.getElementById('seance').classList.add('open');
+  document.body.style.overflow='hidden';
+  sxDessine();
+}
+function fermerSeance(){
+  if(sxTimer){ clearInterval(sxTimer); sxTimer=null; }
+  try{ if(sxWake && sxWake.release){ sxWake.release(); sxWake=null; } }catch(e){}
+  const el=document.getElementById('seance');
+  el.classList.remove('open','repos','fini');
+  document.body.style.overflow='';
+  SX=null;
+}
+
+function sxBarre(){
+  const b=document.getElementById('sxProg');
+  if(b && SX) b.style.width=Math.round(SX.i/SX.etapes.length*100)+'%';
+}
+function sxProchain(i){
+  if(!SX || i>=SX.etapes.length) return '';
+  const et=SX.etapes[i];
+  return '<b>'+trExo(et.e.n)+'</b>'+(et.total>1? ' · série '+et.serie+' / '+et.total : '');
+}
+
+function sxDessine(){
+  if(!SX) return;
+  const box=document.getElementById('sxBody');
+  const el=document.getElementById('seance');
+  const sb=document.getElementById('sxSonBtn');
+  if(sb) sb.textContent=sxSonLibelle();
+  el.classList.toggle('repos', SX.mode==='repos');
+  el.classList.toggle('fini', SX.mode==='fin');
+  sxBarre();
+
+  if(SX.mode==='exo'){
+    const et=SX.etapes[SX.i], e=et.e;
+    box.innerHTML='<div class="sx-etape">Exercice '+(et.ei+1)+' sur '+SX.d.ex.length+'</div>'+
+      (e.note? '<span class="sx-note">'+tr(e.note)+'</span>' : '')+
+      '<h1 class="sx-nom">'+trExo(e.n)+'</h1>'+
+      (e.poids? '<div class="sx-kg">'+e.poids+'</div>' : '')+
+      (et.total>1? '<div class="sx-serie">Série <b>'+et.serie+'</b> / '+et.total+'</div>' : '')+
+      '<div class="sx-detail">'+trSerie(et.detail)+'</div>'+
+      '<button class="sx-go" id="sxGo">'+(et.total>1?'Série terminée':'Terminé')+'</button>'+
+      (SX.i+1<SX.etapes.length? '<div class="sx-next">Ensuite : '+sxProchain(SX.i+1)+'</div>'
+                               : '<div class="sx-next">Dernier effort.</div>');
+    document.getElementById('sxGo').addEventListener('click', sxValiderEtape);
+    return;
+  }
+
+  if(SX.mode==='repos'){
+    box.innerHTML='<div class="sx-ring">'+
+      '<svg viewBox="0 0 120 120"><circle class="r-bg" cx="60" cy="60" r="52"/>'+
+      '<circle class="r-fg" id="sxRing" cx="60" cy="60" r="52" stroke-dasharray="327" stroke-dashoffset="0"/></svg>'+
+      '<div class="sx-sec" id="sxSec">'+SX.restant+'</div></div>'+
+      '<div class="sx-reposlbl">Repos</div>'+
+      '<button class="sx-skip" id="sxSkip">Passer le repos</button>'+
+      '<div class="sx-next">Ensuite : '+sxProchain(SX.i)+'</div>';
+    document.getElementById('sxSkip').addEventListener('click', sxFinRepos);
+    return;
+  }
+
+  sxDessineFin(box);
+}
+
+function sxValiderEtape(){
+  if(!SX) return;
+  const et=SX.etapes[SX.i];
+  SX.i++;
+  if(SX.i>=SX.etapes.length){ SX.mode='fin'; sxDessine(); return; }
+  if(et.repos>0){
+    SX.mode='repos'; SX.restant=et.repos; SX.total=et.repos;
+    sxDessine();
+    if(sxTimer) clearInterval(sxTimer);
+    sxTimer=setInterval(function(){
+      if(!SX || SX.mode!=='repos'){ clearInterval(sxTimer); sxTimer=null; return; }
+      SX.restant--;
+      const s=document.getElementById('sxSec');
+      const r=document.getElementById('sxRing');
+      if(s) s.textContent=Math.max(0,SX.restant);
+      if(r) r.setAttribute('stroke-dashoffset', String(327*(1-SX.restant/SX.total)));
+      if(SX.restant<=0){ sxBip(); sxFinRepos(); }
+    },1000);
+    return;
+  }
+  SX.mode='exo'; sxDessine();
+}
+function sxFinRepos(){
+  if(sxTimer){ clearInterval(sxTimer); sxTimer=null; }
+  if(!SX) return;
+  SX.mode='exo'; sxDessine();
+}
+
+/* ---------- fin de seance ---------- */
+function sxBilanChiffres(){
+  let series=0, tonnage=0;
+  SX.etapes.forEach(function(et){
+    series++;
+    const kg=sxKg(et.e.poids), reps=sxReps(et.detail);
+    if(kg && reps) tonnage+=kg*reps;
+  });
+  return {series:series, tonnage:Math.round(tonnage), duree:Date.now()-SX.debut};
+}
+function sxDessineFin(box){
+  const c=sxBilanChiffres();
+  const exos=SX.d.ex.filter(function(e){ return e.poids; });
+  const R=[['facile','Trop facile'],['ok',"Juste ce qu'il faut"],['dur','Trop dur']];
+  box.innerHTML='<div class="sx-fin">'+
+    '<h1>Séance terminée</h1>'+
+    '<p class="sx-sub">'+tr(SX.d.jour)+' · '+tr(SX.d.titre)+'</p>'+
+    '<div class="sx-stats">'+
+      '<div class="sx-st"><b>'+sxDuree(c.duree)+'</b><span>durée</span></div>'+
+      '<div class="sx-st"><b>'+c.series+'</b><span>séries<br>faites</span></div>'+
+      '<div class="sx-st"><b>'+(c.tonnage? (c.tonnage>=1000? (c.tonnage/1000).toFixed(1).replace('.',',')+' t' : c.tonnage+' kg') : '—')+'</b><span>soulevé<br>en tout</span></div>'+
+    '</div>'+
+    '<div class="sx-form">'+
+      '<div class="sx-lbl">C\'était comment ?</div>'+
+      '<div class="sx-chips">'+R.map(function(x){
+        return '<button type="button" class="sx-chip sx-r" data-r="'+x[0]+'" aria-pressed="'+(x[0]==='ok')+'">'+x[1]+'</button>';
+      }).join('')+'</div>'+
+      (exos.length? '<div class="sx-lbl">Charges utilisées</div>'+exos.map(function(e){
+        return '<label class="sx-p"><span>'+trExo(e.n)+'</span><input type="number" inputmode="decimal" step="2.5" min="0" data-exo="'+encodeURIComponent(e.n)+'" value="'+(sxKg(e.poids)||'')+'"><em>kg</em></label>';
+      }).join('') : '')+
+    '</div>'+
+    '<button class="sx-go" id="sxSave">Enregistrer ma séance</button>'+
+    '</div>';
+  box.querySelectorAll('.sx-r').forEach(function(b){
+    b.addEventListener('click',function(){
+      box.querySelectorAll('.sx-r').forEach(function(x){ x.setAttribute('aria-pressed', x===b); });
+    });
+  });
+  document.getElementById('sxSave').addEventListener('click', sxEnregistrer);
+}
+
+function sxEnregistrer(){
+  if(!SX) return;
+  const box=document.getElementById('sxBody');
+  let ressenti='ok';
+  box.querySelectorAll('.sx-r').forEach(function(x){
+    if(x.getAttribute('aria-pressed')==='true') ressenti=x.dataset.r;
+  });
+  const charges={};
+  box.querySelectorAll('input[data-exo]').forEach(function(i){
+    const kg=parseFloat(String(i.value).replace(',','.'));
+    if(kg>0) charges[decodeURIComponent(i.dataset.exo)]=kg;
+  });
+  const c=sxBilanChiffres();
+  const d=SX.d, di=SX.di;
+  enregistrerSeance(d, ressenti, charges);
+  try{ rafraichirCharges(); }catch(e){}
+  try{ majBilan(); renderCoachResult(); renderTracker(); }catch(e){}
+  box.innerHTML='<div class="sx-fin">'+
+    '<div class="sx-coach"><span class="av"><svg viewBox="0 0 24 24"><path d="M6.5 6.5h11v11h-11z"/><path d="M4 9.5v5M20 9.5v5M2 11v2M22 11v2"/></svg></span>'+
+      '<p><span class="qui">Ton coach</span>'+debriefTexte(d,di,c,ressenti,charges)+'</p></div>'+
+    '<button class="sx-go" id="sxRetour">Retour au programme</button></div>';
+  document.getElementById('sxRetour').addEventListener('click', fermerSeance);
+}
+
+/* le coach reagit, a partir de ce qui vient reellement de se passer */
+function debriefTexte(d, di, c, ressenti, charges){
+  const pre=sxPrenom();
+  const salut = pre ? ('Bien joué '+pre+'.') : 'Bien joué.';
+  const bouts=[salut];
+
+  bouts.push(c.series+' série'+(c.series>1?'s':'')+' bouclée'+(c.series>1?'s':'')+' en '+sxDuree(c.duree)+
+             (c.tonnage? ', <b>'+(c.tonnage>=1000? (c.tonnage/1000).toFixed(1).replace('.',',')+' tonnes' : c.tonnage+' kg')+'</b> '+(c.tonnage>=1000?'soulevées':'soulevés')+' en tout' : '')+'.');
+
+  /* une charge qui a monte depuis la derniere fois */
+  let monte=null;
+  Object.keys(charges||{}).forEach(function(nom){
+    const anc=SUIVI.filter(function(s){ return s.charges && s.charges[nom]>0; })
+                   .sort(function(a,b){ return a.date.localeCompare(b.date); });
+    if(anc.length>=2){
+      const av=anc[anc.length-2].charges[nom];
+      if(charges[nom]>av && !monte) monte={nom:nom, de:av, a:charges[nom]};
+    }
+  });
+  if(monte) bouts.push('Et tu as monté <b>'+monte.nom+'</b> de '+monte.de+' à '+monte.a+' kg. Ça, c\'est du concret.');
+
+  if(ressenti==='facile') bouts.push('Tu as trouvé ça trop facile : je monte les charges de 2,5 kg pour la prochaine.');
+  else if(ressenti==='dur') bouts.push('C\'était dur : je redescends un peu la prochaine fois, pas de honte, c\'est comme ça qu\'on progresse sans se blesser.');
+  else bouts.push('Tu es sur le bon réglage, on garde ces charges.');
+
+  /* le prochain rendez-vous */
+  if(COACH_PROG && COACH_PROG.length>1){
+    const suiv=COACH_PROG[(di+1)%COACH_PROG.length];
+    bouts.push('Prochain rendez-vous : <b>'+tr(suiv.jour)+'</b>, '+tr(suiv.titre)+'.');
+  } else {
+    bouts.push('Repose-toi, et on remet ça à la prochaine séance.');
+  }
+  return bouts.join(' ');
+}
+
+/* ================= SUIVI DES SÉANCES =================
    Tout reste sur l'appareil de la personne. Aucun compte requis. */
 function loadSeances(){ try{ return JSON.parse(localStorage.getItem('graille_seances')||'[]'); }catch(e){ return []; } }
 function saveSeances(l){ try{ localStorage.setItem('graille_seances', JSON.stringify(l.slice(-200))); }catch(e){} }
@@ -3951,10 +4331,14 @@ function renderCoachResult(){
         <div class="cx-n">${trExo(e.n)}${e.note?` <i>${tr(e.note)}</i>`:''}</div>
         <div class="cx-d"><b>${trSerie(e.s)}</b>${e.r&&e.r!=='—'?` · ${tr('repos')} ${trSerie(e.r)}`:''}${e.poids?` · <span class="cx-kg">${e.poids}</span>`:''}</div>
       </div>`).join('')}
+      <button class="sx-demarrer" data-go="${di}"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>Démarrer ma séance</button>
       ${svHTML(d,di)}
     </div>`).join('')+
     `<p class="cx-warn">Les charges sont indicatives, calculées sur ton poids. Si c'est trop lourd, baisse. Si c'est trop léger, monte de 1 à 2 kg à la séance suivante. En cas de douleur, arrête.</p>`;
   res.querySelectorAll('.cx-swap').forEach(b=>b.addEventListener('click',()=>swapSeance(+b.dataset.d)));
+  res.querySelectorAll('.sx-demarrer').forEach(function(b){
+    b.addEventListener('click',function(){ ouvrirSeance(+b.dataset.go); });
+  });
   brancherSuivi(res);
 }
 
@@ -4789,6 +5173,17 @@ if(typeof sheet !== 'undefined' && sheet){
   }, {passive:true});
   sheet.addEventListener('touchend', ()=>{ _sy = null; }, {passive:true});
 }
+
+/* ================= MODE ENTRAINEMENT : boutons du haut ================= */
+bind('sxClose', function(){
+  if(SX && SX.mode!=='fin'){ if(!confirm('Quitter la séance en cours ?')) return; }
+  fermerSeance();
+});
+bind('sxSonBtn', function(){
+  sxSonSuivant();
+  const b=document.getElementById('sxSonBtn');
+  if(b) b.textContent=sxSonLibelle();
+});
 
 /* ================= ÉCRAN DE BIENVENUE ================= */
 /* La demonstration : le curseur monte et descend tout seul, les quantites suivent.
