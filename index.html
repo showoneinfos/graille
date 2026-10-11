@@ -753,8 +753,12 @@
     background:var(--surface2);color:var(--green-dark);font-size:22px;font-weight:800;line-height:1}
   .rp-moins:hover,.rp-plus:hover{border-color:var(--green);background:var(--green-tint)}
   .rp-val{flex:1;text-align:center}
-  .rp-val b{display:block;font-size:30px;font-weight:800;color:var(--green);letter-spacing:-1px;line-height:1;
-    font-variant-numeric:tabular-nums}
+  .rp-val input{display:inline-block;width:4.2ch;max-width:100%;font-size:32px;font-weight:800;color:var(--green);
+    letter-spacing:-1px;line-height:1.1;text-align:center;border:none;border-bottom:2px dashed var(--green);
+    background:transparent;padding:0 0 3px;font-family:inherit;font-variant-numeric:tabular-nums;
+    -moz-appearance:textfield}
+  .rp-val input::-webkit-outer-spin-button,.rp-val input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .rp-val input:focus{outline:none;border-bottom-color:var(--green)}
   .rp-val span{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
     color:var(--ink2);margin-top:4px}
   .rp-prot{font-size:12.5px;color:var(--ink2);font-weight:600;margin-bottom:10px;text-align:center}
@@ -783,7 +787,8 @@
   .rp-n b{display:block;font-size:14.5px;font-weight:700;line-height:1.3}
   .rp-q{display:block;font-size:16px;color:var(--green-dark);font-weight:800;margin-top:4px;
     letter-spacing:-.3px;font-variant-numeric:tabular-nums}
-  .rp-q em{font-style:normal;color:var(--ink2);font-weight:600}
+  .rp-q em{display:block;font-style:normal;color:var(--ink2);font-weight:600;font-size:12px;
+    letter-spacing:0;margin-top:2px}
   .rp-edit{display:flex;align-items:center;gap:7px;margin-top:5px}
   .rp-edit input{width:76px;padding:7px 6px;border:1.5px solid var(--green);border-radius:10px;
     background:var(--surface);font-weight:700;font-size:14px;text-align:center;color:var(--ink);
@@ -1471,11 +1476,14 @@
     <button class="fr-skip" id="repasClose">Fermer</button>
     <div class="ob-eyebrow">Sur mesure</div>
     <h1 class="ob-title">Mon repas sur mesure</h1>
-    <p class="ob-sub">Tu ne trouves pas ton bonheur dans les recettes ? Choisis tes aliments, donne tes calories, je calcule les quantités.</p>
+    <p class="ob-sub">Tape tes calories, choisis tes aliments, je te donne les quantités à peser.</p>
 
     <div class="rp-cible">
       <button class="rp-moins" id="rpMoins" type="button" aria-label="Moins de calories">−</button>
-      <div class="rp-val"><b id="rpKcal">600</b><span>kcal visées</span></div>
+      <div class="rp-val">
+        <input id="rpKcal" type="number" inputmode="numeric" min="100" max="3000" step="10" value="600" aria-label="Calories visées">
+        <span>kcal visées</span>
+      </div>
       <button class="rp-plus" id="rpPlus" type="button" aria-label="Plus de calories">+</button>
     </div>
     <p class="rp-prot" id="rpProtTxt"></p>
@@ -3880,22 +3888,22 @@ const AL_RAW = [
  ["Œufs & laitiers","creme30","Crème 30%",290,2,3,30,"gras",10,80,25],
  ["Œufs & laitiers","creme15","Crème 15%",160,3,4,15,"gras",15,120,40],
 
- ["Féculents","riz","Riz blanc cuit",130,2.4,28,0.3,"fec",50,400,150],
- ["Féculents","riz-complet","Riz complet cuit",120,2.6,23,1,"fec",50,400,150],
- ["Féculents","riz-basmati","Riz basmati cuit",130,2.7,28,0.3,"fec",50,400,150],
- ["Féculents","pates","Pâtes cuites",130,5,25,0.6,"fec",50,400,150],
- ["Féculents","pates-completes","Pâtes complètes cuites",125,5,24,1,"fec",50,400,150],
- ["Féculents","semoule","Semoule cuite",120,4,25,0.2,"fec",50,400,150],
- ["Féculents","couscous","Couscous cuit",110,4,23,0.2,"fec",50,400,150],
- ["Féculents","quinoa","Quinoa cuit",120,4.4,21,1.9,"fec",50,400,150],
- ["Féculents","boulgour","Boulgour cuit",110,3,23,0.2,"fec",50,400,150],
- ["Féculents","nouilles","Nouilles cuites",140,5,27,1,"fec",50,400,150],
+ ["Féculents","riz","Riz blanc",130,2.4,28,0.3,"fec",50,400,150],
+ ["Féculents","riz-complet","Riz complet",120,2.6,23,1,"fec",50,400,150],
+ ["Féculents","riz-basmati","Riz basmati",130,2.7,28,0.3,"fec",50,400,150],
+ ["Féculents","pates","Pâtes",130,5,25,0.6,"fec",50,400,150],
+ ["Féculents","pates-completes","Pâtes complètes",125,5,24,1,"fec",50,400,150],
+ ["Féculents","semoule","Semoule",120,4,25,0.2,"fec",50,400,150],
+ ["Féculents","couscous","Couscous",110,4,23,0.2,"fec",50,400,150],
+ ["Féculents","quinoa","Quinoa",120,4.4,21,1.9,"fec",50,400,150],
+ ["Féculents","boulgour","Boulgour",110,3,23,0.2,"fec",50,400,150],
+ ["Féculents","nouilles","Nouilles",140,5,27,1,"fec",50,400,150],
  ["Féculents","polenta","Polenta",85,2,18,0.3,"fec",60,400,180],
  ["Féculents","pdt","Pommes de terre",85,2,18,0.1,"fec",60,500,200],
  ["Féculents","patate-douce","Patate douce",90,1.6,20,0.1,"fec",60,500,200],
  ["Féculents","pdt-sautees","Pommes de terre sautées",180,3,25,8,"fec",50,350,150],
- ["Féculents","lentilles","Lentilles cuites",115,9,17,0.4,"fec",50,350,150],
- ["Féculents","pois-chiches","Pois chiches cuits",140,8,20,2.6,"fec",50,350,150],
+ ["Féculents","lentilles","Lentilles",115,9,17,0.4,"fec",50,350,150],
+ ["Féculents","pois-chiches","Pois chiches",140,8,20,2.6,"fec",50,350,150],
  ["Féculents","haricots-rouges","Haricots rouges",120,8,18,0.5,"fec",50,350,150],
  ["Féculents","haricots-blancs","Haricots blancs",120,7,19,0.6,"fec",50,350,150],
  ["Féculents","avoine","Flocons d'avoine",370,13,60,7,"fec",20,150,60],
@@ -3981,9 +3989,13 @@ const AL_RAW = [
  ["Sauces & extras","chocolat-noir","Chocolat noir 70%",550,8,35,40,"gras",5,60,20]
 ];
 
+/* cru = grammes a peser avant cuisson pour obtenir 100 g une fois cuit.
+   Le riz gonfle (0,33), la viande perd de l'eau (1,3). */
+const RP_CRU={"poulet": 1.3, "cuisse-poulet": 1.3, "dinde": 1.3, "boeuf5": 1.25, "boeuf15": 1.25, "porc-filet": 1.3, "veau": 1.3, "agneau": 1.25, "lapin": 1.3, "magret": 1.25, "saumon": 1.2, "truite": 1.2, "thon-frais": 1.2, "cabillaud": 1.2, "colin": 1.2, "merlu": 1.2, "dorade": 1.2, "crevettes": 1.15, "saint-jacques": 1.15, "riz": 0.33, "riz-complet": 0.33, "riz-basmati": 0.33, "pates": 0.4, "pates-completes": 0.4, "nouilles": 0.4, "semoule": 0.35, "couscous": 0.35, "quinoa": 0.35, "boulgour": 0.35, "polenta": 0.25, "lentilles": 0.4, "pois-chiches": 0.45, "pdt": 1.05, "pdt-sautees": 1.15, "patate-douce": 1.05, "epinards": 1.35, "champignons": 1.3, "courgette": 1.1, "poireau": 1.1, "aubergine": 1.15, "potimarron": 1.15};
 const ALIMENTS = AL_RAW.map(function(r){
   return {g:r[0], id:r[1], nom:r[2], k:r[3], p:r[4], c:r[5], l:r[6], role:r[7],
-          min:r[8], max:r[9], def:r[10], unite:(r[11]||'g'), pu:(r[12]||1)};
+          min:r[8], max:r[9], def:r[10], unite:(r[11]||'g'), pu:(r[12]||1),
+          cru:(RP_CRU[r[1]]||1)};
 });
 function alimentPar(id){ for(let i=0;i<ALIMENTS.length;i++) if(ALIMENTS[i].id===id) return ALIMENTS[i]; return null; }
 
@@ -4129,9 +4141,15 @@ function rpCalculer(){
 }
 
 /* ---------- affichage ---------- */
+function rpCru(a, q){
+  const g=q*a.cru;
+  return g>=100 ? Math.round(g/5)*5 : Math.round(g);
+}
 function rpQte(x){
-  if(x.a.unite==='piece') return x.q+' '+(x.q>1?'pièces':'pièce')+' <em>('+(x.q*x.a.pu)+' g)</em>';
-  return x.q+' g';
+  const a=x.a;
+  if(a.unite==='piece') return x.q+' '+(x.q>1?'pièces':'pièce')+' <em>('+(x.q*a.pu)+' g)</em>';
+  if(Math.abs(a.cru-1)<0.05) return x.q+' g';
+  return rpCru(a,x.q)+' g crus<em>soit '+x.q+' g une fois cuit</em>';
 }
 /* Ce qu'il reste a manger aujourd'hui : un clic et c'est la cible du repas. */
 function rpMajReste(){
@@ -4142,7 +4160,7 @@ function rpMajReste(){
   reste=Math.round(reste/10)*10;
   if(reste<150 || reste===RP.cible){ b.hidden=true; return; }
   b.hidden=false;
-  b.textContent='Il te reste '+reste+' kcal aujourd\'hui — cliquez pour viser ce chiffre';
+  b.textContent='Il te reste '+reste+' kcal aujourd\'hui — clique pour viser ce chiffre';
   b.dataset.r=reste;
 }
 
@@ -4160,13 +4178,13 @@ function rpRendre(){
   const liste=document.getElementById('rpListe');
   const tot=document.getElementById('rpTotaux');
   const kc=document.getElementById('rpKcal');
-  if(kc) kc.textContent=RP.cible;
+  if(kc && document.activeElement!==kc) kc.value=RP.cible;
   const pc=document.getElementById('rpProtTxt');
   if(pc) pc.textContent=rpProtCible()+' g de protéines visées';
   rpMajReste();
 
   if(!res.items.length){
-    liste.innerHTML='<p class="rp-vide">Cherche un aliment ci-dessus et ajoute-le. Trois ou quatre suffisent : une protéine, un féculent, un légume, une matière grasse.</p>';
+    liste.innerHTML='<p class="rp-vide">Tape tes calories dans le grand chiffre vert, puis cherche tes aliments ci-dessus. Trois ou quatre suffisent : une protéine, un féculent, un légume, une matière grasse.<br><br>Pour le riz, les pâtes ou la viande, je te donne le poids <b>cru</b>, celui que tu pèses avant de cuisiner.</p>';
     tot.innerHTML='';
     return;
   }
@@ -4174,7 +4192,9 @@ function rpRendre(){
     return '<div class="rp-row'+(x.lock?' fixe':'')+'">'+
       '<div class="rp-n"><b>'+x.a.nom+'</b>'+
         (x.lock
-          ? '<span class="rp-edit"><input type="number" inputmode="decimal" min="'+x.a.min+'" max="'+x.a.max+'" step="'+(x.a.unite==='piece'?1:5)+'" data-q="'+i+'" value="'+x.q+'"><em>'+(x.a.unite==='piece'?'pièce(s)':'g')+'</em></span>'
+          ? '<span class="rp-edit"><input type="number" inputmode="decimal" min="'+x.a.min+'" max="'+x.a.max+'" step="'+(x.a.unite==='piece'?1:5)+'" data-q="'+i+'" value="'+x.q+'"><em>'+
+              (x.a.unite==='piece' ? 'pièce(s)'
+                                   : (Math.abs(x.a.cru-1)<0.05 ? 'g' : 'g cuits = '+rpCru(x.a,x.q)+' g crus'))+'</em></span>'
           : '<span class="rp-q">'+rpQte(x)+'</span>')+
       '</div>'+
       '<div class="rp-k">'+Math.round(x.a.k*rpGrammes(x.a,x.q)/100)+' kcal</div>'+
@@ -4358,7 +4378,7 @@ function rpAjouterJournee(){
   addToJournal('repas-sur-mesure', rpNomRepas(res), res.kcal, res.kcal, []);
   res.items.forEach(function(x){
     if(x.a.unite==='piece') mergeShop(x.a.nom, x.q, 'piece', false);
-    else                    mergeShop(x.a.nom, x.q, 'g', false);
+    else                    mergeShop(x.a.nom, rpCru(x.a, x.q), 'g', false);
   });
   try{ saveShop(); updateShopBadge(); }catch(e){}
   fermerRepas();
@@ -4368,12 +4388,22 @@ function rpAjouterJournee(){
 /* ---------- branchements ---------- */
 document.getElementById('repasClose').addEventListener('click', fermerRepas);
 document.getElementById('rpMoins').addEventListener('click', function(){
-  RP.cible=Math.max(150, RP.cible-50); rpSauver(); rpRendre();
+  RP.cible=Math.max(100, RP.cible-50); rpSauver(); rpRendre();
 });
 document.getElementById('rpPlus').addEventListener('click', function(){
-  RP.cible=Math.min(2000, RP.cible+50); rpSauver(); rpRendre();
+  RP.cible=Math.min(3000, RP.cible+50); rpSauver(); rpRendre();
 });
 document.getElementById('rpQ').addEventListener('input', rpRendreResultats);
+document.getElementById('rpKcal').addEventListener('input', function(){
+  const v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
+  if(v>=100 && v<=3000){ RP.cible=v; rpSauver(); rpRendre(); }
+});
+document.getElementById('rpKcal').addEventListener('blur', function(){
+  let v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
+  if(isNaN(v)) v=RP.cible;
+  RP.cible=Math.max(100, Math.min(3000, v));
+  this.value=RP.cible; rpSauver(); rpRendre();
+});
 document.getElementById('rpVider').addEventListener('click', function(){
   RP.items=[]; rpSauver(); rpRendre();
 });
@@ -5157,6 +5187,10 @@ const UI_I18N = {
   "Mon frigo": "My fridge",
   "Ma liste de courses": "My shopping list",
   "Repas en famille": "Family meals",
+  "Mon repas sur mesure": "My custom meal",
+  "Tu ne trouves pas ta recette ?": "Can't find your recipe?",
+  "Compose ton repas : tes aliments, tes calories, je calcule les quantités.": "Build your own meal: your foods, your calories, I work out the amounts.",
+  "Composer mon repas sur mesure": "Build my custom meal",
   "Ta journée": "Your day",
   "Ton objectif du jour": "Your goal for today",
   "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Answer 4 questions, we work out your calories and you track your day.",
@@ -5263,6 +5297,10 @@ const UI_I18N = {
   "Mon frigo": "Mi nevera",
   "Ma liste de courses": "Mi lista de la compra",
   "Repas en famille": "Comidas en familia",
+  "Mon repas sur mesure": "Mi comida a medida",
+  "Tu ne trouves pas ta recette ?": "¿No encuentras tu receta?",
+  "Compose ton repas : tes aliments, tes calories, je calcule les quantités.": "Crea tu comida: tus alimentos, tus calorías, yo calculo las cantidades.",
+  "Composer mon repas sur mesure": "Crear mi comida a medida",
   "Ta journée": "Tu día",
   "Ton objectif du jour": "Tu objetivo del día",
   "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Responde a 4 preguntas, calculamos tus calorías y sigues tu día.",
@@ -5369,6 +5407,10 @@ const UI_I18N = {
   "Mon frigo": "O meu frigorífico",
   "Ma liste de courses": "A minha lista de compras",
   "Repas en famille": "Refeições em família",
+  "Mon repas sur mesure": "A minha refeição sob medida",
+  "Tu ne trouves pas ta recette ?": "Não encontras a tua receita?",
+  "Compose ton repas : tes aliments, tes calories, je calcule les quantités.": "Monta a tua refeição: os teus alimentos, as tuas calorias, eu calculo as quantidades.",
+  "Composer mon repas sur mesure": "Montar a minha refeição sob medida",
   "Ta journée": "O teu dia",
   "Ton objectif du jour": "O teu objetivo do dia",
   "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Responde a 4 perguntas, calculamos as tuas calorias e acompanhas o teu dia.",
@@ -5475,6 +5517,10 @@ const UI_I18N = {
   "Mon frigo": "Mein Kühlschrank",
   "Ma liste de courses": "Meine Einkaufsliste",
   "Repas en famille": "Familienessen",
+  "Mon repas sur mesure": "Meine Mahlzeit nach Maß",
+  "Tu ne trouves pas ta recette ?": "Du findest dein Rezept nicht?",
+  "Compose ton repas : tes aliments, tes calories, je calcule les quantités.": "Stell deine Mahlzeit zusammen: deine Lebensmittel, deine Kalorien, ich berechne die Mengen.",
+  "Composer mon repas sur mesure": "Meine Mahlzeit nach Maß zusammenstellen",
   "Ta journée": "Dein Tag",
   "Ton objectif du jour": "Dein Tagesziel",
   "Réponds à 4 questions, on calcule tes calories et tu suis ta journée.": "Beantworte 4 Fragen, wir berechnen deine Kalorien und du verfolgst deinen Tag.",
