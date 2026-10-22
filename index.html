@@ -160,10 +160,13 @@
   .hero .searchbox svg{stroke:rgba(255,255,255,.5)}
 
   /* ============ ACCUEIL EN FIL : on balaie vers le haut ============ */
-  .screen.feed{scroll-snap-type:y mandatory;scroll-behavior:smooth;color:#fff;
+  .screen.feed{scroll-snap-type:y proximity;scroll-behavior:smooth;color:#fff;
     background:linear-gradient(170deg,#16241C 0%,var(--dark) 58%,#070D0A 100%)}
   .fd{position:relative;min-height:100%;display:flex;flex-direction:column;justify-content:center;
-    scroll-snap-align:start;scroll-snap-stop:always;padding:18px 0 72px}
+    scroll-snap-align:start;padding:18px 0 72px}
+  /* carte plus haute que l'ecran : on ne centre plus et on relache l'accrochage,
+     sinon le bas (les croix, le bouton Vider) devient inatteignable */
+  .fd.haute{justify-content:flex-start;scroll-snap-align:none}
   #fdJour{min-height:calc(100% - var(--haut));padding-top:calc(14px + var(--haut))}
   #fdJour .brand{margin-bottom:16px}
   #fdJour h1{font-size:25px;margin-bottom:6px}
@@ -267,10 +270,11 @@
   .trk-item .nm small{display:block;font-weight:600;font-size:13px;line-height:1.35;
     color:rgba(255,255,255,.7);margin-top:3px}
   .trk-item .k{color:rgba(255,255,255,.8);font-weight:700;font-size:13px;white-space:nowrap}
-  .trk-item .trk-rm{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.3);
-    color:#fff;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .trk-reset{margin-top:14px;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 16px;
-    color:#fff;font-size:13.5px;font-weight:700}
+  .trk-item .trk-rm{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);
+    background:rgba(255,255,255,.14);
+    color:#fff;font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .trk-reset{margin-top:14px;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:12px 18px;
+    color:#fff;font-size:13.5px;font-weight:700;background:rgba(255,255,255,.1)}
   .trk-empty{display:flex;flex-direction:column;align-items:flex-start;gap:14px;font-size:14.5px;
     color:rgba(255,255,255,.85)}
   .trk-cta,.trk-menu,.trk-shop{background:#fff;color:var(--green);border-radius:12px;padding:12px 18px;
@@ -2786,6 +2790,7 @@ function renderTracker(){
     if(r) openSheet(r, (it.base!=null?it.base:it.kcal), it.sides||[], i);
   }));
   ligneCoachAccueil(el);
+  try{ fdHauteur(); }catch(e){}
 }
 /* petit rappel du suivi sportif, sous la carte de la journee */
 function ligneCoachAccueil(el){
@@ -5994,7 +5999,14 @@ function fdIdeesMaj(force){
   });
 }
 
-function fdMaj(){ fdPoints(); fdMenuMaj(); fdIdeesMaj(); }
+/* un ecran plus haut que le telephone : on coupe l'accrochage pour celui-la */
+function fdHauteur(){
+  const sc=document.getElementById('scHome'); if(!sc) return;
+  const h=sc.clientHeight;
+  fdEcrans().forEach(function(el){ el.classList.toggle('haute', el.offsetHeight > h+4); });
+}
+function fdMaj(){ fdPoints(); fdMenuMaj(); fdIdeesMaj(); fdHauteur(); }
+window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); }catch(e){} });
 
 (function fdBrancher(){
   const sc=document.getElementById('scHome');
