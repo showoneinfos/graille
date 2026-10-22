@@ -160,13 +160,20 @@
   .hero .searchbox svg{stroke:rgba(255,255,255,.5)}
 
   /* ============ ACCUEIL EN FIL : on balaie vers le haut ============ */
-  .screen.feed{scroll-snap-type:y proximity;scroll-behavior:smooth;color:#fff;
+  .screen.feed{scroll-snap-type:y mandatory;scroll-behavior:smooth;color:#fff;
     background:linear-gradient(170deg,#16241C 0%,var(--dark) 58%,#070D0A 100%)}
   .fd{position:relative;min-height:100%;display:flex;flex-direction:column;justify-content:center;
-    scroll-snap-align:start;padding:18px 0 72px}
-  /* carte plus haute que l'ecran : on ne centre plus et on relache l'accrochage,
-     sinon le bas (les croix, le bouton Vider) devient inatteignable */
-  .fd.haute{justify-content:flex-start;scroll-snap-align:none}
+    scroll-snap-align:start;scroll-snap-stop:always;padding:18px 0 72px}
+  /* Un ecran plus haut que le telephone (journee bien remplie) : on ne centre plus,
+     et on pose un deuxieme point d'arret tout en bas. Sans lui, l'accrochage
+     ramenerait en haut et le bas de la carte — les croix, le bouton Vider —
+     resterait inatteignable. */
+  .fd.haute{justify-content:flex-start}
+  .fd-fin{display:none}
+  /* Des qu'un ecran est plus haut que le telephone (journee bien remplie),
+     on coupe l'accrochage pour TOUT le fil : il n'y a plus de point d'arret
+     a plus d'un balayage du precedent, donc plus de blocage. */
+  .screen.feed.libre{scroll-snap-type:none}
   #fdJour{min-height:calc(100% - var(--haut));padding-top:calc(14px + var(--haut))}
   #fdJour .brand{margin-bottom:16px}
   #fdJour h1{font-size:25px;margin-bottom:6px}
@@ -1162,6 +1169,7 @@
       </div>
     </div>
     <button class="fd-next" type="button" data-fd="1"><span>Ton menu du jour</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="fd-fin" aria-hidden="true"></div>
   </section>
 
   <!-- ---------- 2. MENU DU JOUR ---------- -->
@@ -1174,6 +1182,7 @@
       <button class="fd-go" id="tileMenuDay" type="button">Composer mon menu du jour</button>
     </div>
     <button class="fd-next" type="button" data-fd="2"><span>Des idées pour toi</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="fd-fin" aria-hidden="true"></div>
   </section>
 
   <!-- ---------- 3. IDÉES ---------- -->
@@ -1186,6 +1195,7 @@
       <button class="fd-go alt" id="fdTout" type="button">Voir toutes les recettes</button>
     </div>
     <button class="fd-next" type="button" data-fd="3"><span>Tes outils</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="fd-fin" aria-hidden="true"></div>
   </section>
 
   <!-- ---------- 4. OUTILS ---------- -->
@@ -1221,6 +1231,7 @@
         </button>
       </div>
     </div>
+    <div class="fd-fin" aria-hidden="true"></div>
   </section>
 
   <div class="fd-dots" id="fdDots" aria-hidden="true"></div>
@@ -5934,9 +5945,13 @@ function fdPointActif(){
   const sc=document.getElementById('scHome'), box=document.getElementById('fdDots');
   const es=fdEcrans();
   if(!sc || !box || !es.length) return;
-  const h=sc.clientHeight||1;
-  let i=Math.round(sc.scrollTop/h);
-  i=Math.max(0, Math.min(es.length-1, i));
+  /* les ecrans n'ont pas tous la meme hauteur : on cherche celui
+     qui occupe le milieu de l'ecran, pas une division approximative */
+  const milieu=sc.scrollTop + sc.clientHeight/2;
+  let i=0;
+  for(let k=0;k<es.length;k++){
+    if(milieu >= es[k].offsetTop) i=k; else break;
+  }
   Array.prototype.forEach.call(box.children, function(d,k){ d.classList.toggle('on', k===i); });
 }
 function fdPoints(){
@@ -6003,7 +6018,13 @@ function fdIdeesMaj(force){
 function fdHauteur(){
   const sc=document.getElementById('scHome'); if(!sc) return;
   const h=sc.clientHeight;
-  fdEcrans().forEach(function(el){ el.classList.toggle('haute', el.offsetHeight > h+4); });
+  let trop=false;
+  fdEcrans().forEach(function(el){
+    const haute = el.offsetHeight > h+4;
+    el.classList.toggle('haute', haute);
+    if(haute) trop=true;
+  });
+  sc.classList.toggle('libre', trop);
 }
 function fdMaj(){ fdPoints(); fdMenuMaj(); fdIdeesMaj(); fdHauteur(); }
 window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); }catch(e){} });
