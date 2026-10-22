@@ -134,6 +134,11 @@
   .fr-chip:hover:not([aria-pressed="true"]){border-color:var(--green);color:var(--green)}
   .chip-f.off{opacity:.35;pointer-events:none}
   .chip-monde{border-color:var(--amber);color:#8A5E10}
+  /* les deux entrees qu'on veut qu'on voie en premier */
+  .chip-vedette{border-color:var(--green);color:var(--green-dark);background:var(--green-tint);font-weight:700}
+  .chip-vedette[aria-pressed="true"]{background:var(--green);color:#fff;border-color:var(--green)}
+  .chip-vedette i{font-style:normal;opacity:.65;font-weight:700;margin-left:2px}
+  #chipsVedette{margin-bottom:-2px}
 
   /* ============ ACCUEIL ============ */
   #scHome{background:var(--dark)}
@@ -1258,6 +1263,7 @@
       <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 11h18"/><path d="M5 11a7 7 0 0 1 14 0"/><path d="M4 15h16"/><path d="M12 4v1.5"/><circle cx="12" cy="8.5" r="1"/></svg></span>
       <span><b>Tu ne trouves pas ta recette&nbsp;?</b><span>Compose ton repas : tes aliments, tes calories, je calcule les quantités.</span></span>
     </button>
+    <div class="chiprow" id="chipsVedette"></div>
     <div class="chiprow" id="chipsCat"></div>
     <div class="srow">
       <span class="rcount"><b id="count">0</b> recettes</span>
@@ -1713,6 +1719,7 @@ const ICON_PLATE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const grid=document.getElementById('grid');
 const chipsCat=document.getElementById('chipsCat');
 const chipsSpecial=document.getElementById('chipsSpecial');
+const chipsVedette=document.getElementById('chipsVedette');
 const chipsBase=document.getElementById('chipsBase');
 const chipsFec=document.getElementById('chipsFec');
 const sortSel=document.getElementById('sort');
@@ -1747,23 +1754,49 @@ function onPrimaryClick(val){
   if(activeFec!=="Tous" && !availF.includes(activeFec)) activeFec="Tous";
   buildPrimary(); buildBaseChips(); buildFecChips(); update();
 }
-function buildPrimary(){ buildCatChips(); buildSpecialChips(); }
+function buildPrimary(){ buildCatChips(); buildSpecialChips(); buildVedetteChips(); }
+/* Les deux entrees qu'on veut que les gens voient tout de suite, en clair sur
+   l'ecran Recettes, et pas enfermees dans le panneau Filtres. */
+function buildVedetteChips(){
+  if(!chipsVedette) return;
+  const v=[["Repas 4€","Repas 4€"],["Simple & pas cher","@simple"]].filter(function(x){ return typePresent(x[1]); });
+  if(!v.length){ chipsVedette.innerHTML=''; return; }
+  chipsVedette.innerHTML=v.map(function(x){
+    const n=poolFor(x[0]).length;
+    return '<button class="chip-f chip-vedette" aria-pressed="'+(x[0]===activeCat)+'" data-cat="'+x[0]+'">'+x[0]+' <i>'+n+'</i></button>';
+  }).join('');
+  chipsVedette.querySelectorAll('.chip-f').forEach(function(el){
+    el.addEventListener('click',function(){ onPrimaryClick(el.dataset.cat); });
+  });
+}
 function buildCatChips(){
   const present=MEAL_MOMENTS.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m)));
   const all=["Tous",...present];
   chipsCat.innerHTML=all.map(c=>`<button class="chip-f" aria-pressed="${c===activeCat}" data-cat="${c}">${c}</button>`).join('');
   chipsCat.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>onPrimaryClick(el.dataset.cat)));
 }
-const CAT_TYPES=[["Saveurs du monde","Monde"],["Fast food","Fast food"],["Bowls","Bowls"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Sauces","Sauce"]];
+/* Simple et pas cher : 6 ingredients maxi, 25 minutes maxi,
+   et aucun ingredient qui fait grimper le ticket de caisse. */
+const ING_CHERS=/(saumon|crevette|saint-jacques|magret|canard|agneau|boeuf|entrecote|parmesan|pignon|avocat|mangue|cajou|amande|noisette|halloumi|feta|chevre|comte|emmental|whey|gambas|truite|dorade|fruits de mer|pesto|burrata|mozzarella|ricotta|sirop d|proteine en poudre)/;
+function simplePasCher(r){
+  const ings=r.ingredients||[];
+  if(!ings.length || ings.length>6) return false;
+  if(((r.temps_preparation||0)+(r.temps_cuisson||0))>25) return false;
+  return !ING_CHERS.test(frNorm(ings.map(function(i){ return i.nom||''; }).join(' ')));
+}
+const CAT_TYPES=[["Repas 4€","Repas 4€"],["Simple & pas cher","@simple"],["Saveurs du monde","Monde"],["Fast food","Fast food"],["Bowls","Bowls"],["Salades","Salade"],["Express","Express"],["Snacking","@snack"],["Végé","Végé"],["Légumes","Légumes"],["Desserts","Dessert"],["Barres protéinées","Barres protéinées"],["Encas","Encas"],["Sauces","Sauce"]];
 function typePresent(v){
   if(v==="@snack") return RECETTES.some(r=>(r.moment||[]).some(x=>x==="Encas 10h"||x==="Encas 16h"));
+  if(v==="@simple") return RECETTES.some(simplePasCher);
   return RECETTES.some(r=>r.categorie===v);
 }
 function buildSpecialChips(){
   const sp=CAT_TYPES.filter(([l,v])=>typePresent(v)).map(([l])=>l);
   chipsSpecial.innerHTML=sp.map(c=>{
-    const special = c==="Saveurs du monde";
-    return `<button class="chip-f${special?' chip-monde':''}" aria-pressed="${c===activeCat}" data-cat="${c}">${special?'🌍 ':''}${c}</button>`;
+    const monde = c==="Saveurs du monde";
+    const vedette = (c==="Repas 4€" || c==="Simple & pas cher");
+    const cls = monde ? ' chip-monde' : (vedette ? ' chip-vedette' : '');
+    return `<button class="chip-f${cls}" aria-pressed="${c===activeCat}" data-cat="${c}">${monde?'🌍 ':''}${c}</button>`;
   }).join('');
   chipsSpecial.querySelectorAll('.chip-f').forEach(el=>el.addEventListener('click',()=>onPrimaryClick(el.dataset.cat)));
 }
@@ -1782,6 +1815,10 @@ function buildFecChips(){
 }
 function poolFor(sel){
   if(sel==="Tous") return RECETTES.filter(r=>r.categorie!=="Sauce");
+  if(sel==="Repas 4€") return RECETTES.filter(r=>r.categorie==="Repas 4€");
+  if(sel==="Simple & pas cher") return RECETTES.filter(r=>r.categorie!=="Sauce" && simplePasCher(r));
+  if(sel==="Barres protéinées") return RECETTES.filter(r=>r.categorie==="Barres protéinées");
+  if(sel==="Encas") return RECETTES.filter(r=>r.categorie==="Encas");
   if(sel==="Sauces") return RECETTES.filter(r=>r.categorie==="Sauce");
   if(sel==="Salades") return RECETTES.filter(r=>r.categorie==="Salade");
   if(sel==="Desserts") return RECETTES.filter(r=>r.categorie==="Dessert");
@@ -5996,7 +6033,9 @@ function fdIdeesMaj(force){
   const nb=document.getElementById('fdNb'); if(nb) nb.textContent=RECETTES.length;
   if(!force && fdVues.length) return;
   const pasSauce=function(r){ return !/^sauce/i.test(r.categorie||''); };
-  let pool=RECETTES.filter(function(r){ return pasSauce(r) && r.image_url; });
+  /* on met en avant ce que les gens cherchent vraiment : simple, rapide, pas cher */
+  let pool=RECETTES.filter(function(r){ return pasSauce(r) && r.image_url && simplePasCher(r); });
+  if(pool.length<3) pool=RECETTES.filter(function(r){ return pasSauce(r) && r.image_url; });
   if(pool.length<3) pool=RECETTES.filter(pasSauce);
   if(!pool.length) pool=RECETTES.slice();
   const pris=[], copie=pool.slice();
