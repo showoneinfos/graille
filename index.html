@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- Mesure d'audience Google -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BVQJMCSZ30"></script>
 <script>
@@ -58,7 +58,7 @@
     --amber:#F2A93B;
     --danger:#D4462B;
     --r:16px;
-    --tabh:76px;
+    --tabh:80px;
     --shadow:0 2px 10px rgba(14,26,20,.05);
     --shadow-lg:0 18px 50px rgba(14,26,20,.18);
     /* alias de compatibilité avec l'ancien code */
@@ -75,19 +75,21 @@
   svg{flex:0 0 auto}
 
   /* ============ COQUE : écrans + barre du bas ============ */
-  .screen{display:none;position:fixed;left:0;right:0;top:0;bottom:var(--tabh);
+  .screen{display:none;position:fixed;left:0;right:0;top:0;
+    bottom:calc(var(--tabh) + env(safe-area-inset-bottom));
     overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;background:var(--bg);z-index:1}
   .screen.open{display:block}
   .wrap{max-width:620px;margin:0 auto;padding:0 18px}
   .screen-pad{padding-bottom:34px}
 
-  .tabbar{position:fixed;left:0;right:0;bottom:0;height:var(--tabh);z-index:50;
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;
+    height:calc(var(--tabh) + env(safe-area-inset-bottom));
     background:var(--surface);border-top:1.5px solid var(--line);
     box-shadow:0 -6px 22px rgba(14,26,20,.08);
     display:flex;align-items:stretch;padding:7px 6px calc(7px + env(safe-area-inset-bottom))}
-  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-    border-radius:15px;color:var(--ink2);font-size:12.5px;font-weight:700;letter-spacing:0;
-    transition:color .15s,background .15s}
+  .tab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    border-radius:15px;color:var(--ink2);font-size:12.5px;font-weight:700;letter-spacing:-.2px;
+    line-height:1.15;white-space:nowrap;transition:color .15s,background .15s}
   .tab svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;
     stroke-linecap:round;stroke-linejoin:round}
   .tab:hover{color:var(--green)}
@@ -381,7 +383,7 @@
   .fr-chips{display:flex;flex-wrap:wrap;gap:8px}
   .fr-bar{position:fixed;left:0;right:0;bottom:0;z-index:95;background:var(--surface);
     border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
-  .screen .fr-bar{bottom:var(--tabh);z-index:45}
+  .screen .fr-bar{bottom:calc(var(--tabh) + env(safe-area-inset-bottom));z-index:45}
   .fr-inner{max-width:620px;margin:0 auto;display:flex;gap:10px;width:100%}
   .fr-clear{flex:0 0 auto;border:1.5px solid var(--line);border-radius:13px;padding:14px 16px;
     font-weight:700;font-size:15.5px;color:var(--ink2);background:var(--surface);white-space:nowrap}
@@ -2768,9 +2770,14 @@ function renderTracker(){
   const rb=document.getElementById('trkReset'); if(rb) rb.addEventListener('click',resetJournal);
   el.querySelectorAll('.trk-rm').forEach(b=>b.addEventListener('click',()=>removeFromJournal(+b.dataset.i)));
   el.querySelectorAll('.trk-item .nm').forEach(b=>b.addEventListener('click',()=>{
-    const it=JOURNAL.items[+b.dataset.j]; if(!it) return;
+    const i=+b.dataset.j, it=JOURNAL.items[i]; if(!it) return;
+    /* un repas composé à la main : on rouvre l'écran sur mesure */
+    if(it.id==='repas-sur-mesure'){
+      if(typeof ouvrirRepasJournal==='function') ouvrirRepasJournal(i);
+      return;
+    }
     const r=RECETTES.find(x=>x.id===it.id);
-    if(r) openSheet(r, (it.base!=null?it.base:it.kcal), it.sides||[], +b.dataset.j);
+    if(r) openSheet(r, (it.base!=null?it.base:it.kcal), it.sides||[], i);
   }));
   ligneCoachAccueil(el);
 }
@@ -4093,6 +4100,7 @@ function alimentPar(id){ for(let i=0;i<ALIMENTS.length;i++) if(ALIMENTS[i].id===
 
 /* ---------- etat ---------- */
 let RP = {cible:600, items:[]};
+let rpJournalIdx = null;   /* repas de la journee en cours de modification */
 function rpSauver(){ try{ localStorage.setItem('graille_repas', JSON.stringify(RP)); }catch(e){} }
 function rpCharger(){
   try{
@@ -4274,6 +4282,7 @@ function rpRendre(){
   const pc=document.getElementById('rpProtTxt');
   if(pc) pc.textContent=rpProtCible()+' g de protéines visées';
   rpMajReste();
+  rpBoutonMaj();
 
   if(!res.items.length){
     liste.innerHTML='<p class="rp-vide">Tape tes calories dans le grand chiffre vert, puis cherche tes aliments ci-dessus. Trois ou quatre suffisent : une protéine, un féculent, un légume, une matière grasse.<br><br>Pour le riz, les pâtes ou la viande, je te donne le poids <b>cru</b>, celui que tu pèses avant de cuisiner.</p>';
@@ -4447,6 +4456,7 @@ function rpRendreResultats(){
 
 /* ---------- ouverture / actions ---------- */
 function ouvrirRepas(){
+  rpJournalIdx=null;
   rpCharger();
   const p=(typeof loadProfile==='function')?loadProfile():null;
   if(p && p.parRepas && !RP.items.length) RP.cible=p.parRepas;
@@ -4455,6 +4465,21 @@ function ouvrirRepas(){
   rpRendre();
   document.getElementById('repas').classList.add('open');
   document.body.style.overflow='hidden';
+}
+function ouvrirRepasJournal(i){
+  const it=JOURNAL.items[i];
+  ouvrirRepas();
+  if(it && it.rp && it.rp.items && it.rp.items.length){
+    RP={cible:it.rp.cible||600, items:it.rp.items.filter(function(x){ return alimentPar(x.id); })};
+    rpJournalIdx=i;
+  }
+  rpRendre();
+  rpBoutonMaj();
+}
+/* le bouton du bas : ajouter, ou mettre a jour le repas deja dans la journee */
+function rpBoutonMaj(){
+  const b=document.getElementById('rpAjouter');
+  if(b) b.textContent = (rpJournalIdx!=null) ? 'Mettre à jour ce repas' : 'Ajouter à ma journée';
 }
 function fermerRepas(){
   document.getElementById('repas').classList.remove('open');
@@ -4467,12 +4492,23 @@ function rpAjouterJournee(){
   const res=rpCalculer();
   if(!res.items.length) return;
   if(typeof loadProfile==='function' && !loadProfile()){ fermerRepas(); openOnboard(); return; }
-  addToJournal('repas-sur-mesure', rpNomRepas(res), res.kcal, res.kcal, []);
+  const compo={cible:RP.cible, items:RP.items.map(function(x){ return {id:x.id, lock:!!x.lock, q:x.q}; })};
+  if(rpJournalIdx!=null && JOURNAL.items[rpJournalIdx]){
+    /* on remplace le repas au lieu d'en ajouter un deuxieme */
+    const it=JOURNAL.items[rpJournalIdx];
+    it.nom=rpNomRepas(res); it.kcal=res.kcal; it.base=res.kcal; it.sides=[]; it.rp=compo;
+    saveJournal(JOURNAL); renderTracker();
+  } else {
+    addToJournal('repas-sur-mesure', rpNomRepas(res), res.kcal, res.kcal, []);
+    const dernier=JOURNAL.items[JOURNAL.items.length-1];
+    if(dernier){ dernier.rp=compo; saveJournal(JOURNAL); renderTracker(); }
+  }
   res.items.forEach(function(x){
     if(x.a.unite==='piece') mergeShop(x.a.nom, x.q, 'piece', false);
     else                    mergeShop(x.a.nom, rpCru(x.a, x.q), 'g', false);
   });
   try{ saveShop(); updateShopBadge(); }catch(e){}
+  rpJournalIdx=null;
   fermerRepas();
 }
 
