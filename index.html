@@ -193,7 +193,11 @@
   .fd-go{display:block;width:100%;background:var(--green);color:#fff;border-radius:16px;
     padding:18px;font-size:16px;font-weight:700;margin-top:16px}
   .fd-go:hover{background:var(--green-dark)}
-  .fd-go.alt{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#fff}
+  .fd-go.alt{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#fff;margin-top:9px}
+  .fd-go[hidden]{display:none}
+  .fd-relance{display:block;width:100%;margin-top:12px;color:rgba(255,255,255,.6);
+    font-size:13.5px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+  .fd-relance:hover{color:var(--lime)}
   .fd-go.alt:hover{background:rgba(139,221,79,.14);border-color:rgba(139,221,79,.45)}
 
   .fd-next{position:absolute;left:0;right:0;bottom:14px;display:flex;flex-direction:column;
@@ -1193,11 +1197,13 @@
   <!-- ---------- 3. IDÉES ---------- -->
   <section class="fd" id="fdIdees">
     <div class="wrap fd-in">
-      <div class="fd-eyebrow">À essayer</div>
-      <h2 class="fd-t">Des idées pour toi</h2>
-      <p class="fd-s">Trois recettes au hasard parmi les <b id="fdNb">744</b> du site.</p>
+      <div class="fd-eyebrow">Simple &amp; pas cher</div>
+      <h2 class="fd-t">Pas de prise de tête</h2>
+      <p class="fd-s"><b id="fdNb">330</b> recettes à 6 ingrédients maximum, prêtes en 25 minutes, sans rien d'onéreux dans le panier.</p>
       <div class="fd-recs" id="fdRecs"></div>
-      <button class="fd-go alt" id="fdTout" type="button">Voir toutes les recettes</button>
+      <button class="fd-go" id="fdTout" type="button">Voir les recettes simples</button>
+      <button class="fd-go alt" id="fd4e" type="button">Mes repas à 4&nbsp;€</button>
+      <button class="fd-relance" id="fdAutres" type="button">Montre-m'en trois autres</button>
     </div>
     <button class="fd-next" type="button" data-fd="3"><span>Tes outils</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
     <div class="fd-fin" aria-hidden="true"></div>
@@ -6030,12 +6036,18 @@ let fdVues=[];
 function fdIdeesMaj(force){
   const box=document.getElementById('fdRecs');
   if(!box || typeof RECETTES==='undefined' || !RECETTES.length) return;
-  const nb=document.getElementById('fdNb'); if(nb) nb.textContent=RECETTES.length;
-  if(!force && fdVues.length) return;
   const pasSauce=function(r){ return !/^sauce/i.test(r.categorie||''); };
-  /* on met en avant ce que les gens cherchent vraiment : simple, rapide, pas cher */
-  let pool=RECETTES.filter(function(r){ return pasSauce(r) && r.image_url && simplePasCher(r); });
-  if(pool.length<3) pool=RECETTES.filter(function(r){ return pasSauce(r) && r.image_url; });
+  const simples=RECETTES.filter(function(r){ return pasSauce(r) && simplePasCher(r); });
+  const nb=document.getElementById('fdNb'); if(nb) nb.textContent=simples.length||RECETTES.length;
+  const b4=document.getElementById('fd4e');
+  if(b4){
+    const n4=RECETTES.filter(function(r){ return r.categorie==='Repas 4€'; }).length;
+    if(n4){ b4.hidden=false; b4.innerHTML='Mes '+n4+' repas à 4&nbsp;€'; } else b4.hidden=true;
+  }
+  if(!force && fdVues.length) return;
+  /* on montre en priorite celles qui ont deja leur photo */
+  let pool=simples.filter(function(r){ return r.image_url; });
+  if(pool.length<3) pool=simples;
   if(pool.length<3) pool=RECETTES.filter(pasSauce);
   if(!pool.length) pool=RECETTES.slice();
   const pris=[], copie=pool.slice();
@@ -6077,8 +6089,18 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
   document.querySelectorAll('#scHome .fd-next').forEach(function(b){
     b.addEventListener('click', function(){ fdAller(+b.dataset.fd); });
   });
+  /* les boutons ouvrent l'onglet Recettes AVEC le filtre deja applique */
+  function fdFiltre(cat){
+    try{ if(typeof onPrimaryClick==='function') onPrimaryClick(cat); }catch(e){}
+    showTab('recipes');
+    const sc=document.getElementById('scRecipes'); if(sc) sc.scrollTop=0;
+  }
   const t=document.getElementById('fdTout');
-  if(t) t.addEventListener('click', function(){ showTab('recipes'); });
+  if(t) t.addEventListener('click', function(){ fdFiltre('Simple & pas cher'); });
+  const q=document.getElementById('fd4e');
+  if(q) q.addEventListener('click', function(){ fdFiltre('Repas 4€'); });
+  const a=document.getElementById('fdAutres');
+  if(a) a.addEventListener('click', function(){ fdIdeesMaj(true); });
   fdPoints();
 })();
 
