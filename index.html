@@ -1245,16 +1245,11 @@
   <section class="fd" id="fdSurMesure">
     <div class="wrap fd-in">
       <div class="fd-eyebrow">Ce que TikTok ne fait pas</div>
-      <h2 class="fd-t">Ton repas sur mesure</h2>
+      <h2 class="fd-t">Calcule le poids de tes aliments</h2>
       <p class="fd-s">La vidéo dit « mettez du riz ». Elle ne sait pas combien il t'en faut, à toi. Moi si.</p>
-      <div class="fd-ex">
-        <div class="fd-ex-h">Par exemple, pour 650 kcal</div>
-        <div class="fd-ex-r"><b>Riz</b><span>66 g crus</span></div>
-        <div class="fd-ex-r"><b>Blanc de poulet</b><span>170 g crus</span></div>
-        <div class="fd-ex-r"><b>Sauce soja</b><span>15 g</span></div>
-      </div>
+      <div class="fd-ex" id="fdSurBox" hidden></div>
       <button class="fd-go" id="fdSurGo" type="button">Composer mon repas</button>
-      <button class="fd-relance" id="fdSurReprendre" type="button" hidden>Reprendre mon dernier repas</button>
+      <button class="fd-relance" id="fdSurReprendre" type="button" hidden>Vider et repartir de zéro</button>
     </div>
     <button class="fd-next" type="button" data-fd="2"><span>Ton menu du jour</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
     <div class="fd-fin" aria-hidden="true"></div>
@@ -6449,13 +6444,31 @@ function semSupprimerJour(di){
 
 /* --- ecran : repas sur mesure --- */
 function fdSurMaj(){
-  const b=document.getElementById('fdSurReprendre');
-  if(!b) return;
+  const b=document.getElementById('fdSurReprendre'), box=document.getElementById('fdSurBox'),
+        go=document.getElementById('fdSurGo');
+  if(!box) return;
   let dernier=null;
   try{ dernier=JSON.parse(localStorage.getItem('graille_repas')||'null'); }catch(e){}
-  const n=(dernier && dernier.items) ? dernier.items.length : 0;
-  b.hidden = !n;
-  if(n) b.textContent='Reprendre mon dernier repas ('+n+' aliment'+(n>1?'s':'')+')';
+  const items=(dernier && dernier.items) ? dernier.items.filter(function(x){ return alimentPar(x.id); }) : [];
+  if(!items.length){
+    box.hidden=true; box.innerHTML='';
+    if(b) b.hidden=true;
+    if(go) go.textContent='Composer mon repas';
+    return;
+  }
+  /* pas d'exemple invente : on montre ce que la personne a vraiment compose */
+  box.hidden=false;
+  box.innerHTML='<div class="fd-ex-h">Ton dernier repas · '+(dernier.cible||'')+' kcal</div>'+
+    items.map(function(x){
+      const a=alimentPar(x.id);
+      let q;
+      if(a.unite==='piece') q=x.q+' '+(x.q>1?'pièces':'pièce');
+      else if(Math.abs(a.cru-1)<0.05) q=x.q+' g';
+      else q=rpCru(a,x.q)+' g crus';
+      return '<div class="fd-ex-r"><b>'+a.nom+'</b><span>'+q+'</span></div>';
+    }).join('');
+  if(b) b.hidden=false;
+  if(go) go.textContent='Reprendre ce repas';
 }
 function fdMaj(){ fdPoints(); fdSurMaj(); fdMenuMaj(); fdIdeesMaj(); fd4Maj(); fdCoachMaj(); fdSemMaj(); fdHauteur(); }
 window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); }catch(e){} });
@@ -6515,7 +6528,9 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
   const sm=document.getElementById('fdSurGo');
   if(sm) sm.addEventListener('click', function(){ try{ ouvrirRepas(); }catch(e){} });
   const sr=document.getElementById('fdSurReprendre');
-  if(sr) sr.addEventListener('click', function(){ try{ ouvrirRepas(); }catch(e){} });
+  if(sr) sr.addEventListener('click', function(){
+    try{ RP={cible:RP.cible||600, items:[]}; rpSauver(); rpRendre(); fdSurMaj(); }catch(e){}
+  });
   const mr=document.getElementById('fdMenuRegen');
   if(mr) mr.addEventListener('click', function(){ try{ generateMenu(); }catch(e){} });
   const q4=document.getElementById('fd4Voir');
