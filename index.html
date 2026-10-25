@@ -2294,10 +2294,15 @@ function updateValues(){
   document.getElementById('mLip').textContent=Math.round(ms.F+st.l);
   const tot=document.getElementById('sidesTotal'); if(tot) tot.textContent=activeTarget+st.k;
   document.querySelectorAll('.ingredients .qty').forEach(el=>{
+    /* un ingredient sans quantite (sel, poivre, origan, miel...) n'a pas de
+       data-base : on le laisse sans chiffre au lieu d'ecrire "NaN undefined" */
+    if(el.dataset.base===undefined || el.dataset.base==='') return;
     const base=parseFloat(el.dataset.base);
+    if(!isFinite(base)) { el.textContent=''; return; }
     const cat=el.dataset.cat;
     const fac=cat==='prot'?ms.fProt:(cat==='carb'?ms.fCarb:ms.f);
-    el.textContent=`${displayQty(base*fac,el.dataset.unite)} ${el.dataset.unite}`;
+    const u=el.dataset.unite||'';
+    el.textContent=(displayQty(base*fac,u)+' '+u).trim();
   });
   const ak=document.getElementById('addKcal'); if(ak) ak.textContent=activeTarget+st.k;
   if(typeof majReste==='function') majReste(activeTarget+st.k);
