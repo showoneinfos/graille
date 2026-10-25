@@ -4363,7 +4363,10 @@ function alimentPar(id){ for(let i=0;i<ALIMENTS.length;i++) if(ALIMENTS[i].id===
 /* ---------- etat ---------- */
 let RP = {cible:600, items:[]};
 let rpJournalIdx = null;   /* repas de la journee en cours de modification */
-function rpSauver(){ try{ localStorage.setItem('graille_repas', JSON.stringify(RP)); }catch(e){} }
+function rpSauver(){
+  try{ localStorage.setItem('graille_repas', JSON.stringify(RP)); }catch(e){}
+  try{ fdSurMaj(); }catch(e){}
+}
 function rpCharger(){
   try{
     const s=JSON.parse(localStorage.getItem('graille_repas'));
@@ -4750,6 +4753,9 @@ function rpBoutonMaj(){
 function fermerRepas(){
   document.getElementById('repas').classList.remove('open');
   document.body.style.overflow='';
+  /* l'accueil doit refleter le repas immediatement, pas au prochain demarrage */
+  try{ fdSurMaj(); }catch(e){}
+  try{ fdHauteur(); }catch(e){}
 }
 function rpNomRepas(res){
   return 'Repas sur mesure · '+res.items.map(function(x){ return x.a.nom; }).join(', ');
