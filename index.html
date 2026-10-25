@@ -100,6 +100,17 @@
   body.dark-nav .tab{color:rgba(255,255,255,.58)}
   body.dark-nav .tab:hover{color:#fff}
   body.dark-nav .tab.on{color:var(--lime);background:rgba(139,221,79,.16)}
+  /* Courses : vert des qu'il y a quelque chose dans la liste, blanc sinon */
+  .tab.plein{color:var(--green)}
+  .tab.plein svg{stroke:var(--green)}
+  body.dark-nav .tab.plein{color:var(--lime)}
+  body.dark-nav .tab.plein svg{stroke:var(--lime)}
+  .tab{position:relative}
+  .tab-pastille{position:absolute;top:6px;right:50%;transform:translateX(26px);
+    min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--green);color:#fff;
+    font-size:11px;font-weight:800;line-height:18px;text-align:center;font-style:normal;display:none}
+  .tab-pastille.on{display:block}
+  body.dark-nav .tab-pastille{background:var(--lime);color:var(--dark)}
 
   /* ============ ÉLÉMENTS COMMUNS ============ */
   .ptitle{font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1.15}
@@ -242,6 +253,11 @@
     border-left:1px solid rgba(255,255,255,.1)}
   .fd-m-sw:hover{color:var(--lime);background:rgba(139,221,79,.1)}
   .fd-m.vide{padding:13px 14px}
+  .fd-m-plat{flex:1;display:flex;align-items:center;gap:11px;padding:13px 14px}
+  .fd-m-plat i{font-style:normal;font-size:11.5px;font-weight:800;letter-spacing:.8px;
+    text-transform:uppercase;color:var(--lime);flex:0 0 118px}
+  .fd-m-plat b{flex:1;font-size:14.5px;font-weight:600}
+  .fd[hidden]{display:none}
   .fd-m.vide{border-style:dashed;background:transparent}
   .fd-m.vide b,.fd-m.vide span{color:rgba(255,255,255,.34)}
   .fd-m.vide i{color:rgba(139,221,79,.5)}
@@ -1211,14 +1227,52 @@
       <p class="fd-s"><b id="fdNb">330</b> recettes à 6 ingrédients maximum, prêtes en 25 minutes, sans rien d'onéreux dans le panier.</p>
       <div class="fd-recs" id="fdRecs"></div>
       <button class="fd-go" id="fdTout" type="button">Voir les recettes simples</button>
-      <button class="fd-go alt" id="fd4e" type="button">Mes repas à 4&nbsp;€</button>
       <button class="fd-relance" id="fdAutres" type="button">Montre-m'en trois autres</button>
     </div>
-    <button class="fd-next" type="button" data-fd="3"><span>Tes outils</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <button class="fd-next" type="button" data-fd="3"><span>Mes repas à 4 €</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
     <div class="fd-fin" aria-hidden="true"></div>
   </section>
 
-  <!-- ---------- 4. OUTILS ---------- -->
+  <!-- ---------- 4. REPAS À 4 € ---------- -->
+  <section class="fd" id="fdQuatre">
+    <div class="wrap fd-in">
+      <div class="fd-eyebrow">Petit budget</div>
+      <h2 class="fd-t">Mes repas à 4 €</h2>
+      <p class="fd-s"><b id="fd4Nb">50</b> recettes complètes pour moins de 4 € la portion.</p>
+      <div class="fd-recs" id="fd4Recs"></div>
+      <button class="fd-go" id="fd4Voir" type="button">Voir tous mes repas à 4 €</button>
+      <button class="fd-relance" id="fd4Autres" type="button">Montre-m'en trois autres</button>
+    </div>
+    <button class="fd-next" type="button" data-fd="4"><span>Ton coach</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="fd-fin" aria-hidden="true"></div>
+  </section>
+
+  <!-- ---------- 5. COACH ---------- -->
+  <section class="fd" id="fdCoach">
+    <div class="wrap fd-in">
+      <div class="fd-eyebrow">Sport</div>
+      <h2 class="fd-t">Ton coach</h2>
+      <p class="fd-s" id="fdCoachS">Choisis ton sport et tes jours, je te prépare tes séances.</p>
+      <div class="fd-menu" id="fdCoachBox"></div>
+      <button class="fd-go" id="fdCoachGo" type="button">Ouvrir mon coach</button>
+    </div>
+    <button class="fd-next" type="button" data-fd="5"><span>Ma semaine</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="fd-fin" aria-hidden="true"></div>
+  </section>
+
+  <!-- ---------- 6. SEMAINE ---------- -->
+  <section class="fd" id="fdSemaine">
+    <div class="wrap fd-in">
+      <div class="fd-eyebrow">Organisation</div>
+      <h2 class="fd-t">Mes repas de la semaine</h2>
+      <p class="fd-s" id="fdSemS">Sept jours de repas d'un coup, avec la liste de courses qui va avec.</p>
+      <button class="fd-go" id="fdSemGo" type="button">Composer ma semaine</button>
+    </div>
+    <button class="fd-next" type="button" data-fd="6"><span>Tes outils</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="fd-fin" aria-hidden="true"></div>
+  </section>
+
+  <!-- ---------- 7. OUTILS ---------- -->
   <section class="fd" id="fdOutils">
     <div class="wrap fd-in">
       <div class="fd-eyebrow">Tes outils</div>
@@ -1229,9 +1283,9 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="3"/><path d="M8 7h8M8 12h2M8 16.5h2M14 12h2M14 16.5h2"/></svg></span>
           <span>Calculateur de calories</span>
         </button>
-        <button class="tile" id="tileWeek">
-          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M3 10h18M8 2.5v4M16 2.5v4"/></svg></span>
-          <span>Mes repas de la semaine</span>
+        <button class="tile" id="tileRecettes">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 19V5.5A2.5 2.5 0 0 1 6.5 3H18a1 1 0 0 1 1 1v13"/><path d="M6.5 17H19v4H6.5A2.5 2.5 0 0 1 4 18.5v0A2.5 2.5 0 0 1 6.5 16"/></svg></span>
+          <span>Toutes les recettes</span>
         </button>
         <button class="tile" id="openFridge">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M5 10h14M8.5 6v2M8.5 13.5v2.5"/></svg></span>
@@ -1424,14 +1478,8 @@
   <button class="tab on" data-tab="home">
     <svg viewBox="0 0 24 24"><path d="M3 11l9-7.5 9 7.5"/><path d="M5.5 9.8V20h13V9.8"/></svg><span>Accueil</span>
   </button>
-  <button class="tab" data-tab="recipes">
-    <svg viewBox="0 0 24 24"><path d="M4 19V5.5A2.5 2.5 0 0 1 6.5 3H18a1 1 0 0 1 1 1v13"/><path d="M6.5 17H19v4H6.5A2.5 2.5 0 0 1 4 18.5v0A2.5 2.5 0 0 1 6.5 16"/></svg><span>Recettes</span>
-  </button>
-  <button class="tab" data-tab="week">
-    <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M3 10h18M8 2.5v4M16 2.5v4"/></svg><span>Semaine</span>
-  </button>
-  <button class="tab" data-tab="coach">
-    <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11v11h-11z"/><path d="M4 9.5v5M20 9.5v5M2 11v2M22 11v2"/></svg><span>Coach</span>
+  <button class="tab" data-tab="shop" id="tabShop">
+    <svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.4 11.4a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21 7H6"/></svg><span>Courses</span><em class="tab-pastille" id="tabShopN"></em>
   </button>
   <button class="tab" data-tab="profile">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20.5c0-3.8 3.4-6.2 7.5-6.2s7.5 2.4 7.5 6.2"/></svg><span>Profil</span>
@@ -2667,6 +2715,11 @@ function updateShopBadge(){
   const n=SHOP.filter(i=>!i.got).length;
   const b=document.getElementById('shopBadge');
   if(b){ b.textContent=n||''; b.classList.toggle('show', n>0); }
+  /* le bouton du bas passe au vert des qu'il y a quelque chose a acheter */
+  const t=document.getElementById('tabShop');
+  if(t) t.classList.toggle('plein', n>0);
+  const p=document.getElementById('tabShopN');
+  if(p){ p.textContent=n>99?'99+':(n||''); p.classList.toggle('on', n>0); }
 }
 function renderShop(){
   const box=document.getElementById('shopList');
@@ -2685,8 +2738,18 @@ function renderShop(){
   box.querySelectorAll('.shop-check').forEach(b=>b.addEventListener('click',()=>{SHOP[+b.dataset.i].got=!SHOP[+b.dataset.i].got;saveShop();renderShop();updateShopBadge();}));
   box.querySelectorAll('.shop-rm').forEach(b=>b.addEventListener('click',()=>{SHOP.splice(+b.dataset.i,1);saveShop();renderShop();updateShopBadge();}));
 }
-function openShop(){renderShop();document.getElementById('shop').classList.add('open');document.body.style.overflow='hidden';}
-function closeShop(){document.getElementById('shop').classList.remove('open');document.body.style.overflow='';}
+function openShop(){
+  renderShop();
+  document.getElementById('shop').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.tab==='shop'); });
+}
+function closeShop(){
+  document.getElementById('shop').classList.remove('open');
+  document.body.style.overflow='';
+  const n=(typeof currentTab!=='undefined' && currentTab==='profile')?'profile':'home';
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.tab===n); });
+}
 document.getElementById('shopFab').addEventListener('click',openShop);
 document.getElementById('shopClose').addEventListener('click',closeShop);
 document.getElementById('shopDone').addEventListener('click',closeShop);
@@ -6049,7 +6112,10 @@ let currentTab = 'home';
 
 /* ================= ACCUEIL EN FIL =================
    On balaie vers le haut, chaque écran s'arrête tout seul. */
-function fdEcrans(){ return Array.prototype.slice.call(document.querySelectorAll('#scHome .fd')); }
+function fdEcrans(){
+  return Array.prototype.slice.call(document.querySelectorAll('#scHome .fd'))
+    .filter(function(e){ return !e.hidden && e.offsetParent!==null; });
+}
 function fdAller(i){
   const e=fdEcrans()[i];
   if(e) e.scrollIntoView({behavior:'smooth', block:'start'});
@@ -6128,11 +6194,6 @@ function fdIdeesMaj(force){
   const pasSauce=function(r){ return !/^sauce/i.test(r.categorie||''); };
   const simples=RECETTES.filter(function(r){ return pasSauce(r) && simplePasCher(r); });
   const nb=document.getElementById('fdNb'); if(nb) nb.textContent=simples.length||RECETTES.length;
-  const b4=document.getElementById('fd4e');
-  if(b4){
-    const n4=RECETTES.filter(function(r){ return r.categorie==='Repas 4€'; }).length;
-    if(n4){ b4.hidden=false; b4.innerHTML='Mes '+n4+' repas à 4&nbsp;€'; } else b4.hidden=true;
-  }
   if(!force && fdVues.length) return;
   /* on montre en priorite celles qui ont deja leur photo */
   let pool=simples.filter(function(r){ return r.image_url; });
@@ -6166,7 +6227,78 @@ function fdHauteur(){
   });
   sc.classList.toggle('libre', trop);
 }
-function fdMaj(){ fdPoints(); fdMenuMaj(); fdIdeesMaj(); fdHauteur(); }
+/* une carte recette pour le fil */
+function fdCarte(r,i,cle){
+  return '<button class="fd-rec" data-'+cle+'="'+i+'">'+
+    '<span class="vg">'+thumbHTML(r)+'</span>'+
+    '<span class="tx"><b>'+nomL(r)+'</b><em>'+Math.round(r.calories)+' kcal</em></span>'+
+    '<svg class="ch" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>'+
+  '</button>';
+}
+function fdTirer(pool, n){
+  const pris=[], copie=pool.slice();
+  while(pris.length<n && copie.length) pris.push(copie.splice(Math.floor(Math.random()*copie.length),1)[0]);
+  return pris;
+}
+
+/* --- ecran : mes repas a 4 euros --- */
+let fd4Vues=[];
+function fd4Maj(force){
+  const box=document.getElementById('fd4Recs'); if(!box) return;
+  if(typeof RECETTES==='undefined' || !RECETTES.length) return;
+  const pool=RECETTES.filter(function(r){ return r.categorie==='Repas 4€'; });
+  const nb=document.getElementById('fd4Nb'); if(nb) nb.textContent=pool.length;
+  const sec=document.getElementById('fdQuatre');
+  if(!pool.length){ if(sec) sec.hidden=true; return; }
+  if(sec) sec.hidden=false;
+  if(!force && fd4Vues.length) return;
+  const avecPhoto=pool.filter(function(r){ return r.image_url; });
+  fd4Vues=fdTirer(avecPhoto.length>=3?avecPhoto:pool, 3);
+  box.innerHTML=fd4Vues.map(function(r,i){ return fdCarte(r,i,'fd4r'); }).join('');
+  box.querySelectorAll('.fd-rec').forEach(function(b){
+    b.addEventListener('click', function(){ openSheet(fd4Vues[+b.dataset.fd4r]); });
+  });
+}
+
+/* --- ecran : coach --- */
+function fdCoachMaj(){
+  const s=document.getElementById('fdCoachS'), box=document.getElementById('fdCoachBox');
+  if(!s||!box) return;
+  let b=null;
+  try{ if(typeof bilanCoach==='function') b=bilanCoach(); }catch(e){}
+  if(!b || (!b.faites && !b.prevues)){
+    s.textContent="Choisis ton sport et tes jours, je te prépare tes séances.";
+    box.innerHTML='';
+    return;
+  }
+  s.innerHTML = b.faites
+    ? '<b>'+b.faites+' séance'+(b.faites>1?'s':'')+'</b> cette semaine.'
+    : 'Tes séances t\'attendent.';
+  const l=[];
+  l.push(['Cette semaine', b.faites+(b.prevues?(' / '+b.prevues+' prévues'):' faite'+(b.faites>1?'s':''))]);
+  if(b.serie>1) l.push(['Série', b.serie+' semaines d\'affilée']);
+  if(b.joursSuivis) l.push(['Objectif tenu', b.tenus+' jour'+(b.tenus>1?'s':'')+' sur '+b.joursSuivis]);
+  box.innerHTML=l.map(function(x){
+    return '<div class="fd-m"><span class="fd-m-plat"><i>'+x[0]+'</i><b>'+x[1]+'</b></span></div>';
+  }).join('');
+}
+
+/* --- ecran : semaine --- */
+function fdSemMaj(){
+  const s=document.getElementById('fdSemS'), bt=document.getElementById('fdSemGo');
+  if(!s) return;
+  let ok=false;
+  try{ ok=!!(typeof WEEK_MENU!=='undefined' && WEEK_MENU && WEEK_MENU.length); }catch(e){}
+  if(ok){
+    s.innerHTML='Ta semaine est prête : <b>'+WEEK_MENU.length+' jour'+(WEEK_MENU.length>1?'s':'')+'</b> de repas.';
+    if(bt) bt.textContent='Revoir ma semaine';
+  } else {
+    s.textContent="Sept jours de repas d'un coup, avec la liste de courses qui va avec.";
+    if(bt) bt.textContent='Composer ma semaine';
+  }
+}
+
+function fdMaj(){ fdPoints(); fdMenuMaj(); fdIdeesMaj(); fd4Maj(); fdCoachMaj(); fdSemMaj(); fdHauteur(); }
 window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); }catch(e){} });
 
 (function fdBrancher(){
@@ -6176,7 +6308,11 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
     sc.__fdT=setTimeout(function(){ sc.__fdT=null; fdPointActif(); }, 90);
   }, {passive:true});
   document.querySelectorAll('#scHome .fd-next').forEach(function(b){
-    b.addEventListener('click', function(){ fdAller(+b.dataset.fd); });
+    b.addEventListener('click', function(){
+      const es=fdEcrans(), moi=b.closest('.fd');
+      const i=es.indexOf(moi);
+      if(i>=0 && i<es.length-1) fdAller(i+1);
+    });
   });
   /* les boutons ouvrent l'onglet Recettes AVEC le filtre deja applique */
   function fdFiltre(cat){
@@ -6186,12 +6322,20 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
   }
   const t=document.getElementById('fdTout');
   if(t) t.addEventListener('click', function(){ fdFiltre('Simple & pas cher'); });
-  const q=document.getElementById('fd4e');
-  if(q) q.addEventListener('click', function(){ fdFiltre('Repas 4€'); });
   const a=document.getElementById('fdAutres');
   if(a) a.addEventListener('click', function(){ fdIdeesMaj(true); });
   const mr=document.getElementById('fdMenuRegen');
   if(mr) mr.addEventListener('click', function(){ try{ generateMenu(); }catch(e){} });
+  const q4=document.getElementById('fd4Voir');
+  if(q4) q4.addEventListener('click', function(){ fdFiltre('Repas 4€'); });
+  const q4a=document.getElementById('fd4Autres');
+  if(q4a) q4a.addEventListener('click', function(){ fd4Maj(true); });
+  const cg=document.getElementById('fdCoachGo');
+  if(cg) cg.addEventListener('click', function(){ try{ openCoach(); }catch(e){} });
+  const sg=document.getElementById('fdSemGo');
+  if(sg) sg.addEventListener('click', function(){ try{ openMenuWeek(); }catch(e){} });
+  const tr=document.getElementById('tileRecettes');
+  if(tr) tr.addEventListener('click', function(){ fdFiltre('Tous'); });
   fdPoints();
 })();
 
@@ -6213,7 +6357,10 @@ function showTab(name){
       if(name==='home') fdPointActif();
     });
   }
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===name));
+  /* Recettes, Semaine et Coach n'ont plus de bouton en bas : on les atteint
+     depuis le fil de l'accueil, donc c'est Accueil qui reste allume. */
+  const ongletActif = (name==='profile') ? 'profile' : 'home';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===ongletActif));
   document.body.classList.toggle('dark-nav', name==='home');
   if(name==='profile') renderProfile();
   if(name==='home') fdMaj();
@@ -6223,6 +6370,7 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   const n = t.dataset.tab;
   if(n==='week'){ openMenuWeek(); }
   else if(n==='coach'){ openCoach(); }
+  else if(n==='shop'){ openShop(); }
   else { showTab(n); }
 }));
 
