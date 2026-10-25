@@ -2713,8 +2713,9 @@ function generateMenu(){
     const r=pool[Math.floor(Math.random()*pool.length)]; used.add(r.id);
     MENU.push({moment:m, recipe:r, kcal:alloc});
   });
-  menuDone=true;
+  menuDone=true; menuAjoute=false;
   renderMenuResult(p);
+  saveMenu();
   try{ fdMenuMaj(); }catch(e){}
   document.getElementById('menuRegen').style.display='';
   document.getElementById('menuGen').textContent='Ajouter à ma journée';
@@ -2738,20 +2739,64 @@ function renderMenuResult(p){
     const usedIds=new Set(MENU.map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
-    if(pool.length){ MENU[i]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]}; renderMenuResult(loadProfile()); }
+    if(pool.length){
+      MENU[i]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]};
+      renderMenuResult(loadProfile()); saveMenu();
+      try{ fdMenuMaj(); }catch(e){}
+    }
   }));
+}
+/* Le menu du jour est enregistre : il survit a la fermeture de l'application
+   et reste affiche sur l'accueil jusqu'au lendemain. */
+let menuAjoute=false;
+function saveMenu(){
+  try{
+    localStorage.setItem('graille_menu', JSON.stringify({
+      date: today(),
+      moments: Array.from(menuSel),
+      ajoute: menuAjoute,
+      items: MENU.map(function(it){ return {moment:it.moment, id:it.recipe.id, kcal:it.kcal}; })
+    }));
+  }catch(e){}
+}
+function loadMenu(){
+  try{
+    const s=JSON.parse(localStorage.getItem('graille_menu'));
+    if(!s || s.date!==today()){ localStorage.removeItem('graille_menu'); return; }
+    if(s.moments && s.moments.length) menuSel=new Set(s.moments);
+    menuAjoute=!!s.ajoute;
+    if(!s.items || !s.items.length) return;
+    if(typeof RECETTES==='undefined' || !RECETTES.length) return;
+    const repris=[];
+    s.items.forEach(function(x){
+      const r=RECETTES.find(function(y){ return y.id===x.id; });
+      if(r) repris.push({moment:x.moment, recipe:r, kcal:x.kcal});
+    });
+    if(repris.length){ MENU=repris; menuDone=true; }
+  }catch(e){}
 }
 function addMenuToDay(){
   if(!MENU.length) return;
   MENU.forEach(it=>{ addToJournal(it.recipe.id, nomL(it.recipe), it.kcal); addRecipeToShop(it.recipe, it.kcal); });
-  updateShopBadge(); closeMenu();
+  updateShopBadge();
+  menuAjoute=true; saveMenu();
+  try{ fdMenuMaj(); }catch(e){}
+  closeMenu();
 }
 function openMenu(){
-  menuDone=false; MENU=[];
   renderMenuMoments();
-  document.getElementById('menuResult').innerHTML='';
-  document.getElementById('menuRegen').style.display='none';
-  document.getElementById('menuGen').textContent='Générer mon menu';
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(menuDone && MENU.length && p){
+    /* un menu existe deja aujourd'hui : on le remontre au lieu de l'effacer */
+    renderMenuResult(p);
+    document.getElementById('menuRegen').style.display='';
+    document.getElementById('menuGen').textContent= menuAjoute ? 'Ajouter encore une fois' : 'Ajouter à ma journée';
+  } else {
+    menuDone=false; MENU=[];
+    document.getElementById('menuResult').innerHTML='';
+    document.getElementById('menuRegen').style.display='none';
+    document.getElementById('menuGen').textContent='Générer mon menu';
+  }
   document.getElementById('menu').classList.add('open'); document.body.style.overflow='hidden';
 }
 function closeMenu(){ document.getElementById('menu').classList.remove('open'); document.body.style.overflow=''; }
@@ -2999,6 +3044,7 @@ async function chargerRecettes(){
   const sr=document.getElementById('stat-recettes'); if(sr) sr.textContent = RECETTES.length;
   const sc=document.getElementById('stat-cats'); if(sc) sc.textContent = MOMENTS_ORDER.filter(m=>RECETTES.some(r=>(r.moment||[]).includes(m))).length;
   buildPrimary(); buildBaseChips(); buildFecChips(); update();
+  try{ loadMenu(); }catch(e){}
   try{ fdMaj(); }catch(e){}
 }
 
@@ -6029,11 +6075,14 @@ function fdMenuMaj(){
     return;
   }
   const total=MENU.reduce(function(s,it){ return s+it.kcal; },0);
-  if(sous) sous.innerHTML='Ton menu est prêt : <b>'+total+' kcal</b> sur la journée.';
+  if(sous) sous.innerHTML = menuAjoute
+    ? 'Déjà dans ta journée : <b>'+total+' kcal</b>.'
+    : 'Ton menu est prêt : <b>'+total+' kcal</b> sur la journée.';
   box.innerHTML=MENU.map(function(it){
     return '<div class="fd-m"><i>'+it.moment+'</i><b>'+nomL(it.recipe)+'</b><span>'+it.kcal+' kcal</span></div>';
   }).join('');
-  if(bt) bt.textContent='Ouvrir mon menu du jour';
+  /* ce bouton ouvre le panneau : le libelle doit dire ou il mene */
+  if(bt) bt.textContent = menuAjoute ? 'Revoir mon menu du jour' : 'Voir et ajouter à ma journée';
 }
 
 /* l'écran « idées » : trois recettes, les illustrées d'abord */
