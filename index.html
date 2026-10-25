@@ -213,6 +213,7 @@
 
   .fd-next{position:absolute;left:0;right:0;bottom:14px;display:flex;flex-direction:column;
     align-items:center;gap:3px;color:rgba(255,255,255,.6);font-size:13px;font-weight:600}
+  .fd-boucle svg{animation-direction:reverse}
   .fd-next:hover{color:var(--lime)}
   .fd-next svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;
     stroke-linecap:round;stroke-linejoin:round;animation:fdbounce 1.9s ease-in-out infinite}
@@ -1305,6 +1306,10 @@
         </button>
       </div>
     </div>
+    <button class="fd-next fd-boucle" id="fdRetour" type="button">
+      <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+      <span>Revenir au début</span>
+    </button>
     <div class="fd-fin" aria-hidden="true"></div>
   </section>
 
@@ -6307,7 +6312,36 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
     if(sc.__fdT) return;
     sc.__fdT=setTimeout(function(){ sc.__fdT=null; fdPointActif(); }, 90);
   }, {passive:true});
+  /* Arrive tout en bas, un balayage de plus repart au premier ecran :
+     on ne reste pas bloque dans un cul-de-sac. */
+  function toutEnBas(){ return sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4; }
+  function boucler(){
+    if(sc.__antiRebond) return;
+    sc.__antiRebond=setTimeout(function(){ sc.__antiRebond=null; }, 900);
+    fdAller(0);
+  }
+  if(sc){
+    let basAuDepart=false, yDepart=0;
+    sc.addEventListener('touchstart', function(e){
+      if(e.touches.length!==1){ basAuDepart=false; return; }
+      yDepart=e.touches[0].clientY;
+      basAuDepart=toutEnBas();          /* il faut DEJA etre en bas avant le geste */
+    }, {passive:true});
+    sc.addEventListener('touchend', function(e){
+      if(!basAuDepart) return;
+      basAuDepart=false;
+      const t=e.changedTouches && e.changedTouches[0]; if(!t) return;
+      if(yDepart - t.clientY >= 40 && toutEnBas()) boucler();
+    }, {passive:true});
+    sc.addEventListener('wheel', function(e){
+      if(e.deltaY>0 && toutEnBas()) boucler();
+    }, {passive:true});
+  }
+  const ret=document.getElementById('fdRetour');
+  if(ret) ret.addEventListener('click', function(){ fdAller(0); });
+
   document.querySelectorAll('#scHome .fd-next').forEach(function(b){
+    if(b.id==='fdRetour') return;
     b.addEventListener('click', function(){
       const es=fdEcrans(), moi=b.closest('.fd');
       const i=es.indexOf(moi);
