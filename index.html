@@ -174,6 +174,10 @@
   .hero .searchbox input{color:#fff}
   .hero .searchbox input::placeholder{color:rgba(255,255,255,.45)}
   .hero .searchbox svg{stroke:rgba(255,255,255,.5)}
+  .searchfaux{width:100%;text-align:left;cursor:pointer}
+  .searchfaux span{flex:1;min-width:0;font-size:16px;color:rgba(255,255,255,.45);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .searchfaux:hover{border-color:rgba(139,221,79,.45)}
 
   /* ============ ACCUEIL EN FIL : on balaie vers le haut ============ */
   .screen.feed{scroll-snap-type:y mandatory;scroll-behavior:smooth;color:#fff;
@@ -281,6 +285,15 @@
   .fd-j-sw{flex:0 0 auto;width:38px;font-size:15px;color:rgba(255,255,255,.5);
     border-left:1px solid rgba(255,255,255,.08)}
   .fd-j-sw:hover{color:var(--lime);background:rgba(139,221,79,.1)}
+  .fd-ex{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;overflow:hidden;margin-bottom:4px}
+  .fd-ex-h{padding:10px 14px;font-size:11.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--lime);background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08)}
+  .fd-ex-r{display:flex;align-items:center;gap:12px;padding:12px 14px;
+    border-top:1px solid rgba(255,255,255,.06)}
+  .fd-ex-r:first-of-type{border-top:none}
+  .fd-ex-r b{flex:1;font-size:14.5px;font-weight:600}
+  .fd-ex-r span{font-size:15px;font-weight:800;color:var(--lime);font-variant-numeric:tabular-nums}
   .fd-m.vide{border-style:dashed;background:transparent}
   .fd-m.vide b,.fd-m.vide span{color:rgba(255,255,255,.34)}
   .fd-m.vide i{color:rgba(139,221,79,.5)}
@@ -1210,12 +1223,12 @@
         <div class="brand-txt"><b>GRAILLE</b><span>LIGHT</span></div>
         <div class="langsel hero-lang" data-noTr></div>
       </div>
-      <h1>Des recettes simples,<br><em>healthy &amp; gourmandes</em></h1>
-      <p>Mange ce que tu aimes, atteins ton objectif.</p>
-      <div class="searchbox">
+      <h1>Tes aliments,<br><em>tes grammes exacts</em></h1>
+      <p>Une recette vue sur TikTok ? Donne-moi les ingrédients, je calcule les quantités pour tes calories.</p>
+      <button class="searchbox searchfaux" id="heroCalc" type="button">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="homeSearch" type="search" placeholder="Rechercher une recette, un ingrédient…" autocomplete="off">
-      </div>
+        <span>Riz, poulet, sauce soja…</span>
+      </button>
       <div class="perso" id="perso"></div>
       <div class="installbar" id="installBar" hidden>
         <span class="ib-ic"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/><path d="M12 6.5v6"/><path d="m9.5 10 2.5 2.5L14.5 10"/></svg></span>
@@ -1224,7 +1237,26 @@
         <button class="ib-no" id="ibNo" type="button" aria-label="Non merci">✕</button>
       </div>
     </div>
-    <button class="fd-next" type="button" data-fd="1"><span>Ton menu du jour</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <button class="fd-next" type="button" data-fd="1"><span>Ton repas sur mesure</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="fd-fin" aria-hidden="true"></div>
+  </section>
+
+  <!-- ---------- 2. REPAS SUR MESURE ---------- -->
+  <section class="fd" id="fdSurMesure">
+    <div class="wrap fd-in">
+      <div class="fd-eyebrow">Ce que TikTok ne fait pas</div>
+      <h2 class="fd-t">Ton repas sur mesure</h2>
+      <p class="fd-s">La vidéo dit « mettez du riz ». Elle ne sait pas combien il t'en faut, à toi. Moi si.</p>
+      <div class="fd-ex">
+        <div class="fd-ex-h">Par exemple, pour 650 kcal</div>
+        <div class="fd-ex-r"><b>Riz</b><span>66 g crus</span></div>
+        <div class="fd-ex-r"><b>Blanc de poulet</b><span>170 g crus</span></div>
+        <div class="fd-ex-r"><b>Sauce soja</b><span>15 g</span></div>
+      </div>
+      <button class="fd-go" id="fdSurGo" type="button">Composer mon repas</button>
+      <button class="fd-relance" id="fdSurReprendre" type="button" hidden>Reprendre mon dernier repas</button>
+    </div>
+    <button class="fd-next" type="button" data-fd="2"><span>Ton menu du jour</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
     <div class="fd-fin" aria-hidden="true"></div>
   </section>
 
@@ -4313,7 +4345,14 @@ const AL_RAW = [
  ["Sauces & extras","lait-coco","Lait de coco",190,2,3,19,"gras",20,200,60],
  ["Sauces & extras","miel","Miel",300,0,82,0,"condiment",5,50,15],
  ["Sauces & extras","confiture","Confiture",250,0,60,0,"condiment",5,60,20],
- ["Sauces & extras","chocolat-noir","Chocolat noir 70%",550,8,35,40,"gras",5,60,20]
+ ["Sauces & extras","chocolat-noir","Chocolat noir 70%",550,8,35,40,"gras",5,60,20],
+ ["Sauces & extras","sriracha","Sauce sriracha",93,1.9,19,0.9,"condiment",5,50,15],
+ ["Sauces & extras","sirop-zero","Sirop zéro calorie",10,0,2,0,"condiment",5,60,20],
+ ["Sauces & extras","edulcorant","Édulcorant en poudre",20,0,100,0,"condiment",2,30,5],
+ ["Sauces & extras","levure-maltee","Levure maltée",350,50,35,4,"condiment",3,30,8],
+ ["Sauces & extras","gelatine","Gélatine en poudre",340,86,0,0,"condiment",2,25,5],
+ ["Sauces & extras","psyllium","Psyllium",180,2,85,0.5,"condiment",3,25,6],
+ ["Légumes","konjac","Konjac / shirataki",10,0.2,3,0,"leg",100,400,200]
 ];
 
 /* cru = grammes a peser avant cuisson pour obtenir 100 g une fois cuit.
@@ -4628,7 +4667,11 @@ const RP_SYN={
   'sauce-tomate':'coulis passata', 'sauce-soja':'soja asiatique', ketchup:'sauce',
   moutarde:'sauce', mayonnaise:'sauce mayo', pesto:'sauce basilic',
   'lait-coco':'coco asiatique curry', miel:'sucre', confiture:'sucre',
-  'chocolat-noir':'chocolat cacao', compote:'pomme dessert', dattes:'fruits secs'
+  'chocolat-noir':'chocolat cacao',
+  sriracha:'sauce piquante piment asiatique', 'sirop-zero':'sirop sans sucre zero pancake',
+  edulcorant:'sucre sans sucre stevia erythritol sucralose', 'levure-maltee':'levure fromage vegan',
+  gelatine:'gelifiant agar', psyllium:'fibre tegument',
+  konjac:'shirataki nouilles zero calorie pates konjac', compote:'pomme dessert', dattes:'fruits secs'
 };
 ALIMENTS.forEach(function(a){
   a.cle=frNorm(a.nom);
@@ -5533,6 +5576,10 @@ const UI_I18N = {
   "Voir les recettes d'abord": "Browse recipes first",
   "Ta santé, notre priorité": "Your health, our priority",
   "Des recettes simples,": "Simple recipes,",
+  "Tes aliments,": "Your ingredients,",
+  "tes grammes exacts": "your exact grams",
+  "Une recette vue sur TikTok ? Donne-moi les ingrédients, je calcule les quantités pour tes calories.": "Saw a recipe on TikTok? Give me the ingredients and I work out the amounts for your calories.",
+  "Riz, poulet, sauce soja…": "Rice, chicken, soy sauce…",
   "healthy & gourmandes": "healthy & delicious",
   "Mange ce que tu aimes, atteins ton objectif.": "Eat what you love, reach your goal.",
   "Rechercher une recette, un ingrédient…": "Search a recipe, an ingredient…",
@@ -5643,6 +5690,10 @@ const UI_I18N = {
   "Voir les recettes d'abord": "Ver las recetas primero",
   "Ta santé, notre priorité": "Tu salud, nuestra prioridad",
   "Des recettes simples,": "Recetas sencillas,",
+  "Tes aliments,": "Tus alimentos,",
+  "tes grammes exacts": "tus gramos exactos",
+  "Une recette vue sur TikTok ? Donne-moi les ingrédients, je calcule les quantités pour tes calories.": "¿Viste una receta en TikTok? Dame los ingredientes y calculo las cantidades para tus calorías.",
+  "Riz, poulet, sauce soja…": "Arroz, pollo, salsa de soja…",
   "healthy & gourmandes": "sanas y deliciosas",
   "Mange ce que tu aimes, atteins ton objectif.": "Come lo que te gusta, alcanza tu objetivo.",
   "Rechercher une recette, un ingrédient…": "Buscar una receta, un ingrediente…",
@@ -5753,6 +5804,10 @@ const UI_I18N = {
   "Voir les recettes d'abord": "Ver as receitas primeiro",
   "Ta santé, notre priorité": "A tua saúde, a nossa prioridade",
   "Des recettes simples,": "Receitas simples,",
+  "Tes aliments,": "Os teus alimentos,",
+  "tes grammes exacts": "as tuas gramas exatas",
+  "Une recette vue sur TikTok ? Donne-moi les ingrédients, je calcule les quantités pour tes calories.": "Viste uma receita no TikTok? Dá-me os ingredientes e eu calculo as quantidades para as tuas calorias.",
+  "Riz, poulet, sauce soja…": "Arroz, frango, molho de soja…",
   "healthy & gourmandes": "saudáveis e deliciosas",
   "Mange ce que tu aimes, atteins ton objectif.": "Come o que gostas, atinge o teu objetivo.",
   "Rechercher une recette, un ingrédient…": "Procurar uma receita, um ingrediente…",
@@ -5863,6 +5918,10 @@ const UI_I18N = {
   "Voir les recettes d'abord": "Zuerst Rezepte ansehen",
   "Ta santé, notre priorité": "Deine Gesundheit, unsere Priorität",
   "Des recettes simples,": "Einfache Rezepte,",
+  "Tes aliments,": "Deine Lebensmittel,",
+  "tes grammes exacts": "deine genauen Gramm",
+  "Une recette vue sur TikTok ? Donne-moi les ingrédients, je calcule les quantités pour tes calories.": "Ein Rezept auf TikTok gesehen? Gib mir die Zutaten, ich berechne die Mengen für deine Kalorien.",
+  "Riz, poulet, sauce soja…": "Reis, Hähnchen, Sojasauce…",
   "healthy & gourmandes": "gesund & lecker",
   "Mange ce que tu aimes, atteins ton objectif.": "Iss, was du magst, erreiche dein Ziel.",
   "Rechercher une recette, un ingrédient…": "Rezept oder Zutat suchen…",
@@ -6388,7 +6447,17 @@ function semSupprimerJour(di){
   fdSemMaj();
 }
 
-function fdMaj(){ fdPoints(); fdMenuMaj(); fdIdeesMaj(); fd4Maj(); fdCoachMaj(); fdSemMaj(); fdHauteur(); }
+/* --- ecran : repas sur mesure --- */
+function fdSurMaj(){
+  const b=document.getElementById('fdSurReprendre');
+  if(!b) return;
+  let dernier=null;
+  try{ dernier=JSON.parse(localStorage.getItem('graille_repas')||'null'); }catch(e){}
+  const n=(dernier && dernier.items) ? dernier.items.length : 0;
+  b.hidden = !n;
+  if(n) b.textContent='Reprendre mon dernier repas ('+n+' aliment'+(n>1?'s':'')+')';
+}
+function fdMaj(){ fdPoints(); fdSurMaj(); fdMenuMaj(); fdIdeesMaj(); fd4Maj(); fdCoachMaj(); fdSemMaj(); fdHauteur(); }
 window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); }catch(e){} });
 
 (function fdBrancher(){
@@ -6443,6 +6512,10 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
   if(t) t.addEventListener('click', function(){ fdFiltre('Simple & pas cher'); });
   const a=document.getElementById('fdAutres');
   if(a) a.addEventListener('click', function(){ fdIdeesMaj(true); });
+  const sm=document.getElementById('fdSurGo');
+  if(sm) sm.addEventListener('click', function(){ try{ ouvrirRepas(); }catch(e){} });
+  const sr=document.getElementById('fdSurReprendre');
+  if(sr) sr.addEventListener('click', function(){ try{ ouvrirRepas(); }catch(e){} });
   const mr=document.getElementById('fdMenuRegen');
   if(mr) mr.addEventListener('click', function(){ try{ generateMenu(); }catch(e){} });
   const q4=document.getElementById('fd4Voir');
@@ -6554,19 +6627,13 @@ bind('filtersReset', ()=>{
 /* ================= RECHERCHE ================= */
 const recSearch = document.getElementById('recSearch');
 if(recSearch) recSearch.addEventListener('input', e=>{ window.__q = e.target.value; update(); });
-const homeSearch = document.getElementById('homeSearch');
-if(homeSearch){
-  homeSearch.addEventListener('focus', ()=>{
-    showTab('recipes');
-    setTimeout(()=>{ const r = document.getElementById('recSearch'); if(r) r.focus(); }, 80);
-  });
-  /* filet de securite : si le clavier reste sur l'accueil, la frappe filtre quand meme */
-  homeSearch.addEventListener('input', e=>{
-    const v = e.target.value;
-    const r = document.getElementById('recSearch'); if(r) r.value = v;
-    window.__q = v;
-    if(currentTab !== 'recipes') showTab('recipes');
-    update();
+/* La barre de l'accueil ouvre le calculateur et donne le clavier directement :
+   on y tape des aliments, pas des recettes. */
+const heroCalc = document.getElementById('heroCalc');
+if(heroCalc){
+  heroCalc.addEventListener('click', function(){
+    try{ ouvrirRepas(); }catch(e){ return; }
+    setTimeout(function(){ const q=document.getElementById('rpQ'); if(q) q.focus(); }, 120);
   });
 }
 
