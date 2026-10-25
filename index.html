@@ -234,6 +234,14 @@
     color:var(--lime);flex:0 0 76px}
   .fd-m b{flex:1;min-width:0;font-size:13.5px;font-weight:600;line-height:1.3}
   .fd-m span{flex:0 0 auto;font-size:13px;font-weight:700;color:rgba(255,255,255,.62)}
+  .fd-m{padding:0}
+  .fd-m-go{flex:1;min-width:0;display:flex;align-items:center;gap:11px;text-align:left;
+    padding:13px 4px 13px 14px;color:#fff}
+  .fd-m-go:hover b{color:var(--lime)}
+  .fd-m-sw{flex:0 0 auto;width:40px;align-self:stretch;font-size:17px;color:rgba(255,255,255,.55);
+    border-left:1px solid rgba(255,255,255,.1)}
+  .fd-m-sw:hover{color:var(--lime);background:rgba(139,221,79,.1)}
+  .fd-m.vide{padding:13px 14px}
   .fd-m.vide{border-style:dashed;background:transparent}
   .fd-m.vide b,.fd-m.vide span{color:rgba(255,255,255,.34)}
   .fd-m.vide i{color:rgba(139,221,79,.5)}
@@ -1189,6 +1197,7 @@
       <p class="fd-s" id="fdMenuS">Dis-moi tes repas de la journée, je compose un menu complet qui tombe sur tes calories.</p>
       <div class="fd-menu" id="fdMenuBox"></div>
       <button class="fd-go" id="tileMenuDay" type="button">Composer mon menu du jour</button>
+      <button class="fd-relance" id="fdMenuRegen" type="button" hidden>Changer tout le menu</button>
     </div>
     <button class="fd-next" type="button" data-fd="2"><span>Des idées pour toi</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
     <div class="fd-fin" aria-hidden="true"></div>
@@ -2739,11 +2748,7 @@ function renderMenuResult(p){
     const usedIds=new Set(MENU.map(x=>x.recipe.id));
     let pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !usedIds.has(r.id));
     if(!pool.length) pool=RECETTES.filter(r=>r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id);
-    if(pool.length){
-      MENU[i]={...it, recipe:pool[Math.floor(Math.random()*pool.length)]};
-      renderMenuResult(loadProfile()); saveMenu();
-      try{ fdMenuMaj(); }catch(e){}
-    }
+    if(pool.length) menuEchanger(i);
   }));
 }
 /* Le menu du jour est enregistre : il survit a la fermeture de l'application
@@ -2774,6 +2779,20 @@ function loadMenu(){
     });
     if(repris.length){ MENU=repris; menuDone=true; }
   }catch(e){}
+}
+/* Remplace la recette d'un repas par une autre du meme moment. */
+function menuEchanger(i){
+  const it=MENU[i]; if(!it) return false;
+  const m=it.moment;
+  const pris=new Set(MENU.map(function(x){ return x.recipe.id; }));
+  let pool=RECETTES.filter(function(r){ return r.categorie!=="Sauce" && (r.moment||[]).includes(m) && !pris.has(r.id); });
+  if(!pool.length) pool=RECETTES.filter(function(r){ return r.categorie!=="Sauce" && (r.moment||[]).includes(m) && r.id!==it.recipe.id; });
+  if(!pool.length) return false;
+  MENU[i]={moment:m, recipe:pool[Math.floor(Math.random()*pool.length)], kcal:it.kcal};
+  saveMenu();
+  try{ renderMenuResult(loadProfile()); }catch(e){}
+  try{ fdMenuMaj(); }catch(e){}
+  return true;
 }
 function addMenuToDay(){
   if(!MENU.length) return;
@@ -6071,18 +6090,34 @@ function fdMenuMaj(){
     if(sous) sous.innerHTML = p
       ? 'Je répartis tes <b>'+p.calories+' kcal</b> sur la journée et je choisis les recettes.'
       : "Je répartis tes calories sur la journée et je choisis les recettes.";
-    if(bt) bt.textContent='Composer mon menu du jour';
+    if(bt){ bt.textContent='Composer mon menu du jour'; bt.dataset.act='ouvrir'; }
+    const rg=document.getElementById('fdMenuRegen'); if(rg) rg.hidden=true;
     return;
   }
   const total=MENU.reduce(function(s,it){ return s+it.kcal; },0);
   if(sous) sous.innerHTML = menuAjoute
     ? 'Déjà dans ta journée : <b>'+total+' kcal</b>.'
     : 'Ton menu est prêt : <b>'+total+' kcal</b> sur la journée.';
-  box.innerHTML=MENU.map(function(it){
-    return '<div class="fd-m"><i>'+it.moment+'</i><b>'+nomL(it.recipe)+'</b><span>'+it.kcal+' kcal</span></div>';
+  box.innerHTML=MENU.map(function(it,i){
+    return '<div class="fd-m">'+
+      '<button class="fd-m-go" data-fdm="'+i+'"><i>'+it.moment+'</i><b>'+nomL(it.recipe)+'</b><span>'+it.kcal+' kcal</span></button>'+
+      '<button class="fd-m-sw" data-fdsw="'+i+'" aria-label="Changer cette recette" title="Changer cette recette">↻</button>'+
+    '</div>';
   }).join('');
-  /* ce bouton ouvre le panneau : le libelle doit dire ou il mene */
-  if(bt) bt.textContent = menuAjoute ? 'Revoir mon menu du jour' : 'Voir et ajouter à ma journée';
+  box.querySelectorAll('.fd-m-go').forEach(function(b){
+    b.addEventListener('click', function(){
+      const it=MENU[+b.dataset.fdm]; if(it) openSheet(it.recipe, it.kcal);
+    });
+  });
+  box.querySelectorAll('.fd-m-sw').forEach(function(b){
+    b.addEventListener('click', function(){ menuEchanger(+b.dataset.fdsw); });
+  });
+  if(bt){
+    bt.textContent = menuAjoute ? 'Modifier mon menu' : 'Valider et ajouter à ma journée';
+    bt.dataset.act = menuAjoute ? 'ouvrir' : 'valider';
+  }
+  const rg=document.getElementById('fdMenuRegen');
+  if(rg) rg.hidden=false;
 }
 
 /* l'écran « idées » : trois recettes, les illustrées d'abord */
@@ -6155,6 +6190,8 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
   if(q) q.addEventListener('click', function(){ fdFiltre('Repas 4€'); });
   const a=document.getElementById('fdAutres');
   if(a) a.addEventListener('click', function(){ fdIdeesMaj(true); });
+  const mr=document.getElementById('fdMenuRegen');
+  if(mr) mr.addEventListener('click', function(){ try{ generateMenu(); }catch(e){} });
   fdPoints();
 })();
 
@@ -6191,7 +6228,11 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
 
 /* ================= TUILES DE L'ACCUEIL ================= */
 function bind(id, fn){ const el = document.getElementById(id); if(el) el.addEventListener('click', fn); }
-bind('tileMenuDay', openMenu);
+bind('tileMenuDay', function(){
+  const b=document.getElementById('tileMenuDay');
+  if(b && b.dataset.act==='valider'){ addMenuToDay(); showTab('home'); }
+  else openMenu();
+});
 bind('tileWeek', openMenuWeek);
 bind('tileShop', openShop);
 bind('tileFam', openFamille);
