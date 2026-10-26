@@ -908,6 +908,20 @@
   .rp-val input:focus{outline:none;border-bottom-color:var(--green)}
   .rp-val span{display:block;font-size:12.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
     color:var(--ink2);margin-top:4px}
+  .rp-cibles{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0 8px}
+  .rp-cb{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);cursor:text}
+  .rp-cb>span{flex:1;min-width:0;font-size:12px;font-weight:700;letter-spacing:.3px;
+    text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+  .rp-cb input{width:3.6ch;flex:0 0 auto;border:none;background:none;outline:none;text-align:right;
+    font-family:inherit;font-size:17px;font-weight:800;color:var(--green);
+    font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+  .rp-cb input::-webkit-outer-spin-button,.rp-cb input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .rp-cb input::placeholder{color:var(--ink3);font-size:16px;font-weight:700}
+  .rp-cb em{flex:0 0 auto;font-style:normal;font-size:13px;font-weight:700;color:var(--ink2)}
+  .rp-cb.libre{border-style:dashed}
+  .rp-cb.libre em{display:none}
+  .rp-cb.libre input{width:5.4ch;color:var(--ink3)}
   .rp-prot{font-size:13px;color:var(--ink2);font-weight:600;margin-bottom:10px;text-align:center}
   .rp-reste{display:block;width:100%;margin:0 0 16px;padding:11px 14px;border-radius:13px;
     border:1.5px solid var(--green);background:var(--green-tint);color:var(--green-dark);
@@ -1723,6 +1737,12 @@
         <span>kcal visées</span>
       </div>
       <button class="rp-plus" id="rpPlus" type="button" aria-label="Plus de calories">+</button>
+    </div>
+    <div class="rp-cibles">
+      <label class="rp-cb"><span>Protéines</span>
+        <input id="rpProtIn" type="number" inputmode="numeric" min="0" max="400" step="5" aria-label="Protéines visées"><em>g</em></label>
+      <label class="rp-cb" id="rpGlucCb"><span>Glucides</span>
+        <input id="rpGlucIn" type="number" inputmode="numeric" min="0" max="600" step="5" placeholder="libre" aria-label="Glucides visés"><em>g</em></label>
     </div>
     <p class="rp-prot" id="rpProtTxt"></p>
     <button class="rp-reste" id="rpReste" type="button" hidden></button>
@@ -4361,7 +4381,7 @@ const ALIMENTS = AL_RAW.map(function(r){
 function alimentPar(id){ for(let i=0;i<ALIMENTS.length;i++) if(ALIMENTS[i].id===id) return ALIMENTS[i]; return null; }
 
 /* ---------- etat ---------- */
-let RP = {cible:600, items:[]};
+let RP = {cible:600, prot:null, gluc:null, items:[]};
 let rpJournalIdx = null;   /* repas de la journee en cours de modification */
 function rpSauver(){
   try{ localStorage.setItem('graille_repas', JSON.stringify(RP)); }catch(e){}
@@ -4370,14 +4390,24 @@ function rpSauver(){
 function rpCharger(){
   try{
     const s=JSON.parse(localStorage.getItem('graille_repas'));
-    if(s && s.items) RP={cible:s.cible||600, items:s.items.filter(function(x){ return alimentPar(x.id); })};
+    if(s && s.items) RP={cible:s.cible||600,
+                          prot:(s.prot!=null?s.prot:null), gluc:(s.gluc!=null?s.gluc:null),
+                          items:s.items.filter(function(x){ return alimentPar(x.id); })};
   }catch(e){}
 }
 
 function rpProtCible(){
+  if(RP.prot!=null) return RP.prot;
   const p=(typeof loadProfile==='function')?loadProfile():null;
   if(p && p.calories && p.prot) return Math.round(p.prot*RP.cible/p.calories);
   return Math.round(RP.cible*0.25/4);
+}
+/* null = l'utilisateur ne vise pas les glucides, ils tombent ou ils tombent */
+function rpGlucCible(){ return (RP.gluc!=null) ? RP.gluc : null; }
+function rpGlucAuto(){
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(p && p.calories && p.gluc) return Math.round(p.gluc*RP.cible/p.calories);
+  return Math.round(RP.cible*0.45/4);
 }
 function rpArrondi(a, g){
   if(a.unite==='piece') return Math.max(a.min, Math.min(a.max, Math.round(g/a.pu)));
@@ -4395,40 +4425,47 @@ function rpGrammes(a, q){ return a.unite==='piece' ? q*a.pu : q; }
    Les proteines : on essaie plusieurs repartitions et on garde la
    meilleure, sans jamais sortir des portions realistes. */
 
-function rpEchelle(libres, kCible, pousseProt){
-  libres.forEach(function(x){
-    x.bloque=false;
-    x.g=rpGrammes(x.a, x.a.def)*(x.a.role==='prot' ? pousseProt : 1);
-    const gmin=rpGrammes(x.a,x.a.min), gmax=rpGrammes(x.a,x.a.max);
-    x.g=Math.max(gmin, Math.min(gmax, x.g));
+/* ---------- le calcul : trois cibles ----------
+   calories, proteines et (si l'utilisateur le demande) glucides.
+   Les lipides ne se reglent pas : ils sont ce qui reste, par arithmetique.
+   On part des portions normales et on deplace chaque aliment, chacun restant
+   entre son mini et son maxi, jusqu'a minimiser l'ecart sur les trois cibles. */
+function rpResoudre(libres, K, P, C){
+  const bas =libres.map(function(x){ return rpGrammes(x.a,x.a.min)/100; });
+  const haut=libres.map(function(x){ return rpGrammes(x.a,x.a.max)/100; });
+  libres.forEach(function(x,i){
+    x.u=Math.max(bas[i], Math.min(haut[i], rpGrammes(x.a,x.a.def)/100));
   });
-  for(let it=0; it<40; it++){
-    let kFixe=0, kMob=0;
-    libres.forEach(function(x){
-      const k=x.a.k*x.g/100;
-      if(x.bloque) kFixe+=k; else kMob+=k;
-    });
-    if(kMob<=0) break;
-    const f=(kCible-kFixe)/kMob;
-    if(f<=0) break;
-    if(Math.abs(f-1)<0.004) break;
-    let bloqueNouveau=false;
-    libres.forEach(function(x){
-      if(x.bloque) return;
-      const gmin=rpGrammes(x.a,x.a.min), gmax=rpGrammes(x.a,x.a.max);
-      let g=x.g*f;
-      if(g<gmin){ g=gmin; x.bloque=true; bloqueNouveau=true; }
-      else if(g>gmax){ g=gmax; x.bloque=true; bloqueNouveau=true; }
-      x.g=g;
-    });
-    if(!bloqueNouveau) break;
-  }
-  let k=0,p=0;
-  libres.forEach(function(x){ k+=x.a.k*x.g/100; p+=x.a.p*x.g/100; });
-  return {k:k, p:p};
-}
+  /* poids : chaque cible compte en ecart relatif, pour que 10 kcal
+     et 10 g de proteines ne pesent pas pareil */
+  const wK=1/((K>1?K:1)*(K>1?K:1));
+  const wP=1/((P>1?P:1)*(P>1?P:1));
+  const wC=(C==null)?0:1/((C>1?C:1)*(C>1?C:1));
 
-const RP_POUSSEES=[1, 1.25, 1.5, 0.8, 0.6];
+  /* On ajuste un aliment a la fois, exactement, puis on recommence.
+     Pour un seul aliment l'optimum se calcule directement. */
+  for(let tour=0; tour<80; tour++){
+    let bouge=0;
+    for(let i=0;i<libres.length;i++){
+      let sk=0,sp=0,sc=0;
+      libres.forEach(function(y,j){ if(j===i) return; sk+=y.a.k*y.u; sp+=y.a.p*y.u; sc+=y.a.c*y.u; });
+      const a=libres[i].a;
+      const den = wK*a.k*a.k + wP*a.p*a.p + wC*a.c*a.c;
+      if(!(den>0)) continue;
+      const num = wK*a.k*(K-sk) + wP*a.p*(P-sp) + wC*a.c*((C==null)?0:(C-sc));
+      let u=num/den;
+      u=Math.max(bas[i], Math.min(haut[i], u));
+      bouge=Math.max(bouge, Math.abs(u-libres[i].u));
+      libres[i].u=u;
+    }
+    if(bouge<1e-4) break;
+  }
+  libres.forEach(function(x,i){
+    x.g=x.u*100;
+    x.auMax=(x.u>=haut[i]-1e-6);
+    x.auMin=(x.u<=bas[i]+1e-6);
+  });
+}
 
 /* L'arrondi a la dizaine de grammes fait perdre ou gagner quelques calories.
    On rattrape l'ecart en bougeant d'un cran l'aliment le mieux place. */
@@ -4462,35 +4499,26 @@ function rpAjuster(items, kCible){
 
 function rpCalculer(){
   const protCible=rpProtCible();
+  const glucCible=rpGlucCible();            /* null = on ne vise pas les glucides */
   const items=RP.items.map(function(x){ return {id:x.id, lock:!!x.lock, q:x.q, a:alimentPar(x.id)}; })
                       .filter(function(x){ return x.a; });
-  if(!items.length) return {items:[], kcal:0, p:0, c:0, l:0, protCible:protCible};
+  if(!items.length) return {items:[], kcal:0, p:0, c:0, l:0, protCible:protCible, glucCible:glucCible};
 
-  let kLock=0, pLock=0;
+  let kLock=0, pLock=0, cLock=0;
   items.forEach(function(x){
-    if(x.lock){ const g=rpGrammes(x.a,x.q)/100; kLock+=x.a.k*g; pLock+=x.a.p*g; }
+    if(x.lock){ const g=rpGrammes(x.a,x.q)/100; kLock+=x.a.k*g; pLock+=x.a.p*g; cLock+=x.a.c*g; }
   });
   const libres=items.filter(function(x){ return !x.lock; });
   const kRest=Math.max(0, RP.cible-kLock);
   const pRest=Math.max(0, protCible-pLock);
+  const cRest=(glucCible==null)?null:Math.max(0, glucCible-cLock);
 
   if(libres.length && kRest<=0){
     /* les aliments fixes mangent deja toute la cible : les autres au minimum */
-    libres.forEach(function(x){ x.q=x.a.min; });
+    libres.forEach(function(x){ x.q=x.a.min; x.auMin=true; x.auMax=false; });
   }
   else if(libres.length && kRest>0){
-    const aProt=libres.some(function(x){ return x.a.role==='prot'; });
-    const tous =libres.every(function(x){ return x.a.role==='prot'; });
-    let meilleure=1, meilleurEcart=Infinity;
-    const essais=(aProt && !tous) ? RP_POUSSEES : [1];
-    essais.forEach(function(pp){
-      const r=rpEchelle(libres, kRest, pp);
-      /* on ne retient un essai que s'il tient les calories */
-      const penalite=Math.abs(r.k-kRest)*0.35;
-      const ecart=Math.abs(r.p-pRest)+penalite;
-      if(ecart<meilleurEcart){ meilleurEcart=ecart; meilleure=pp; }
-    });
-    rpEchelle(libres, kRest, meilleure);
+    rpResoudre(libres, kRest, pRest, cRest);
     libres.forEach(function(x){ x.q=rpArrondi(x.a, x.g); });
     rpAjuster(items, RP.cible);
   }
@@ -4502,7 +4530,8 @@ function rpCalculer(){
     kcal+=x.a.k*g; p+=x.a.p*g; c+=x.a.c*g; l+=x.a.l*g;
   });
   return {items:items, kcal:Math.round(kcal), p:Math.round(p), c:Math.round(c), l:Math.round(l),
-          protCible:protCible, kLock:Math.round(kLock), nbLibres:libres.length};
+          protCible:protCible, glucCible:glucCible,
+          kLock:Math.round(kLock), nbLibres:libres.length};
 }
 
 /* ---------- affichage ---------- */
@@ -4530,22 +4559,75 @@ function rpMajReste(){
 }
 
 function rpConseil(res, ecart){
-  if(Math.abs(ecart)<=25) return 'Tu es sur ta cible de '+RP.cible+' kcal.';
   if(!res.nbLibres) return 'Tout est fixé, je ne peux rien ajuster : déverrouille un aliment et je recalcule.';
-  if(ecart>0){
-    if(res.kLock>RP.cible) return 'Tes aliments fixés font déjà <b>'+res.kLock+' kcal</b>, soit '+(res.kLock-RP.cible)+' de plus que ta cible. Baisse une quantité fixée.';
-    return '<b>'+ecart+' kcal au-dessus</b> de ta cible : les quantités sont déjà au plus petit, retire un aliment.';
+  const eP = res.p - res.protCible;
+  const eC = (res.glucCible==null) ? 0 : (res.c - res.glucCible);
+  const tolK=25, tolP=5, tolC=8;
+
+  const libres = res.items.filter(function(x){ return !x.lock; });
+  const parRole = function(r){ return libres.filter(function(x){ return x.a.role===r; }); };
+  const tousAuMax = function(l){ return l.length && l.every(function(x){ return x.auMax; }); };
+  const tousAuMin = function(l){ return l.length && l.every(function(x){ return x.auMin; }); };
+  const prot = parRole('prot'), fec = parRole('fec'), gras = parRole('gras');
+
+  if(Math.abs(ecart)<=tolK && Math.abs(eP)<=tolP && Math.abs(eC)<=tolC){
+    return res.glucCible==null
+      ? 'Tu es sur ta cible de '+RP.cible+' kcal, protéines comprises.'
+      : 'Tu es sur tes trois cibles.';
   }
-  return '<b>'+Math.abs(ecart)+' kcal en dessous</b> : les quantités sont déjà au maximum, ajoute un aliment plus nourrissant.';
+
+  /* 1. les proteines d'abord : c'est ce qu'un sportif rate en premier */
+  if(eP < -tolP){
+    if(!prot.length) return 'Il manque <b>'+Math.abs(Math.round(eP))+' g de protéines</b> et aucun de tes aliments n\'en apporte vraiment. Ajoute du poulet, du fromage blanc, des œufs ou de la whey.';
+    return 'Il manque <b>'+Math.abs(Math.round(eP))+' g de protéines</b> : '+prot.map(function(x){ return x.a.nom.toLowerCase(); }).join(' et ')+(prot.length>1?' sont':' est')+' déjà au maximum. Ajoute une autre source de protéines.';
+  }
+  if(eP > tolP){
+    if(tousAuMin(prot)) return '<b>'+Math.round(eP)+' g de protéines de trop</b>, et tes sources sont déjà au minimum. Remplace-en une par quelque chose de plus léger, ou monte ta cible.';
+    return '<b>'+Math.round(eP)+' g de protéines de trop</b> : c\'est le seul moyen d\'atteindre tes calories avec ces aliments. Ajoute une matière grasse ou un féculent pour soulager.';
+  }
+
+  /* 2. les glucides, seulement s'ils sont vises */
+  if(res.glucCible!=null && eC < -tolC){
+    if(!fec.length) return 'Il manque <b>'+Math.abs(Math.round(eC))+' g de glucides</b> et tu n\'as aucun féculent. Ajoute du riz, des pâtes, du pain ou une patate douce.';
+    return 'Il manque <b>'+Math.abs(Math.round(eC))+' g de glucides</b> : tes féculents sont au maximum. Ajoutes-en un autre.';
+  }
+  if(res.glucCible!=null && eC > tolC){
+    return '<b>'+Math.round(eC)+' g de glucides de trop</b> : baisse ta cible de glucides, ou retire un féculent.';
+  }
+
+  /* 3. les calories en dernier : si protéines et glucides sont bons,
+        ce qui manque ne peut venir que du gras. C'est de l'arithmetique. */
+  if(ecart < 0){
+    const manque=Math.abs(ecart);
+    if(Math.abs(eP)<=tolP && Math.abs(eC)<=tolC){
+      const g=Math.max(1, Math.round(manque/9));
+      if(gras.length && tousAuMax(gras))
+        return 'Il manque <b>'+manque+' kcal</b>. Tes protéines et tes glucides sont à la cible, donc elles ne peuvent venir que du gras — et le tien est au maximum. Ajoute des amandes, du beurre de cacahuète ou de l\'huile.';
+      if(!gras.length)
+        return 'Il manque <b>'+manque+' kcal</b>. Tes protéines et tes glucides sont déjà à la cible : ces calories ne peuvent venir que du gras. Ajoute environ <b>'+g+' g d\'huile d\'olive</b> (ou des amandes, du beurre de cacahuète).';
+      return 'Il manque <b>'+manque+' kcal</b> : monte un peu '+gras[0].a.nom.toLowerCase()+', soit environ '+g+' g de plus.';
+    }
+    return '<b>'+manque+' kcal en dessous</b> : tes quantités sont déjà au maximum, ajoute un aliment.';
+  }
+  if(res.kLock>RP.cible) return 'Tes aliments fixés font déjà <b>'+res.kLock+' kcal</b>, soit '+(res.kLock-RP.cible)+' de plus que ta cible. Baisse une quantité fixée.';
+  return '<b>'+ecart+' kcal au-dessus</b> de ta cible : les quantités sont déjà au plus petit, retire un aliment.';
 }
+
 function rpRendre(){
   const res=rpCalculer();
   const liste=document.getElementById('rpListe');
   const tot=document.getElementById('rpTotaux');
   const kc=document.getElementById('rpKcal');
   if(kc && document.activeElement!==kc) kc.value=RP.cible;
+  const pin=document.getElementById('rpProtIn');
+  if(pin && document.activeElement!==pin) pin.value=rpProtCible();
+  const gin=document.getElementById('rpGlucIn'), gcb=document.getElementById('rpGlucCb');
+  if(gin && document.activeElement!==gin) gin.value=(RP.gluc!=null?RP.gluc:'');
+  if(gcb) gcb.classList.toggle('libre', RP.gluc==null);
   const pc=document.getElementById('rpProtTxt');
-  if(pc) pc.textContent=rpProtCible()+' g de protéines visées';
+  if(pc) pc.textContent = (RP.gluc==null)
+    ? 'Glucides et lipides tombent où ils tombent.'
+    : 'Il reste environ '+Math.max(0,Math.round((RP.cible-rpProtCible()*4-RP.gluc*4)/9))+' g de lipides.';
   rpMajReste();
   rpBoutonMaj();
 
@@ -4570,7 +4652,6 @@ function rpRendre(){
   }).join('');
 
   const ecart=res.kcal-RP.cible;
-  const ecartP=res.p-res.protCible;
   tot.innerHTML='<div class="rp-tot">'+
     '<div class="rp-tg">'+
       '<div class="rp-t"><b>'+res.kcal+'</b><span>kcal</span></div>'+
@@ -4580,9 +4661,6 @@ function rpRendre(){
     '</div>'+
     '<p class="rp-note">'+
       rpConseil(res, ecart)+
-      ' '+(Math.abs(ecartP)<=5 ? 'Protéines dans la cible.'
-                               : (ecartP<0 ? 'Il manque '+Math.abs(ecartP)+' g de protéines — ajoute une viande, un poisson ou du fromage blanc.'
-                                           : Math.abs(ecartP)+' g de protéines de plus que la cible, ce n\'est pas un problème.'))+
     '</p></div>';
 
   liste.querySelectorAll('.rp-rm').forEach(function(b){
@@ -4739,7 +4817,9 @@ function ouvrirRepasJournal(i){
   const it=JOURNAL.items[i];
   ouvrirRepas();
   if(it && it.rp && it.rp.items && it.rp.items.length){
-    RP={cible:it.rp.cible||600, items:it.rp.items.filter(function(x){ return alimentPar(x.id); })};
+    RP={cible:it.rp.cible||600,
+        prot:(it.rp.prot!=null?it.rp.prot:null), gluc:(it.rp.gluc!=null?it.rp.gluc:null),
+        items:it.rp.items.filter(function(x){ return alimentPar(x.id); })};
     rpJournalIdx=i;
   }
   rpRendre();
@@ -4764,7 +4844,8 @@ function rpAjouterJournee(){
   const res=rpCalculer();
   if(!res.items.length) return;
   if(typeof loadProfile==='function' && !loadProfile()){ fermerRepas(); openOnboard(); return; }
-  const compo={cible:RP.cible, items:RP.items.map(function(x){ return {id:x.id, lock:!!x.lock, q:x.q}; })};
+  const compo={cible:RP.cible, prot:RP.prot, gluc:RP.gluc,
+               items:RP.items.map(function(x){ return {id:x.id, lock:!!x.lock, q:x.q}; })};
   if(rpJournalIdx!=null && JOURNAL.items[rpJournalIdx]){
     /* on remplace le repas au lieu d'en ajouter un deuxieme */
     const it=JOURNAL.items[rpJournalIdx];
@@ -4794,6 +4875,27 @@ document.getElementById('rpPlus').addEventListener('click', function(){
   RP.cible=Math.min(3000, RP.cible+50); rpSauver(); rpRendre();
 });
 document.getElementById('rpQ').addEventListener('input', rpRendreResultats);
+/* les deux cibles reglables : proteines, et glucides (champ vide = libres) */
+document.getElementById('rpProtIn').addEventListener('input', function(){
+  const v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
+  if(v>=0 && v<=400){ RP.prot=v; rpSauver(); rpRendre(); }
+});
+document.getElementById('rpProtIn').addEventListener('blur', function(){
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  RP.prot = (t==='') ? null : Math.max(0, Math.min(400, parseInt(t,10)));
+  rpSauver(); rpRendre();
+});
+document.getElementById('rpGlucIn').addEventListener('input', function(){
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  if(t===''){ RP.gluc=null; rpSauver(); rpRendre(); return; }
+  const v=parseInt(t,10);
+  if(v>=0 && v<=600){ RP.gluc=v; rpSauver(); rpRendre(); }
+});
+document.getElementById('rpGlucIn').addEventListener('blur', function(){
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  RP.gluc = (t==='') ? null : Math.max(0, Math.min(600, parseInt(t,10)));
+  rpSauver(); rpRendre();
+});
 document.getElementById('rpKcal').addEventListener('input', function(){
   const v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
   if(v>=100 && v<=3000){ RP.cible=v; rpSauver(); rpRendre(); }
@@ -6535,7 +6637,7 @@ window.addEventListener('resize', function(){ try{ fdHauteur(); fdPointActif(); 
   if(sm) sm.addEventListener('click', function(){ try{ ouvrirRepas(); }catch(e){} });
   const sr=document.getElementById('fdSurReprendre');
   if(sr) sr.addEventListener('click', function(){
-    try{ RP={cible:RP.cible||600, items:[]}; rpSauver(); rpRendre(); fdSurMaj(); }catch(e){}
+    try{ RP={cible:RP.cible||600, prot:RP.prot, gluc:RP.gluc, items:[]}; rpSauver(); rpRendre(); fdSurMaj(); }catch(e){}
   });
   const mr=document.getElementById('fdMenuRegen');
   if(mr) mr.addEventListener('click', function(){ try{ generateMenu(); }catch(e){} });
