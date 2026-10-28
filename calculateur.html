@@ -109,7 +109,7 @@
   .top a.retour:hover{color:#fff;border-color:var(--lime);text-decoration:none}
 
   /* ---------- en-tete ---------- */
-  .hero{background:var(--dark);color:#fff;padding:14px 0 46px;text-align:center}
+  .hero{background:var(--dark);color:#fff;padding:14px 0 34px;text-align:center}
   .hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
     color:var(--lime);margin-bottom:12px}
   .hero h1{font-size:34px;font-weight:900;letter-spacing:-1.2px;line-height:1.08;text-wrap:balance}
@@ -119,7 +119,7 @@
 
   /* ---------- l'outil, pose a cheval sur l'en-tete ---------- */
   .outil{background:var(--surface);border:1px solid var(--line);border-radius:22px;
-    box-shadow:0 18px 50px rgba(14,26,20,.14);padding:20px 18px 22px;margin-top:-28px}
+    box-shadow:0 10px 34px rgba(14,26,20,.09);padding:20px 18px 22px;margin-top:20px}
   .outil h2{font-size:17px;font-weight:800;letter-spacing:-.3px;margin-bottom:3px}
   .outil .intro{font-size:13.5px;color:var(--ink2);margin-bottom:4px}
   .outil-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
@@ -308,6 +308,31 @@
   .rp-entree span{display:block;font-size:13.5px;color:var(--ink2);margin-top:2px;line-height:1.35}
 
 
+
+  /* ============ AJUSTEMENTS DE LA PAGE ============ */
+  /* Les trois cases doivent se lire comme un seul bloc : meme etiquette,
+     meme chiffre au meme endroit, et la croix hors du flux. */
+  .rp-cibles{gap:8px}
+  .rp-cb{position:relative;display:block;padding:10px 12px 11px}
+  .rp-cb>span{display:block;float:none;width:auto;font-size:10.5px;font-weight:800;letter-spacing:.4px;
+    text-transform:uppercase;color:var(--ink2);white-space:nowrap;margin-bottom:1px}
+  .rp-cb>span i{font-style:normal;font-weight:700;color:var(--ink3)}
+  .rp-cb input{display:block;width:100%;text-align:left;font-size:21px;font-weight:800;
+    color:var(--green);letter-spacing:-.5px;line-height:1.25;padding:0}
+  .rp-cb.libre input{color:var(--ink3)}
+  /* la croix se pose a cote du chiffre, pas sur l'etiquette */
+  .rp-cb-x{position:absolute;bottom:9px;right:7px;margin:0;width:22px;height:22px;font-size:14px}
+
+  /* La ligne d'un aliment : le nom respire, le reste reste a sa place. */
+  .rp-row{gap:9px;padding:12px 13px}
+  .rp-n{flex:1 1 auto}
+  .rp-n b{font-size:14.5px}
+  .rp-q{font-size:17px;margin-top:3px}
+  .rp-q em{font-size:12.5px;margin-top:1px}
+  .rp-k{font-size:12.5px}
+  .rp-lock{padding:7px 9px;font-size:12px}
+
+  .rp-prot{font-size:13px;line-height:1.45;margin:9px 0 13px}
 </style>
 </head>
 <body>
@@ -350,20 +375,20 @@
     </div>
 
     <div class="rp-cibles">
-      <label class="rp-cb"><span>Protéines</span>
-        <input id="rpProtIn" type="number" inputmode="numeric" min="0" max="400" step="5" aria-label="Protéines visées"><em>g</em></label>
-      <label class="rp-cb" id="rpGlucCb"><span>Glucides</span>
-        <input id="rpGlucIn" type="number" inputmode="numeric" min="0" max="600" step="5" aria-label="Glucides visés"><em>g</em>
+      <label class="rp-cb"><span>Protéines <i>g</i></span>
+        <input id="rpProtIn" type="number" inputmode="numeric" min="0" max="400" step="5" aria-label="Protéines visées en grammes"></label>
+      <label class="rp-cb" id="rpGlucCb"><span>Glucides <i>g</i></span>
+        <input id="rpGlucIn" type="number" inputmode="numeric" min="0" max="600" step="5" aria-label="Glucides visés en grammes">
         <button class="rp-cb-x" id="rpGlucX" type="button" aria-label="Ne pas viser les glucides" hidden>×</button></label>
-      <label class="rp-cb" id="rpLipCb"><span>Lipides</span>
-        <input id="rpLipIn" type="number" inputmode="numeric" min="0" max="300" step="5" aria-label="Lipides visés"><em>g</em>
+      <label class="rp-cb" id="rpLipCb"><span>Lipides <i>g</i></span>
+        <input id="rpLipIn" type="number" inputmode="numeric" min="0" max="300" step="5" aria-label="Lipides visés en grammes">
         <button class="rp-cb-x" id="rpLipX" type="button" aria-label="Ne pas viser les lipides" hidden>×</button></label>
     </div>
     <p class="rp-prot" id="rpProtTxt"></p>
 
     <div class="searchbox rp-search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="rpQ" type="search" placeholder="Ajouter un aliment : riz, œufs, poulet…" autocomplete="off" aria-label="Chercher un aliment">
+      <input id="rpQ" type="search" placeholder="Riz, poulet, œufs, huile…" autocomplete="off" aria-label="Chercher un aliment">
     </div>
     <div class="rp-res" id="rpRes"></div>
 
@@ -878,7 +903,7 @@ function rpQte(x){
   const a=x.a;
   if(a.unite==='piece') return x.q+' '+(x.q>1?'pièces':'pièce')+' <em>('+(x.q*a.pu)+' g)</em>';
   if(Math.abs(a.cru-1)<0.05) return x.q+' g';
-  return rpCru(a,x.q)+' g crus<em>soit '+x.q+' g une fois cuit</em>';
+  return rpCru(a,x.q)+' g crus<em>soit '+x.q+' g cuit</em>';
 }
 /* Ce qu'il reste a manger aujourd'hui : un clic et c'est la cible du repas. */
 function rpMajReste(){
