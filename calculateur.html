@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BVQJMCSZ30"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BVQJMCSZ30');
+</script>
+<title>Calculateur du poids des aliments — combien peser pour tes calories</title>
+<meta name="description" content="Tu tapes tes calories, tu choisis tes aliments, l'outil te donne le poids exact à peser, en cru. Riz, poulet, huile, légumes. Régime, sèche ou prise de masse. Gratuit, sans inscription.">
+<link rel="canonical" href="https://www.graillelight.com/calculateur">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#0B1410">
+<link rel="apple-touch-icon" href="/icone-180.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GrailleLight">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://www.graillelight.com/calculateur">
+<meta property="og:title" content="Calcule le poids de tes aliments">
+<meta property="og:description" content="Tes calories, tes aliments, les grammes exacts à peser — en cru. Gratuit, sans inscription.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication",
+"name":"Calculateur du poids des aliments",
+"url":"https://www.graillelight.com/calculateur",
+"applicationCategory":"HealthApplication",
+"operatingSystem":"Tout navigateur web",
+"inLanguage":"fr-FR",
+"description":"Donne le poids cru exact de chaque aliment pour atteindre des calories et des macros choisies.",
+"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},
+"publisher":{"@type":"Organization","name":"GrailleLight","url":"https://www.graillelight.com/"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"fr-FR","mainEntity":[
+{"@type":"Question","name":"Faut-il peser les aliments avant ou apr\u00e8s cuisson ?","acceptedAnswer":{"@type":"Answer","text":"Avant. Les calories des tables sont donn\u00e9es pour le produit cru. Le riz triple de poids \u00e0 la cuisson, les p\u00e2tes prennent deux fois et demie leur poids en eau, la viande en perd environ un quart. L'outil donne donc le poids cru, celui que tu mets sur la balance avant de cuisiner, et rappelle ce que \u00e7a donnera une fois cuit."}},
+{"@type":"Question","name":"Combien de riz pour 700 calories ?","acceptedAnswer":{"@type":"Answer","text":"Du riz seul, 700 calories font environ 195 g crus. Dans un repas complet avec du poulet et un peu d'huile, le riz tombe plut\u00f4t entre 80 et 110 g crus, le reste des calories venant des autres aliments."}},
+{"@type":"Question","name":"Pourquoi je n'arrive pas \u00e0 atteindre mes calories ?","acceptedAnswer":{"@type":"Answer","text":"En g\u00e9n\u00e9ral parce qu'il manque une mati\u00e8re grasse. Avec seulement de la viande maigre et des l\u00e9gumes, il faut des quantit\u00e9s \u00e9normes pour monter en calories, car un gramme de lipides apporte 9 kcal contre 4 pour les prot\u00e9ines et les glucides."}},
+{"@type":"Question","name":"Qu'est-ce que les macros ?","acceptedAnswer":{"@type":"Answer","text":"Les macronutriments : prot\u00e9ines, glucides et lipides. Les prot\u00e9ines et les glucides apportent 4 kcal par gramme, les lipides 9. Les calories ne sont que le total de ces trois familles."}},
+{"@type":"Question","name":"Le calculateur est-il gratuit ?","acceptedAnswer":{"@type":"Answer","text":"Oui, enti\u00e8rement, sans compte et sans inscription. Le calcul se fait dans le navigateur et les r\u00e9glages restent sur l'appareil."}}]}
+</script>
+<style>
+  :root{
+    /* --- identité GrailleLight : clair + vert --- */
+    --bg:#F3F6F4;
+    --surface:#FFFFFF;
+    --surface2:#F7F9F8;
+    --ink:#0E1A14;
+    --ink2:#67736E;
+    --ink3:#98A39E;
+    --line:#E4EAE7;
+    --line2:#EFF3F1;
+    --green:#16803C;
+    --green-dark:#0F5F2C;
+    --green-tint:#E8F5ED;
+    --lime:#8BDD4F;
+    --dark:#0B1410;
+    --dark2:#13201A;
+    --amber:#F2A93B;
+    --danger:#D4462B;
+    --r:16px;
+    --tabh:80px;
+    --haut:env(safe-area-inset-top);   /* encoche / heure de l'iPhone */
+    --shadow:0 2px 10px rgba(14,26,20,.05);
+    --shadow-lg:0 18px 50px rgba(14,26,20,.18);
+    /* alias de compatibilité avec l'ancien code */
+    --paper:var(--bg);--card:var(--surface);--rust:var(--green);--rust-deep:var(--green-dark);
+    --olive:var(--green);--gold:var(--amber);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  button,input,select{font-family:inherit}
+  button{cursor:pointer;border:none;background:none;color:inherit}
+  a{color:var(--green-dark);text-decoration:none;font-weight:600}
+  a:hover{text-decoration:underline}
+  ::selection{background:var(--green);color:#fff}
+  svg{flex:0 0 auto}
+  img{max-width:100%;height:auto}
+  :focus-visible{outline:3px solid var(--green);outline-offset:2px;border-radius:6px}
+
+  .wrap{max-width:660px;margin:0 auto;padding:0 18px}
+
+  /* champ de recherche (repris de l'application) */
+  .searchbox{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:0 14px;height:48px;box-shadow:var(--shadow)}
+  .searchbox svg{width:17px;height:17px;stroke:var(--ink3);fill:none;stroke-width:2;stroke-linecap:round}
+  .searchbox input{flex:1;min-width:0;border:none;outline:none;background:none;font-size:16px;color:var(--ink)}
+  .searchbox input::placeholder{color:var(--ink3)}
+  .searchbox input::-webkit-search-cancel-button{-webkit-appearance:none}
+
+  /* ---------- barre du haut ---------- */
+  .top{background:var(--dark);padding:14px 0}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .logo{font-size:17px;font-weight:900;letter-spacing:-.6px;color:#fff;text-decoration:none}
+  .logo i{font-style:normal;color:var(--lime)}
+  .logo:hover{text-decoration:none}
+  .top a.retour{font-size:13.5px;font-weight:700;color:rgba(255,255,255,.72);
+    border:1.5px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 14px}
+  .top a.retour:hover{color:#fff;border-color:var(--lime);text-decoration:none}
+
+  /* ---------- en-tete ---------- */
+  .hero{background:var(--dark);color:#fff;padding:14px 0 46px;text-align:center}
+  .hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--lime);margin-bottom:12px}
+  .hero h1{font-size:34px;font-weight:900;letter-spacing:-1.2px;line-height:1.08;text-wrap:balance}
+  .hero h1 em{font-style:normal;color:var(--lime)}
+  .hero p{font-size:16px;color:rgba(255,255,255,.76);margin-top:14px;max-width:46ch;
+    margin-left:auto;margin-right:auto;text-wrap:pretty}
+
+  /* ---------- l'outil, pose a cheval sur l'en-tete ---------- */
+  .outil{background:var(--surface);border:1px solid var(--line);border-radius:22px;
+    box-shadow:0 18px 50px rgba(14,26,20,.14);padding:20px 18px 22px;margin-top:-28px}
+  .outil h2{font-size:17px;font-weight:800;letter-spacing:-.3px;margin-bottom:3px}
+  .outil .intro{font-size:13.5px;color:var(--ink2);margin-bottom:4px}
+  .outil-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+  .outil-actions .btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+    padding:14px 14px;border-radius:14px;background:var(--green);color:#fff;font-weight:700;font-size:15px;
+    transition:background .15s,transform .1s}
+  .outil-actions .btn:hover{background:var(--green-dark)}
+  .outil-actions .btn:active{transform:scale(.99)}
+  .outil-actions .btn.ghost{background:var(--surface);color:var(--ink2);border:1.5px solid var(--line)}
+  .outil-actions .btn.ghost:hover{background:var(--surface2);border-color:var(--green);color:var(--green)}
+
+  /* ---------- texte ---------- */
+  .section{padding:34px 0 0}
+  .section h2{font-size:23px;font-weight:800;letter-spacing:-.6px;line-height:1.2;
+    margin-bottom:12px;text-wrap:balance}
+  .section h3{font-size:16.5px;font-weight:800;letter-spacing:-.2px;margin:20px 0 5px}
+  .section p{font-size:15.5px;color:var(--ink2);margin-bottom:11px;text-wrap:pretty}
+  .section p b,.section li b{color:var(--ink);font-weight:700}
+  .section ul{list-style:none;margin:0 0 11px}
+  .section li{font-size:15.5px;color:var(--ink2);padding-left:20px;position:relative;margin-bottom:7px}
+  .section li::before{content:'';position:absolute;left:4px;top:9px;width:6px;height:6px;
+    border-radius:50%;background:var(--green)}
+
+  .etapes{counter-reset:e;display:grid;gap:11px;margin-bottom:6px}
+  .etape{display:flex;gap:13px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow)}
+  .etape::before{counter-increment:e;content:counter(e);flex:0 0 auto;width:28px;height:28px;
+    border-radius:9px;background:var(--green-tint);color:var(--green-dark);
+    font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center}
+  .etape b{display:block;font-size:15px;font-weight:700;margin-bottom:2px}
+  .etape span{font-size:14px;color:var(--ink2);line-height:1.5}
+
+  .tableau{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin:6px 0 12px;
+    font-variant-numeric:tabular-nums}
+  .tableau th,.tableau td{padding:11px 12px;text-align:right;font-size:14.5px;border-bottom:1px solid var(--line2)}
+  .tableau th:first-child,.tableau td:first-child{text-align:left}
+  .tableau thead th{background:var(--surface2);font-size:11.5px;font-weight:800;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--ink2)}
+  .tableau tbody tr:last-child td{border-bottom:none}
+  .tableau td:first-child{font-weight:700}
+  .tableau-enroule{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  .encart{background:var(--green-tint);border:1.5px solid var(--green);border-radius:var(--r);
+    padding:16px 18px;margin:14px 0}
+  .encart p{color:var(--green-dark);margin:0;font-size:15px;font-weight:600}
+  .encart p+p{margin-top:8px}
+
+  details.qa{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);margin-bottom:9px;overflow:hidden}
+  details.qa summary{padding:14px 16px;font-size:15.5px;font-weight:700;cursor:pointer;
+    list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  details.qa summary::-webkit-details-marker{display:none}
+  details.qa summary::after{content:'+';flex:0 0 auto;font-size:20px;font-weight:700;color:var(--green);line-height:1}
+  details.qa[open] summary::after{content:'−'}
+  details.qa .rep{padding:0 16px 15px;font-size:15px;color:var(--ink2);line-height:1.6}
+  details.qa .rep p{margin-bottom:9px}
+  details.qa .rep p:last-child{margin-bottom:0}
+
+  .fin{margin:34px 0 0;background:var(--dark);border-radius:var(--r);padding:26px 22px;text-align:center}
+  .fin h2{font-size:21px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:8px}
+  .fin p{font-size:15px;color:rgba(255,255,255,.72);margin-bottom:16px}
+  .fin a.cta{display:inline-flex;align-items:center;gap:8px;background:var(--lime);color:var(--dark);
+    font-weight:800;font-size:15.5px;padding:14px 24px;border-radius:14px}
+  .fin a.cta:hover{text-decoration:none;filter:brightness(1.07)}
+
+  footer{padding:26px 0 34px;text-align:center}
+  footer p{font-size:13px;color:var(--ink3)}
+  footer a{color:var(--ink2);font-weight:600}
+
+  @media(min-width:620px){
+    .hero h1{font-size:42px}
+    .outil{padding:24px 24px 26px}
+    .section h2{font-size:26px}
+  }
+
+  /* ============ MON REPAS SUR MESURE ============ */
+  .rp-cible{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow);margin-bottom:8px}
+  .rp-moins,.rp-plus{width:46px;height:46px;flex:0 0 auto;border-radius:14px;border:1.5px solid var(--line);
+    background:var(--surface2);color:var(--green-dark);font-size:22px;font-weight:800;line-height:1}
+  .rp-moins:hover,.rp-plus:hover{border-color:var(--green);background:var(--green-tint)}
+  .rp-val{flex:1;text-align:center}
+  .rp-val input{display:inline-block;width:4.2ch;max-width:100%;font-size:31px;font-weight:800;color:var(--green);
+    letter-spacing:-1px;line-height:1.1;text-align:center;border:none;border-bottom:2px dashed var(--green);
+    background:transparent;padding:0 0 3px;font-family:inherit;font-variant-numeric:tabular-nums;
+    -moz-appearance:textfield}
+  .rp-val input::-webkit-outer-spin-button,.rp-val input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .rp-val input:focus{outline:none;border-bottom-color:var(--green)}
+  .rp-val span{display:block;font-size:12.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:var(--ink2);margin-top:4px}
+  .rp-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 2px}
+  .rp-mode{padding:9px 4px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);
+    color:var(--ink2);font-size:12.5px;font-weight:700;line-height:1.2;letter-spacing:-.2px;
+    box-shadow:var(--shadow);transition:background .15s,border-color .15s,color .15s}
+  .rp-mode:hover{border-color:var(--green);color:var(--green)}
+  .rp-mode.on{background:var(--green);border-color:var(--green);color:#fff}
+  .rp-modes-aide{font-size:12px;color:var(--ink3);text-align:center;margin:7px 0 0}
+  .rp-cibles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:9px 0 8px}
+  .rp-cb{display:flex;flex-wrap:wrap;align-items:center;gap:4px;background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;padding:9px 10px;box-shadow:var(--shadow);cursor:text}
+  .rp-cb>span{flex:1 0 100%;min-width:0;font-size:11px;font-weight:700;letter-spacing:.3px;
+    text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+  .rp-cb input{width:3.6ch;flex:0 1 auto;border:none;background:none;outline:none;text-align:left;
+    font-family:inherit;font-size:17px;font-weight:800;color:var(--green);
+    font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+  .rp-cb input::-webkit-outer-spin-button,.rp-cb input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .rp-cb input::placeholder{color:var(--ink3);font-size:16px;font-weight:700}
+  .rp-cb em{flex:0 0 auto;font-style:normal;font-size:13px;font-weight:700;color:var(--ink2)}
+  .rp-cb.libre{border-style:dashed}
+  .rp-cb.libre input{color:var(--ink3)}
+  .rp-cb.libre em{color:var(--ink3)}
+  .rp-cb-x{flex:0 0 auto;width:22px;height:22px;margin:-2px -4px -2px 0;border-radius:50%;
+    font-size:15px;line-height:1;color:var(--ink3);background:var(--surface2)}
+  .rp-cb-x:hover{color:#fff;background:var(--danger)}
+  .rp-cb-x[hidden]{display:none}
+  .rp-cb-aide{font-size:12px;color:var(--ink3);text-align:center;margin:-2px 0 10px}
+  .rp-coh{display:inline-block;margin-left:6px;padding:4px 10px;border-radius:999px;
+    border:1.5px solid var(--green);background:var(--green-tint);color:var(--green-dark);
+    font-size:12.5px;font-weight:800;line-height:1.2}
+  .rp-coh:hover{background:var(--green);color:#fff}
+  .rp-prot{font-size:13px;color:var(--ink2);font-weight:600;margin-bottom:10px;text-align:center}
+  .rp-reste{display:block;width:100%;margin:0 0 16px;padding:11px 14px;border-radius:13px;
+    border:1.5px solid var(--green);background:var(--green-tint);color:var(--green-dark);
+    font-size:14px;font-weight:700;line-height:1.4}
+  .rp-reste[hidden]{display:none}
+
+  .rp-search{margin-bottom:6px}
+  .rp-res{display:none;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+  .rp-res.open{display:block}
+  .rp-sug{display:flex;align-items:baseline;justify-content:space-between;gap:12px;width:100%;
+    text-align:left;padding:12px 14px;border-bottom:1px solid var(--line2);font-size:15px;font-weight:600}
+  .rp-sug:last-child{border-bottom:none}
+  .rp-sug:hover{background:var(--green-tint);color:var(--green-dark)}
+  .rp-sug em{font-style:normal;font-size:13.5px;color:var(--ink2);font-weight:600;white-space:nowrap}
+  .rp-sug.deja{opacity:.45}
+
+  .rp-vide{font-size:14px;color:var(--ink2);line-height:1.55;background:var(--surface);
+    border:1px dashed var(--line);border-radius:var(--r);padding:16px}
+  .rp-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow)}
+  .rp-row.fixe{border-color:var(--green);background:var(--green-tint)}
+  .rp-n{flex:1;min-width:0}
+  .rp-n b{display:block;font-size:15px;font-weight:700;line-height:1.3}
+  .rp-q{display:block;font-size:16px;color:var(--green-dark);font-weight:800;margin-top:4px;
+    letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+  .rp-q em{display:block;font-style:normal;color:var(--ink2);font-weight:600;font-size:13.5px;
+    letter-spacing:0;margin-top:2px}
+  .rp-edit{display:flex;align-items:center;gap:7px;margin-top:5px}
+  .rp-edit input{width:76px;padding:7px 6px;border:1.5px solid var(--green);border-radius:10px;
+    background:var(--surface);font-weight:700;font-size:16px;text-align:center;color:var(--ink);
+    -moz-appearance:textfield}
+  .rp-edit input::-webkit-outer-spin-button,.rp-edit input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .rp-edit input:focus{outline:none}
+  .rp-edit em{font-style:normal;font-size:13.5px;color:var(--ink2);font-weight:700}
+  .rp-k{flex:0 0 auto;font-size:13px;font-weight:800;color:var(--ink2);white-space:nowrap;
+    font-variant-numeric:tabular-nums}
+  .rp-lock{flex:0 0 auto;font-size:12.5px;font-weight:800;padding:7px 10px;border-radius:999px;
+    border:1.5px solid var(--line);background:var(--surface);color:var(--ink2)}
+  .rp-lock[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+  .rp-rm{flex:0 0 auto;width:26px;height:26px;border-radius:50%;color:var(--ink3);font-size:16px;line-height:1}
+  .rp-rm:hover{color:var(--danger)}
+
+  .rp-tot{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:16px;box-shadow:var(--shadow)}
+  .rp-tg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .rp-t{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:11px 4px;text-align:center}
+  .rp-t b{display:block;font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.5px;
+    font-variant-numeric:tabular-nums}
+  .rp-t:first-child b{color:var(--green)}
+  .rp-t span{display:block;font-size:11px;color:var(--ink2);font-weight:700;margin-top:3px;
+    text-transform:uppercase;letter-spacing:.6px}
+  .rp-note{font-size:13.5px;color:var(--ink2);line-height:1.5;margin-top:12px}
+  .rp-note b{color:var(--ink)}
+
+  .rp-entree{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);
+    border:1.5px dashed var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:16px}
+  .rp-entree:hover{border-color:var(--green);background:var(--green-tint)}
+  .rp-entree .ic{width:38px;height:38px;flex:0 0 auto;border-radius:12px;background:var(--green-tint);
+    display:flex;align-items:center;justify-content:center}
+  .rp-entree .ic svg{width:19px;height:19px;stroke:var(--green);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  .rp-entree b{display:block;font-size:14.5px;font-weight:700;line-height:1.3}
+  .rp-entree span{display:block;font-size:13.5px;color:var(--ink2);margin-top:2px;line-height:1.35}
+
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="/">GRAI<i>LLE</i>LIGHT</a>
+    <a class="retour" href="/">Les recettes</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Gratuit · sans inscription</div>
+    <h1>Calcule le poids<br><em>de tes aliments</em></h1>
+    <p>Tu donnes tes calories, tu choisis tes aliments, je te donne les grammes à peser. En cru, comme sur ta balance.</p>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ==================== L'OUTIL ==================== -->
+  <section class="outil" id="outil" aria-label="Calculateur">
+    <h2>Ton repas, au gramme près</h2>
+    <p class="intro">Choisis un objectif, tape tes calories, ajoute tes aliments.</p>
+
+    <div class="rp-cible">
+      <button class="rp-moins" id="rpMoins" type="button" aria-label="Moins de calories">−</button>
+      <div class="rp-val">
+        <input id="rpKcal" type="number" inputmode="numeric" min="100" max="3000" step="10" value="750" aria-label="Calories visées">
+        <span>kcal visées</span>
+      </div>
+      <button class="rp-plus" id="rpPlus" type="button" aria-label="Plus de calories">+</button>
+    </div>
+
+    <div class="rp-modes" id="rpModes" role="group" aria-label="Objectif">
+      <button type="button" class="rp-mode" data-m="regime">Régime</button>
+      <button type="button" class="rp-mode" data-m="seche">Sèche</button>
+      <button type="button" class="rp-mode" data-m="masse">Prise de masse</button>
+      <button type="button" class="rp-mode" data-m="perso">Perso</button>
+    </div>
+
+    <div class="rp-cibles">
+      <label class="rp-cb"><span>Protéines</span>
+        <input id="rpProtIn" type="number" inputmode="numeric" min="0" max="400" step="5" aria-label="Protéines visées"><em>g</em></label>
+      <label class="rp-cb" id="rpGlucCb"><span>Glucides</span>
+        <input id="rpGlucIn" type="number" inputmode="numeric" min="0" max="600" step="5" aria-label="Glucides visés"><em>g</em>
+        <button class="rp-cb-x" id="rpGlucX" type="button" aria-label="Ne pas viser les glucides" hidden>×</button></label>
+      <label class="rp-cb" id="rpLipCb"><span>Lipides</span>
+        <input id="rpLipIn" type="number" inputmode="numeric" min="0" max="300" step="5" aria-label="Lipides visés"><em>g</em>
+        <button class="rp-cb-x" id="rpLipX" type="button" aria-label="Ne pas viser les lipides" hidden>×</button></label>
+    </div>
+    <p class="rp-prot" id="rpProtTxt"></p>
+
+    <div class="searchbox rp-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="rpQ" type="search" placeholder="Ajouter un aliment : riz, œufs, poulet…" autocomplete="off" aria-label="Chercher un aliment">
+    </div>
+    <div class="rp-res" id="rpRes"></div>
+
+    <div id="rpListe"></div>
+    <div id="rpTotaux"></div>
+
+    <div class="outil-actions">
+      <button class="btn ghost" id="rpVider" type="button">Vider</button>
+      <button class="btn" id="rpCopier" type="button">Copier mes quantités</button>
+    </div>
+  </section>
+
+  <!-- ==================== COMMENT ÇA MARCHE ==================== -->
+  <section class="section">
+    <h2>Comment ça marche</h2>
+    <div class="etapes">
+      <div class="etape"><div><b>Tu choisis un objectif</b><span>Régime, sèche ou prise de masse. Les protéines, glucides et lipides se règlent tout seuls à partir de tes calories. Si tu préfères décider toi-même, touche un chiffre et tu passes en Perso.</span></div></div>
+      <div class="etape"><div><b>Tu tapes tes calories</b><span>Le chiffre vert en haut. C'est la taille du repas que tu veux, pas de ta journée.</span></div></div>
+      <div class="etape"><div><b>Tu ajoutes tes aliments</b><span>Trois ou quatre suffisent : une protéine, un féculent, un légume, une matière grasse. Le calcul se refait à chaque ajout.</span></div></div>
+      <div class="etape"><div><b>Tu pèses</b><span>Les grammes s'affichent en face de chaque aliment. Tu peux en verrouiller un pour le garder fixe pendant que les autres s'ajustent autour.</span></div></div>
+    </div>
+  </section>
+
+  <!-- ==================== POIDS CRU ==================== -->
+  <section class="section">
+    <h2>Pourquoi les poids sont donnés crus</h2>
+    <p>C'est le point sur lequel presque tout le monde se trompe, et il change tout.</p>
+    <p>Le riz triple de poids à la cuisson, les pâtes prennent deux fois et demie leur poids en eau, la viande en perd un quart. Les tables de calories sont écrites pour le produit cru. Donc si tu pèses 100 g de riz dans ton assiette après cuisson, tu n'as pas mangé 350 calories — tu en as mangé environ 115.</p>
+    <div class="tableau-enroule">
+      <table class="tableau">
+        <thead><tr><th>Aliment</th><th>100 g cuits</th><th>font, crus</th></tr></thead>
+        <tbody>
+          <tr><td>Riz</td><td>100 g</td><td>33 g</td></tr>
+          <tr><td>Pâtes</td><td>100 g</td><td>40 g</td></tr>
+          <tr><td>Lentilles</td><td>100 g</td><td>40 g</td></tr>
+          <tr><td>Blanc de poulet</td><td>100 g</td><td>130 g</td></tr>
+          <tr><td>Saumon</td><td>100 g</td><td>120 g</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>L'outil te donne donc le poids <b>cru</b>, celui que tu mets sur la balance avant de cuisiner, et il te rappelle en dessous ce que ça donnera une fois cuit. Pour les aliments qui ne changent pas — l'huile, le fromage blanc, les œufs — il n'y a qu'un seul chiffre.</p>
+  </section>
+
+  <!-- ==================== LES MACROS ==================== -->
+  <section class="section">
+    <h2>Calories et macros, en deux minutes</h2>
+    <p>Les macros, ce sont les <b>macronutriments</b>. Trois familles, et c'est tout.</p>
+    <ul>
+      <li><b>Les protéines</b> — viande, poisson, œufs, fromage blanc, whey. Elles construisent et gardent le muscle.</li>
+      <li><b>Les glucides</b> — riz, pâtes, pain, pommes de terre, fruits. C'est le carburant.</li>
+      <li><b>Les lipides</b> — huile, fromage, noix, avocat, jaune d'œuf. Ils font tourner les hormones.</li>
+    </ul>
+    <p>Les calories ne sont que le total. Les macros disent comment ce total est réparti, et c'est pour ça que ça compte : 700 calories de riz et 700 calories de poulet ne font pas le même effet sur un corps qui s'entraîne.</p>
+    <div class="tableau-enroule">
+      <table class="tableau">
+        <thead><tr><th>Macro</th><th>Calories par gramme</th></tr></thead>
+        <tbody>
+          <tr><td>Protéines</td><td>4 kcal</td></tr>
+          <tr><td>Glucides</td><td>4 kcal</td></tr>
+          <tr><td>Lipides</td><td>9 kcal</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="encart">
+      <p>Les calories ne sont pas un quatrième réglage : elles sortent des trois autres.</p>
+      <p>protéines × 4 + glucides × 4 + lipides × 9 = calories</p>
+    </div>
+    <p>C'est pour ça que le gras compte double : un gramme d'huile apporte plus du double d'un gramme de riz. Et quand il te manque quelques calories alors que tes protéines et tes glucides sont déjà à la cible, elles ne peuvent venir que du gras — l'outil te le dit, avec la quantité.</p>
+  </section>
+
+  <!-- ==================== OBJECTIFS ==================== -->
+  <section class="section">
+    <h2>Les trois objectifs</h2>
+    <p>Chaque objectif répartit autrement les calories que tu as tapées. Voici ce que ça donne pour un repas de 750 kcal.</p>
+    <div class="tableau-enroule">
+      <table class="tableau">
+        <thead><tr><th>Objectif</th><th>Protéines</th><th>Glucides</th><th>Lipides</th></tr></thead>
+        <tbody>
+          <tr><td>Régime</td><td>66 g</td><td>66 g</td><td>25 g</td></tr>
+          <tr><td>Sèche</td><td>75 g</td><td>66 g</td><td>21 g</td></tr>
+          <tr><td>Prise de masse</td><td>56 g</td><td>84 g</td><td>21 g</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Régime</h3>
+    <p>Beaucoup de protéines pour garder le muscle pendant que le poids descend, et une part de gras normale parce qu'on en a besoin.</p>
+    <h3>Sèche</h3>
+    <p>Protéines au maximum, gras réduit. L'idée est de perdre la graisse sans perdre le muscle avec.</p>
+    <h3>Prise de masse</h3>
+    <p>Les glucides passent devant pour alimenter l'entraînement, et les protéines restent hautes pour construire. L'objectif ne change pas tes calories — c'est à toi de les monter, ici ou dans ton profil.</p>
+  </section>
+
+  <!-- ==================== FAQ ==================== -->
+  <section class="section">
+    <h2>Questions fréquentes</h2>
+
+    <details class="qa"><summary>Faut-il peser avant ou après cuisson ?</summary>
+      <div class="rep"><p>Avant. Les grammes affichés sont des poids crus, parce que c'est comme ça que les calories sont comptées partout. L'outil t'indique en dessous ce que ça donnera dans l'assiette une fois cuit, pour que tu puisses vérifier.</p></div></details>
+
+    <details class="qa"><summary>Combien de riz pour 700 calories ?</summary>
+      <div class="rep"><p>Ça dépend de ce qu'il y a à côté, et c'est justement le travail de l'outil. Du riz seul, 700 calories font environ 195 g crus. Mais dans un vrai repas avec du poulet et un peu d'huile, le riz tombera plutôt autour de 80 à 110 g crus — le reste des calories vient des autres aliments.</p></div></details>
+
+    <details class="qa"><summary>Je n'arrive pas à atteindre mes calories, pourquoi ?</summary>
+      <div class="rep"><p>En général parce qu'il manque une matière grasse. Avec seulement de la viande maigre et des légumes, il faut des quantités énormes pour monter en calories. Ajoute de l'huile d'olive, des amandes ou de l'avocat : quelques grammes suffisent.</p><p>L'outil te dit lequel des trois coince, et de combien.</p></div></details>
+
+    <details class="qa"><summary>Je peux fixer un aliment ?</summary>
+      <div class="rep"><p>Oui. Le bouton « Fixer » à côté d'un aliment verrouille sa quantité, et tous les autres se réajustent autour. Pratique quand tu as une portion imposée : un steak de 150 g, un yaourt entier, un sachet.</p></div></details>
+
+    <details class="qa"><summary>Est-ce que c'est gratuit ?</summary>
+      <div class="rep"><p>Oui, entièrement, sans compte et sans inscription. Rien n'est envoyé nulle part : le calcul se fait sur ton téléphone et tes réglages restent dessus.</p></div></details>
+
+    <details class="qa"><summary>Ça marche pour les recettes TikTok ?</summary>
+      <div class="rep"><p>C'est même à ça que ça sert le mieux. Tu vois un repas protéiné en vidéo, tu notes les aliments, tu les ajoutes ici avec tes calories à toi, et tu obtiens les quantités adaptées à ton gabarit plutôt que celles de la personne dans la vidéo.</p></div></details>
+  </section>
+
+  <div class="fin">
+    <h2>Et pour les idées de repas ?</h2>
+    <p>GrailleLight, c'est aussi des centaines de recettes avec leurs calories et leurs macros déjà calculées.</p>
+    <a class="cta" href="/">Voir les recettes</a>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <p><a href="/">GrailleLight</a> · Recettes et calculateur de calories, gratuit.</p>
+</footer>
+
+<script>
+/* ================= MON REPAS SUR MESURE =================
+   On choisit des aliments, on donne une cible de calories,
+   l'application calcule les quantites pour tomber sur les calories
+   ET sur les proteines de l'objectif. Tout reste sur l'appareil. */
+
+/* [groupe, id, nom, kcal/100g, prot, gluc, lip, role, min, max, defaut, (unite, poids_piece)] */
+const AL_RAW = [
+ ["Viandes","poulet","Blanc de poulet",165,31,0,3.6,"prot",60,300,130],
+ ["Viandes","cuisse-poulet","Cuisse de poulet",190,26,0,9,"prot",60,300,130],
+ ["Viandes","dinde","Escalope de dinde",135,30,0,1.5,"prot",60,300,130],
+ ["Viandes","boeuf5","Steak haché 5%",140,21,0,5,"prot",60,300,130],
+ ["Viandes","boeuf15","Steak haché 15%",215,19,0,15,"prot",60,250,120],
+ ["Viandes","porc-filet","Filet de porc",165,27,0,6,"prot",60,300,130],
+ ["Viandes","veau","Veau",160,28,0,5,"prot",60,300,130],
+ ["Viandes","agneau","Agneau",250,25,0,17,"prot",60,250,120],
+ ["Viandes","lapin","Lapin",160,28,0,5,"prot",60,300,130],
+ ["Viandes","magret","Magret de canard",200,24,0,11,"prot",60,250,120],
+ ["Viandes","jambon","Jambon blanc",110,20,1,2.5,"prot",30,200,80],
+ ["Viandes","jambon-dinde","Jambon de dinde",105,20,1,2,"prot",30,200,80],
+ ["Viandes","bacon","Bacon",300,25,0,22,"gras",15,80,30],
+ ["Viandes","saucisse","Saucisse",290,14,2,25,"gras",40,200,80],
+
+ ["Poissons","saumon","Saumon",200,22,0,12,"prot",60,280,130],
+ ["Poissons","truite","Truite",140,21,0,6,"prot",60,300,130],
+ ["Poissons","thon-frais","Thon frais",150,25,0,5,"prot",60,300,130],
+ ["Poissons","thon-naturel","Thon au naturel",110,25,0,1,"prot",40,250,100],
+ ["Poissons","cabillaud","Cabillaud",90,20,0,0.8,"prot",60,350,150],
+ ["Poissons","colin","Colin",85,18,0,1,"prot",60,350,150],
+ ["Poissons","merlu","Merlu",90,19,0,1,"prot",60,350,150],
+ ["Poissons","dorade","Dorade",110,20,0,3,"prot",60,300,140],
+ ["Poissons","sardine","Sardines",200,25,0,11,"prot",40,200,90],
+ ["Poissons","maquereau","Maquereau",240,21,0,17,"prot",40,200,90],
+ ["Poissons","crevettes","Crevettes",100,20,0,1,"prot",50,300,120],
+ ["Poissons","moules","Moules",90,14,4,2,"prot",80,400,200],
+ ["Poissons","saint-jacques","Saint-Jacques",90,17,3,1,"prot",50,250,120],
+ ["Poissons","surimi","Surimi",100,9,14,1,"prot",40,200,80],
+
+ ["Œufs & laitiers","oeuf","Œufs",145,13,1,10,"prot",1,4,2,"piece",60],
+ ["Œufs & laitiers","blanc-oeuf","Blancs d'œuf",50,11,1,0.2,"prot",50,300,120],
+ ["Œufs & laitiers","fb0","Fromage blanc 0%",47,8,4,0.2,"prot",80,400,150],
+ ["Œufs & laitiers","fb3","Fromage blanc 3%",70,7,4,3,"prot",80,400,150],
+ ["Œufs & laitiers","skyr","Skyr",60,11,4,0.2,"prot",80,400,150],
+ ["Œufs & laitiers","yaourt","Yaourt nature",60,4,5,3,"prot",60,300,125],
+ ["Œufs & laitiers","yaourt-grec","Yaourt grec",115,6,4,8,"prot",60,300,125],
+ ["Œufs & laitiers","cottage","Cottage cheese",100,12,3,4,"prot",60,300,120],
+ ["Œufs & laitiers","lait","Lait demi-écrémé",46,3.3,4.8,1.6,"fec",50,500,200],
+ ["Œufs & laitiers","mozzarella","Mozzarella",250,18,2,19,"gras",20,150,50],
+ ["Œufs & laitiers","feta","Feta",260,14,4,21,"gras",15,120,40],
+ ["Œufs & laitiers","parmesan","Parmesan",400,35,0,28,"gras",5,60,20],
+ ["Œufs & laitiers","emmental","Emmental",360,28,1,28,"gras",10,100,30],
+ ["Œufs & laitiers","chevre","Chèvre",300,19,2,24,"gras",15,100,40],
+ ["Œufs & laitiers","comte","Comté",410,27,0,33,"gras",10,80,30],
+ ["Œufs & laitiers","ricotta","Ricotta",150,11,3,10,"gras",30,200,60],
+ ["Œufs & laitiers","beurre","Beurre",740,0.8,0.6,82,"gras",3,30,10],
+ ["Œufs & laitiers","creme30","Crème 30%",290,2,3,30,"gras",10,80,25],
+ ["Œufs & laitiers","creme15","Crème 15%",160,3,4,15,"gras",15,120,40],
+
+ ["Féculents","riz","Riz blanc",130,2.4,28,0.3,"fec",50,400,150],
+ ["Féculents","riz-complet","Riz complet",120,2.6,23,1,"fec",50,400,150],
+ ["Féculents","riz-basmati","Riz basmati",130,2.7,28,0.3,"fec",50,400,150],
+ ["Féculents","pates","Pâtes",130,5,25,0.6,"fec",50,400,150],
+ ["Féculents","pates-completes","Pâtes complètes",125,5,24,1,"fec",50,400,150],
+ ["Féculents","semoule","Semoule",120,4,25,0.2,"fec",50,400,150],
+ ["Féculents","couscous","Couscous",110,4,23,0.2,"fec",50,400,150],
+ ["Féculents","quinoa","Quinoa",120,4.4,21,1.9,"fec",50,400,150],
+ ["Féculents","boulgour","Boulgour",110,3,23,0.2,"fec",50,400,150],
+ ["Féculents","nouilles","Nouilles",140,5,27,1,"fec",50,400,150],
+ ["Féculents","polenta","Polenta",85,2,18,0.3,"fec",60,400,180],
+ ["Féculents","pdt","Pommes de terre",85,2,18,0.1,"fec",60,500,200],
+ ["Féculents","patate-douce","Patate douce",90,1.6,20,0.1,"fec",60,500,200],
+ ["Féculents","pdt-sautees","Pommes de terre sautées",180,3,25,8,"fec",50,350,150],
+ ["Féculents","lentilles","Lentilles",115,9,17,0.4,"fec",50,350,150],
+ ["Féculents","pois-chiches","Pois chiches",140,8,20,2.6,"fec",50,350,150],
+ ["Féculents","haricots-rouges","Haricots rouges",120,8,18,0.5,"fec",50,350,150],
+ ["Féculents","haricots-blancs","Haricots blancs",120,7,19,0.6,"fec",50,350,150],
+ ["Féculents","avoine","Flocons d'avoine",370,13,60,7,"fec",20,150,60],
+ ["Féculents","muesli","Muesli",380,10,60,10,"fec",20,150,60],
+ ["Féculents","pain-complet","Pain complet",250,9,45,3,"fec",20,200,60],
+ ["Féculents","pain","Pain blanc",265,8,50,3,"fec",20,200,60],
+ ["Féculents","pain-mie","Pain de mie",270,8,48,4,"fec",20,150,60],
+ ["Féculents","biscotte","Biscottes",390,11,72,6,"fec",10,100,30],
+ ["Féculents","tortilla","Tortilla",300,8,50,7,"fec",20,200,60],
+ ["Féculents","bagel","Bagel",270,10,50,2,"fec",30,200,90],
+
+ ["Légumes","brocoli","Brocoli",35,2.8,4,0.4,"leg",50,500,200],
+ ["Légumes","haricots-verts","Haricots verts",30,2,4,0.2,"leg",50,500,200],
+ ["Légumes","courgette","Courgette",20,1.2,2,0.3,"leg",50,500,200],
+ ["Légumes","carotte","Carotte",35,0.8,8,0.2,"leg",50,500,200],
+ ["Légumes","tomate","Tomate",20,0.9,3.5,0.2,"leg",50,500,200],
+ ["Légumes","poivron","Poivron",30,1,5,0.3,"leg",50,400,150],
+ ["Légumes","oignon","Oignon",40,1.1,8,0.1,"leg",20,200,80],
+ ["Légumes","epinards","Épinards",25,2.9,1,0.4,"leg",50,400,150],
+ ["Légumes","champignons","Champignons",25,3,1,0.3,"leg",50,400,150],
+ ["Légumes","aubergine","Aubergine",25,1,4,0.2,"leg",50,500,200],
+ ["Légumes","chou-fleur","Chou-fleur",30,2.4,3,0.3,"leg",50,500,200],
+ ["Légumes","salade","Salade verte",15,1,1,0.2,"leg",30,250,100],
+ ["Légumes","concombre","Concombre",15,0.7,2,0.1,"leg",50,400,150],
+ ["Légumes","petits-pois","Petits pois",80,5,12,0.4,"leg",50,350,150],
+ ["Légumes","mais","Maïs",95,3,19,1.2,"fec",40,300,120],
+ ["Légumes","betterave","Betterave",45,1.6,9,0.1,"leg",50,300,120],
+ ["Légumes","asperges","Asperges",25,2.5,2,0.2,"leg",50,400,150],
+ ["Légumes","poireau","Poireau",30,1.5,5,0.3,"leg",50,400,150],
+ ["Légumes","potimarron","Potimarron",35,1.2,7,0.2,"leg",50,400,200],
+ ["Légumes","avocat","Avocat",160,2,2,15,"gras",30,200,70],
+
+ ["Fruits","banane","Banane",90,1.1,20,0.3,"fec",50,300,120],
+ ["Fruits","pomme","Pomme",55,0.3,12,0.2,"fec",50,400,150],
+ ["Fruits","poire","Poire",55,0.4,12,0.1,"fec",50,400,150],
+ ["Fruits","orange","Orange",45,1,9,0.2,"fec",50,400,150],
+ ["Fruits","clementine","Clémentines",45,0.8,10,0.2,"fec",50,300,120],
+ ["Fruits","fraise","Fraises",33,0.7,6,0.3,"fec",50,400,150],
+ ["Fruits","myrtille","Myrtilles",55,0.7,12,0.3,"fec",30,250,100],
+ ["Fruits","mangue","Mangue",60,0.8,14,0.4,"fec",50,350,150],
+ ["Fruits","ananas","Ananas",50,0.5,12,0.1,"fec",50,400,150],
+ ["Fruits","kiwi","Kiwi",60,1.1,12,0.5,"fec",50,300,120],
+ ["Fruits","raisin","Raisin",70,0.7,16,0.2,"fec",40,300,120],
+ ["Fruits","peche","Pêche",40,0.9,9,0.2,"fec",50,400,150],
+ ["Fruits","melon","Melon",35,0.8,8,0.2,"fec",50,400,200],
+ ["Fruits","pasteque","Pastèque",30,0.6,7,0.2,"fec",50,500,200],
+ ["Fruits","compote","Compote sans sucre",50,0.4,11,0.1,"fec",50,300,100],
+ ["Fruits","dattes","Dattes",280,2.5,65,0.4,"fec",15,120,40],
+
+ ["Gras & oléagineux","huile-olive","Huile d'olive",900,0,0,100,"gras",3,40,10],
+ ["Gras & oléagineux","huile-colza","Huile de colza",900,0,0,100,"gras",3,40,10],
+ ["Gras & oléagineux","amandes","Amandes",600,21,7,53,"gras",5,80,25],
+ ["Gras & oléagineux","noix","Noix",690,15,7,65,"gras",5,70,20],
+ ["Gras & oléagineux","noisettes","Noisettes",630,15,7,61,"gras",5,70,20],
+ ["Gras & oléagineux","cajou","Noix de cajou",580,18,27,44,"gras",5,80,25],
+ ["Gras & oléagineux","cacahuetes","Cacahuètes",570,26,8,48,"gras",5,80,25],
+ ["Gras & oléagineux","bdc","Beurre de cacahuète",600,25,12,50,"gras",5,60,20],
+ ["Gras & oléagineux","graines-courge","Graines de courge",560,30,10,45,"gras",5,60,20],
+ ["Gras & oléagineux","chia","Graines de chia",490,17,8,31,"gras",5,50,15],
+ ["Gras & oléagineux","sesame","Sésame",570,18,12,50,"gras",3,40,10],
+ ["Gras & oléagineux","pignons","Pignons",670,14,13,68,"gras",3,40,10],
+ ["Gras & oléagineux","olives","Olives",150,1,1,15,"gras",15,120,40],
+
+ ["Végétal","tofu","Tofu ferme",145,16,2,9,"prot",60,350,150],
+ ["Végétal","tempeh","Tempeh",190,19,8,11,"prot",50,300,130],
+ ["Végétal","seitan","Seitan",140,25,4,2,"prot",60,300,130],
+ ["Végétal","proteine-soja","Protéines de soja",330,50,30,1,"prot",20,150,60],
+ ["Végétal","edamame","Édamames",125,11,9,5,"prot",50,300,120],
+ ["Végétal","steak-soja","Steak de soja",170,17,8,7,"prot",50,250,100],
+ ["Végétal","falafel","Falafels",220,7,20,13,"fec",50,250,120],
+ ["Végétal","houmous","Houmous",230,8,14,16,"gras",20,150,50],
+
+ ["Sauces & extras","whey","Whey",380,80,7,5,"prot",10,80,30],
+ ["Sauces & extras","sauce-tomate","Sauce tomate",45,1.6,7,1,"condiment",20,200,80],
+ ["Sauces & extras","sauce-soja","Sauce soja",60,6,5,0.1,"condiment",5,50,15],
+ ["Sauces & extras","ketchup","Ketchup",100,1,24,0.2,"condiment",10,60,20],
+ ["Sauces & extras","moutarde","Moutarde",150,7,5,10,"condiment",5,40,10],
+ ["Sauces & extras","mayonnaise","Mayonnaise",680,1,2,75,"gras",5,50,15],
+ ["Sauces & extras","pesto","Pesto",380,5,5,38,"gras",5,60,20],
+ ["Sauces & extras","lait-coco","Lait de coco",190,2,3,19,"gras",20,200,60],
+ ["Sauces & extras","miel","Miel",300,0,82,0,"condiment",5,50,15],
+ ["Sauces & extras","confiture","Confiture",250,0,60,0,"condiment",5,60,20],
+ ["Sauces & extras","chocolat-noir","Chocolat noir 70%",550,8,35,40,"gras",5,60,20],
+ ["Sauces & extras","sriracha","Sauce sriracha",93,1.9,19,0.9,"condiment",5,50,15],
+ ["Sauces & extras","sirop-zero","Sirop zéro calorie",10,0,2,0,"condiment",5,60,20],
+ ["Sauces & extras","edulcorant","Édulcorant en poudre",20,0,100,0,"condiment",2,30,5],
+ ["Sauces & extras","levure-maltee","Levure maltée",350,50,35,4,"condiment",3,30,8],
+ ["Sauces & extras","gelatine","Gélatine en poudre",340,86,0,0,"condiment",2,25,5],
+ ["Sauces & extras","psyllium","Psyllium",180,2,85,0.5,"condiment",3,25,6],
+ ["Légumes","konjac","Konjac / shirataki",10,0.2,3,0,"leg",100,400,200]
+];
+
+/* cru = grammes a peser avant cuisson pour obtenir 100 g une fois cuit.
+   Le riz gonfle (0,33), la viande perd de l'eau (1,3). */
+const RP_CRU={"poulet": 1.3, "cuisse-poulet": 1.3, "dinde": 1.3, "boeuf5": 1.25, "boeuf15": 1.25, "porc-filet": 1.3, "veau": 1.3, "agneau": 1.25, "lapin": 1.3, "magret": 1.25, "saumon": 1.2, "truite": 1.2, "thon-frais": 1.2, "cabillaud": 1.2, "colin": 1.2, "merlu": 1.2, "dorade": 1.2, "crevettes": 1.15, "saint-jacques": 1.15, "riz": 0.33, "riz-complet": 0.33, "riz-basmati": 0.33, "pates": 0.4, "pates-completes": 0.4, "nouilles": 0.4, "semoule": 0.35, "couscous": 0.35, "quinoa": 0.35, "boulgour": 0.35, "polenta": 0.25, "lentilles": 0.4, "pois-chiches": 0.45, "pdt": 1.05, "pdt-sautees": 1.15, "patate-douce": 1.05, "epinards": 1.35, "champignons": 1.3, "courgette": 1.1, "poireau": 1.1, "aubergine": 1.15, "potimarron": 1.15};
+const ALIMENTS = AL_RAW.map(function(r){
+  return {g:r[0], id:r[1], nom:r[2], k:r[3], p:r[4], c:r[5], l:r[6], role:r[7],
+          min:r[8], max:r[9], def:r[10], unite:(r[11]||'g'), pu:(r[12]||1),
+          cru:(RP_CRU[r[1]]||1)};
+});
+function alimentPar(id){ for(let i=0;i<ALIMENTS.length;i++) if(ALIMENTS[i].id===id) return ALIMENTS[i]; return null; }
+
+/* ---------- etat ---------- */
+let RP = {cible:600, prot:null, gluc:null, lip:null, mode:'perso', items:[]};
+
+/* Les trois objectifs : part des calories qui va a chaque macro.
+   proteines et glucides a 4 kcal le gramme, lipides a 9. */
+const RP_MODES = {
+  regime: {nom:'Régime',        p:0.35, c:0.35, l:0.30,
+           aide:'Beaucoup de protéines pour garder le muscle pendant la perte.'},
+  seche:  {nom:'Sèche',         p:0.40, c:0.35, l:0.25,
+           aide:'Protéines au maximum, gras réduit : on perd le gras, pas le muscle.'},
+  masse:  {nom:'Prise de masse', p:0.30, c:0.45, l:0.25,
+           aide:'Glucides pour alimenter l\'entraînement, protéines hautes pour construire.'}
+};
+/* Applique l'objectif choisi aux trois cibles, a partir des calories visees. */
+function rpAppliquerMode(){
+  const m=RP_MODES[RP.mode];
+  if(!m) return;
+  RP.prot=Math.round(RP.cible*m.p/4);
+  RP.gluc=Math.round(RP.cible*m.c/4);
+  RP.lip =Math.round(RP.cible*m.l/9);
+}
+/* Des que l'utilisateur touche un chiffre a la main, on repasse en Perso
+   et on garde telles quelles les valeurs deja affichees. */
+function rpPasserPerso(){
+  if(RP.mode==='perso') return;
+  RP.mode='perso';
+}
+let rpJournalIdx = null;   /* repas de la journee en cours de modification */
+function rpSauver(){
+  try{ localStorage.setItem('graille_repas', JSON.stringify(RP)); }catch(e){}
+  try{ fdSurMaj(); }catch(e){}
+}
+function rpCharger(){
+  try{
+    const s=JSON.parse(localStorage.getItem('graille_repas'));
+    if(s && s.items) RP={cible:s.cible||600,
+                          prot:(s.prot!=null?s.prot:null), gluc:(s.gluc!=null?s.gluc:null),
+                          lip:(s.lip!=null?s.lip:null),
+                          mode:(RP_MODES[s.mode]?s.mode:'perso'),
+                          items:s.items.filter(function(x){ return alimentPar(x.id); })};
+  }catch(e){}
+}
+
+function rpProtCible(){
+  if(RP.prot!=null) return RP.prot;
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(p && p.calories && p.prot) return Math.round(p.prot*RP.cible/p.calories);
+  return Math.round(RP.cible*0.25/4);
+}
+/* null = l'utilisateur ne vise pas les glucides, ils tombent ou ils tombent */
+function rpGlucCible(){ return (RP.gluc!=null) ? RP.gluc : null; }
+function rpGlucAuto(){
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(p && p.calories && p.gluc) return Math.round(p.gluc*RP.cible/p.calories);
+  return Math.round(RP.cible*0.45/4);
+}
+/* null = l'utilisateur ne vise pas les lipides */
+function rpLipCible(){ return (RP.lip!=null) ? RP.lip : null; }
+function rpLipAuto(){
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(p && p.calories && p.lip) return Math.round(p.lip*RP.cible/p.calories);
+  /* ce qui reste une fois les proteines et les glucides servis */
+  const reste=RP.cible - rpProtCible()*4 - (RP.gluc!=null?RP.gluc:rpGlucAuto())*4;
+  return Math.max(0, Math.round(reste/9));
+}
+/* Les calories ne sont pas un 4e reglage : elles sortent des trois macros.
+   4 kcal par gramme de proteines et de glucides, 9 pour les lipides. */
+function rpKcalMacros(){
+  if(RP.gluc==null || RP.lip==null) return null;
+  return Math.round(rpProtCible()*4 + RP.gluc*4 + RP.lip*9);
+}
+function rpArrondi(a, g){
+  if(a.unite==='piece') return Math.max(a.min, Math.min(a.max, Math.round(g/a.pu)));
+  if(g>=100) return Math.round(g/10)*10;
+  if(g>=20)  return Math.round(g/5)*5;
+  return Math.max(1, Math.round(g));
+}
+function rpGrammes(a, q){ return a.unite==='piece' ? q*a.pu : q; }
+
+/* ---------- le calcul ----------
+   On part de la portion normale de chaque aliment (celle qu'on mettrait
+   dans une assiette), puis on monte ou on descend tout le monde ensemble
+   jusqu'a tomber sur les calories demandees. Un aliment qui touche son
+   mini ou son maxi se bloque la, les autres encaissent la difference.
+   Les proteines : on essaie plusieurs repartitions et on garde la
+   meilleure, sans jamais sortir des portions realistes. */
+
+/* ---------- le calcul : trois cibles ----------
+   calories, proteines et (si l'utilisateur le demande) glucides.
+   Les lipides ne se reglent pas : ils sont ce qui reste, par arithmetique.
+   On part des portions normales et on deplace chaque aliment, chacun restant
+   entre son mini et son maxi, jusqu'a minimiser l'ecart sur les trois cibles. */
+function rpResoudre(libres, K, P, C, L){
+  const bas =libres.map(function(x){ return rpGrammes(x.a,x.a.min)/100; });
+  const haut=libres.map(function(x){ return rpGrammes(x.a,x.a.max)/100; });
+  libres.forEach(function(x,i){
+    x.u=Math.max(bas[i], Math.min(haut[i], rpGrammes(x.a,x.a.def)/100));
+  });
+  /* poids : chaque cible compte en ecart relatif, pour que 10 kcal
+     et 10 g de proteines ne pesent pas pareil */
+  const wK=1/((K>1?K:1)*(K>1?K:1));
+  const wP=1/((P>1?P:1)*(P>1?P:1));
+  const wC=(C==null)?0:1/((C>1?C:1)*(C>1?C:1));
+  const wL=(L==null)?0:1/((L>1?L:1)*(L>1?L:1));
+
+  /* On ajuste un aliment a la fois, exactement, puis on recommence.
+     Pour un seul aliment l'optimum se calcule directement. */
+  for(let tour=0; tour<80; tour++){
+    let bouge=0;
+    for(let i=0;i<libres.length;i++){
+      let sk=0,sp=0,sc=0,sl=0;
+      libres.forEach(function(y,j){ if(j===i) return; sk+=y.a.k*y.u; sp+=y.a.p*y.u; sc+=y.a.c*y.u; sl+=y.a.l*y.u; });
+      const a=libres[i].a;
+      const den = wK*a.k*a.k + wP*a.p*a.p + wC*a.c*a.c + wL*a.l*a.l;
+      if(!(den>0)) continue;
+      const num = wK*a.k*(K-sk) + wP*a.p*(P-sp) + wC*a.c*((C==null)?0:(C-sc))
+                + wL*a.l*((L==null)?0:(L-sl));
+      let u=num/den;
+      u=Math.max(bas[i], Math.min(haut[i], u));
+      bouge=Math.max(bouge, Math.abs(u-libres[i].u));
+      libres[i].u=u;
+    }
+    if(bouge<1e-4) break;
+  }
+  libres.forEach(function(x,i){
+    x.g=x.u*100;
+    x.auMax=(x.u>=haut[i]-1e-6);
+    x.auMin=(x.u<=bas[i]+1e-6);
+  });
+}
+
+/* L'arrondi a la dizaine de grammes fait perdre ou gagner quelques calories.
+   On rattrape l'ecart en bougeant d'un cran l'aliment le mieux place. */
+function rpPas(a, q){
+  if(a.unite==='piece') return 0;        /* on ne coupe pas un oeuf en deux */
+  if(q>=100) return 10;
+  if(q>=20)  return 5;
+  return 1;
+}
+function rpAjuster(items, kCible){
+  for(let it=0; it<18; it++){
+    let k=0; items.forEach(function(x){ k+=x.a.k*rpGrammes(x.a,x.q)/100; });
+    const ecart=kCible-k;
+    if(Math.abs(ecart)<=6) return;
+    let best=null;
+    items.forEach(function(x){
+      if(x.lock) return;
+      const pas=rpPas(x.a, x.q);
+      if(!pas) return;
+      [pas,-pas].forEach(function(dp){
+        const nq=x.q+dp;
+        if(nq<x.a.min || nq>x.a.max) return;
+        const ne=Math.abs(kCible-(k+x.a.k*dp/100));
+        if(ne<Math.abs(ecart)-0.5 && (!best || ne<best.e)) best={x:x, dp:dp, e:ne};
+      });
+    });
+    if(!best) return;
+    best.x.q+=best.dp;
+  }
+}
+
+function rpCalculer(){
+  const protCible=rpProtCible();
+  const glucCible=rpGlucCible();            /* null = on ne vise pas les glucides */
+  const lipCible=rpLipCible();              /* null = on ne vise pas les lipides */
+  const items=RP.items.map(function(x){ return {id:x.id, lock:!!x.lock, q:x.q, a:alimentPar(x.id)}; })
+                      .filter(function(x){ return x.a; });
+  if(!items.length) return {items:[], kcal:0, p:0, c:0, l:0,
+                            protCible:protCible, glucCible:glucCible, lipCible:lipCible};
+
+  let kLock=0, pLock=0, cLock=0, lLock=0;
+  items.forEach(function(x){
+    if(x.lock){ const g=rpGrammes(x.a,x.q)/100;
+      kLock+=x.a.k*g; pLock+=x.a.p*g; cLock+=x.a.c*g; lLock+=x.a.l*g; }
+  });
+  const libres=items.filter(function(x){ return !x.lock; });
+  const kRest=Math.max(0, RP.cible-kLock);
+  const pRest=Math.max(0, protCible-pLock);
+  const cRest=(glucCible==null)?null:Math.max(0, glucCible-cLock);
+  const lRest=(lipCible==null)?null:Math.max(0, lipCible-lLock);
+
+  if(libres.length && kRest<=0){
+    /* les aliments fixes mangent deja toute la cible : les autres au minimum */
+    libres.forEach(function(x){ x.q=x.a.min; x.auMin=true; x.auMax=false; });
+  }
+  else if(libres.length && kRest>0){
+    rpResoudre(libres, kRest, pRest, cRest, lRest);
+    libres.forEach(function(x){ x.q=rpArrondi(x.a, x.g); });
+    rpAjuster(items, RP.cible);
+  }
+
+  /* totaux reels, calcules sur les quantites affichees */
+  let kcal=0,p=0,c=0,l=0;
+  items.forEach(function(x){
+    const g=rpGrammes(x.a, x.q)/100;
+    kcal+=x.a.k*g; p+=x.a.p*g; c+=x.a.c*g; l+=x.a.l*g;
+  });
+  return {items:items, kcal:Math.round(kcal), p:Math.round(p), c:Math.round(c), l:Math.round(l),
+          protCible:protCible, glucCible:glucCible, lipCible:lipCible,
+          kLock:Math.round(kLock), nbLibres:libres.length};
+}
+
+/* ---------- affichage ---------- */
+function rpCru(a, q){
+  const g=q*a.cru;
+  return g>=100 ? Math.round(g/5)*5 : Math.round(g);
+}
+function rpQte(x){
+  const a=x.a;
+  if(a.unite==='piece') return x.q+' '+(x.q>1?'pièces':'pièce')+' <em>('+(x.q*a.pu)+' g)</em>';
+  if(Math.abs(a.cru-1)<0.05) return x.q+' g';
+  return rpCru(a,x.q)+' g crus<em>soit '+x.q+' g une fois cuit</em>';
+}
+/* Ce qu'il reste a manger aujourd'hui : un clic et c'est la cible du repas. */
+function rpMajReste(){
+  const b=document.getElementById('rpReste'); if(!b) return;
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(!p || !p.calories){ b.hidden=true; return; }
+  let reste=p.calories-consumed();
+  reste=Math.round(reste/10)*10;
+  if(reste<150 || reste===RP.cible){ b.hidden=true; return; }
+  b.hidden=false;
+  b.textContent='Il te reste '+reste+' kcal aujourd\'hui — clique pour viser ce chiffre';
+  b.dataset.r=reste;
+}
+
+function rpConseil(res, ecart){
+  if(!res.nbLibres) return 'Tout est fixé, je ne peux rien ajuster : déverrouille un aliment et je recalcule.';
+  const eP = res.p - res.protCible;
+  const eC = (res.glucCible==null) ? 0 : (res.c - res.glucCible);
+  const eL = (res.lipCible==null)  ? 0 : (res.l - res.lipCible);
+  const tolK=25, tolP=5, tolC=8, tolL=4;
+
+  const libres = res.items.filter(function(x){ return !x.lock; });
+  const parRole = function(r){ return libres.filter(function(x){ return x.a.role===r; }); };
+  const tousAuMax = function(l){ return l.length && l.every(function(x){ return x.auMax; }); };
+  const tousAuMin = function(l){ return l.length && l.every(function(x){ return x.auMin; }); };
+  const prot = parRole('prot'), fec = parRole('fec'), gras = parRole('gras');
+
+  if(Math.abs(ecart)<=tolK && Math.abs(eP)<=tolP && Math.abs(eC)<=tolC && Math.abs(eL)<=tolL){
+    const n=1+(res.glucCible!=null?1:0)+(res.lipCible!=null?1:0);
+    if(n===1) return 'Tu es sur ta cible de '+RP.cible+' kcal, protéines comprises.';
+    if(n===2) return 'Tu es sur tes trois cibles.';
+    return 'Tu es sur tes quatre cibles : calories, protéines, glucides et lipides.';
+  }
+
+  /* 1. les proteines d'abord : c'est ce qu'un sportif rate en premier */
+  if(eP < -tolP){
+    if(!prot.length) return 'Il manque <b>'+Math.abs(Math.round(eP))+' g de protéines</b> et aucun de tes aliments n\'en apporte vraiment. Ajoute du poulet, du fromage blanc, des œufs ou de la whey.';
+    return 'Il manque <b>'+Math.abs(Math.round(eP))+' g de protéines</b> : '+prot.map(function(x){ return x.a.nom.toLowerCase(); }).join(' et ')+(prot.length>1?' sont':' est')+' déjà au maximum. Ajoute une autre source de protéines.';
+  }
+  if(res.lipCible!=null && eL < -tolL && !gras.length){
+    return 'Il manque <b>'+Math.abs(Math.round(eL))+' g de lipides</b> et tu n\'as aucune matière grasse dans ce repas. C\'est ce qui force tout le reste à monter. Ajoute de l\'huile d\'olive, des amandes, du beurre de cacahuète ou de l\'avocat.';
+  }
+  if(eP > tolP){
+    if(tousAuMin(prot)) return '<b>'+Math.round(eP)+' g de protéines de trop</b>, et tes sources sont déjà au minimum. Remplace-en une par quelque chose de plus léger, ou monte ta cible.';
+    return '<b>'+Math.round(eP)+' g de protéines de trop</b> : c\'est le seul moyen d\'atteindre tes calories avec ces aliments. Ajoute une matière grasse ou un féculent pour soulager.';
+  }
+
+  /* 2. les glucides, seulement s'ils sont vises */
+  if(res.glucCible!=null && eC < -tolC){
+    if(!fec.length) return 'Il manque <b>'+Math.abs(Math.round(eC))+' g de glucides</b> et tu n\'as aucun féculent. Ajoute du riz, des pâtes, du pain ou une patate douce.';
+    return 'Il manque <b>'+Math.abs(Math.round(eC))+' g de glucides</b> : tes féculents sont au maximum. Ajoutes-en un autre.';
+  }
+  if(res.glucCible!=null && eC > tolC){
+    return '<b>'+Math.round(eC)+' g de glucides de trop</b> : baisse ta cible de glucides, ou retire un féculent.';
+  }
+
+  /* 2 bis. les lipides, seulement s'ils sont vises */
+  if(res.lipCible!=null && eL < -tolL){
+    if(!gras.length) return 'Il manque <b>'+Math.abs(Math.round(eL))+' g de lipides</b> et tu n\'as aucune matière grasse. Ajoute de l\'huile d\'olive, des amandes, du beurre de cacahuète ou de l\'avocat.';
+    return 'Il manque <b>'+Math.abs(Math.round(eL))+' g de lipides</b> : '+gras.map(function(x){ return x.a.nom.toLowerCase(); }).join(' et ')+(gras.length>1?' sont':' est')+' déjà au maximum. Ajoute une autre matière grasse.';
+  }
+  if(res.lipCible!=null && eL > tolL){
+    if(tousAuMin(gras)) return '<b>'+Math.round(eL)+' g de lipides de trop</b>, et tes matières grasses sont déjà au minimum. Le gras vient alors des autres aliments : remplaces-en un par une version plus maigre.';
+    return '<b>'+Math.round(eL)+' g de lipides de trop</b> : baisse ta cible de lipides, ou retire une matière grasse.';
+  }
+
+  /* 3. les calories en dernier : si protéines et glucides sont bons,
+        ce qui manque ne peut venir que du gras. C'est de l'arithmetique. */
+  if(ecart < 0){
+    const manque=Math.abs(ecart);
+    if(Math.abs(eP)<=tolP && Math.abs(eC)<=tolC){
+      const g=Math.max(1, Math.round(manque/9));
+      if(gras.length && tousAuMax(gras))
+        return 'Il manque <b>'+manque+' kcal</b>. Tes protéines et tes glucides sont à la cible, donc elles ne peuvent venir que du gras — et le tien est au maximum. Ajoute des amandes, du beurre de cacahuète ou de l\'huile.';
+      if(!gras.length)
+        return 'Il manque <b>'+manque+' kcal</b>. Tes protéines et tes glucides sont déjà à la cible : ces calories ne peuvent venir que du gras. Ajoute environ <b>'+g+' g d\'huile d\'olive</b> (ou des amandes, du beurre de cacahuète).';
+      return 'Il manque <b>'+manque+' kcal</b> : monte un peu '+gras[0].a.nom.toLowerCase()+', soit environ '+g+' g de plus.';
+    }
+    return '<b>'+manque+' kcal en dessous</b> : tes quantités sont déjà au maximum, ajoute un aliment.';
+  }
+  if(res.kLock>RP.cible) return 'Tes aliments fixés font déjà <b>'+res.kLock+' kcal</b>, soit '+(res.kLock-RP.cible)+' de plus que ta cible. Baisse une quantité fixée.';
+  return '<b>'+ecart+' kcal au-dessus</b> de ta cible : les quantités sont déjà au plus petit, retire un aliment.';
+}
+
+function rpRendre(){
+  const res=rpCalculer();
+  const liste=document.getElementById('rpListe');
+  const tot=document.getElementById('rpTotaux');
+  const kc=document.getElementById('rpKcal');
+  if(kc && document.activeElement!==kc) kc.value=RP.cible;
+  const pin=document.getElementById('rpProtIn');
+  if(pin && document.activeElement!==pin) pin.value=rpProtCible();
+  const gin=document.getElementById('rpGlucIn'), gcb=document.getElementById('rpGlucCb'),
+        gx=document.getElementById('rpGlucX');
+  if(gin && document.activeElement!==gin) gin.value=(RP.gluc!=null?RP.gluc:rpGlucAuto());
+  if(gcb) gcb.classList.toggle('libre', RP.gluc==null);
+  if(gx) gx.hidden=(RP.gluc==null);
+  const lin=document.getElementById('rpLipIn'), lcb=document.getElementById('rpLipCb'),
+        lx=document.getElementById('rpLipX');
+  if(lin && document.activeElement!==lin) lin.value=(RP.lip!=null?RP.lip:rpLipAuto());
+  if(lcb) lcb.classList.toggle('libre', RP.lip==null);
+  if(lx) lx.hidden=(RP.lip==null);
+  /* les quatre boutons d'objectif */
+  const mz=document.getElementById('rpModes');
+  if(mz) mz.querySelectorAll('.rp-mode').forEach(function(b){
+    b.classList.toggle('on', b.dataset.m===RP.mode);
+  });
+  const pc=document.getElementById('rpProtTxt');
+  if(pc && RP_MODES[RP.mode]){
+    pc.innerHTML = RP_MODES[RP.mode].aide;
+  } else if(pc){
+    const km=rpKcalMacros();
+    if(km!=null){
+      /* les trois macros sont fixees : les calories en decoulent, on le dit */
+      pc.innerHTML = 'Tes trois macros font <b>'+km+' kcal</b>.'+
+        ((Math.abs(km-RP.cible)>10)
+          ? ' <button type="button" class="rp-coh" data-k="'+km+'">Viser '+km+' kcal</button>'
+          : ' C\'est bien ta cible.');
+    } else if(RP.gluc==null && RP.lip==null){
+      pc.innerHTML = 'Glucides et lipides libres — <b>touche un chiffre</b> pour le fixer.';
+    } else if(RP.gluc==null){
+      pc.innerHTML = 'Il reste environ <b>'+Math.max(0,Math.round((RP.cible-rpProtCible()*4-RP.lip*9)/4))+' g de glucides</b>.';
+    } else {
+      pc.innerHTML = 'Il reste environ <b>'+Math.max(0,Math.round((RP.cible-rpProtCible()*4-RP.gluc*4)/9))+' g de lipides</b>.';
+    }
+    const bc=pc.querySelector('.rp-coh');
+    if(bc) bc.addEventListener('click', function(){
+      RP.cible=Math.max(100, Math.min(3000, +this.dataset.k));
+      rpSauver(); rpRendre();
+    });
+  }
+  rpMajReste();
+  rpBoutonMaj();
+
+  if(!res.items.length){
+    liste.innerHTML='<p class="rp-vide">Tape tes calories dans le grand chiffre vert, puis cherche tes aliments ci-dessus. Trois ou quatre suffisent : une protéine, un féculent, un légume, une matière grasse.<br><br>Pour le riz, les pâtes ou la viande, je te donne le poids <b>cru</b>, celui que tu pèses avant de cuisiner.</p>';
+    tot.innerHTML='';
+    return;
+  }
+  liste.innerHTML=res.items.map(function(x,i){
+    return '<div class="rp-row'+(x.lock?' fixe':'')+'">'+
+      '<div class="rp-n"><b>'+x.a.nom+'</b>'+
+        (x.lock
+          ? '<span class="rp-edit"><input type="number" inputmode="decimal" min="'+x.a.min+'" max="'+x.a.max+'" step="'+(x.a.unite==='piece'?1:5)+'" data-q="'+i+'" value="'+x.q+'"><em>'+
+              (x.a.unite==='piece' ? 'pièce(s)'
+                                   : (Math.abs(x.a.cru-1)<0.05 ? 'g' : 'g cuits = '+rpCru(x.a,x.q)+' g crus'))+'</em></span>'
+          : '<span class="rp-q">'+rpQte(x)+'</span>')+
+      '</div>'+
+      '<div class="rp-k">'+Math.round(x.a.k*rpGrammes(x.a,x.q)/100)+' kcal</div>'+
+      '<button class="rp-lock" data-l="'+i+'" aria-pressed="'+(x.lock?'true':'false')+'" title="Fixer la quantité">'+(x.lock?'Fixé':'Fixer')+'</button>'+
+      '<button class="rp-rm" data-r="'+i+'" aria-label="Retirer">×</button>'+
+    '</div>';
+  }).join('');
+
+  const ecart=res.kcal-RP.cible;
+  tot.innerHTML='<div class="rp-tot">'+
+    '<div class="rp-tg">'+
+      '<div class="rp-t"><b>'+res.kcal+'</b><span>kcal</span></div>'+
+      '<div class="rp-t"><b>'+res.p+'</b><span>protéines</span></div>'+
+      '<div class="rp-t"><b>'+res.c+'</b><span>glucides</span></div>'+
+      '<div class="rp-t"><b>'+res.l+'</b><span>lipides</span></div>'+
+    '</div>'+
+    '<p class="rp-note">'+
+      rpConseil(res, ecart)+
+    '</p></div>';
+
+  liste.querySelectorAll('.rp-rm').forEach(function(b){
+    b.addEventListener('click',function(){ RP.items.splice(+b.dataset.r,1); rpSauver(); rpRendre(); });
+  });
+  liste.querySelectorAll('.rp-lock').forEach(function(b){
+    b.addEventListener('click',function(){
+      const i=+b.dataset.l, it=RP.items[i], x=res.items[i];
+      it.lock=!it.lock;
+      if(it.lock) it.q=x.q;
+      rpSauver(); rpRendre();
+    });
+  });
+  liste.querySelectorAll('input[data-q]').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      const i=+inp.dataset.q, a=alimentPar(RP.items[i].id);
+      let v=parseFloat(String(inp.value).replace(',','.'));
+      if(!(v>0)) return;
+      RP.items[i].q=Math.max(a.min, Math.min(a.max, v));
+      rpSauver();
+      const r=rpCalculer();
+      const t=document.getElementById('rpTotaux');
+      if(t){ rpRendreTotaux(r); }
+    });
+    inp.addEventListener('change',function(){ rpRendre(); });
+  });
+}
+function rpRendreTotaux(res){
+  const tot=document.getElementById('rpTotaux');
+  if(!tot) return;
+  const q=tot.querySelectorAll('.rp-t b');
+  if(q.length===4){ q[0].textContent=res.kcal; q[1].textContent=res.p; q[2].textContent=res.c; q[3].textContent=res.l; }
+}
+
+/* ---------- recherche d'aliments ----------
+   Les gens tapent "boeuf", "fromage", "poisson", "vegan"... pas le nom
+   exact de la fiche. On ajoute donc des mots-cles a chaque aliment,
+   et on classe : nom exact d'abord, puis debut de mot, puis le reste. */
+const RP_SYN={
+  poulet:'volaille', 'cuisse-poulet':'volaille', dinde:'volaille escalope',
+  boeuf5:'boeuf viande hachee steak hache', boeuf15:'boeuf viande hachee steak hache',
+  'porc-filet':'cochon', magret:'canard volaille', agneau:'mouton',
+  jambon:'charcuterie', 'jambon-dinde':'charcuterie', bacon:'charcuterie lardons',
+  saucisse:'charcuterie chipolata merguez',
+  saumon:'poisson', truite:'poisson', 'thon-frais':'poisson', 'thon-naturel':'poisson boite conserve',
+  cabillaud:'poisson blanc', colin:'poisson blanc lieu', merlu:'poisson blanc',
+  dorade:'poisson', sardine:'poisson conserve', maquereau:'poisson conserve',
+  crevettes:'fruits de mer gambas', moules:'fruits de mer coquillage',
+  'saint-jacques':'fruits de mer coquille noix', surimi:'batonnets de surimi poisson',
+  oeuf:'oeufs omelette brouilles', 'blanc-oeuf':'oeufs',
+  fb0:'laitage', fb3:'laitage', skyr:'laitage yaourt', yaourt:'laitage',
+  'yaourt-grec':'laitage', cottage:'laitage fromage frais', lait:'laitage',
+  mozzarella:'fromage', feta:'fromage', parmesan:'fromage', emmental:'fromage rape gruyere',
+  chevre:'fromage', comte:'fromage gruyere', ricotta:'fromage frais',
+  creme30:'creme fraiche', creme15:'creme fraiche legere', beurre:'matiere grasse',
+  riz:'riz', 'riz-complet':'riz', 'riz-basmati':'riz',
+  pates:'spaghetti penne macaroni coquillettes tagliatelles',
+  'pates-completes':'spaghetti penne complet', nouilles:'udon soba chinoises',
+  semoule:'couscous', couscous:'semoule graine',
+  pdt:'patate puree vapeur', 'pdt-sautees':'patate rissolees poelee',
+  'patate-douce':'patate frites',
+  lentilles:'legumineuse legume sec', 'pois-chiches':'legumineuse legume sec',
+  'haricots-rouges':'legumineuse chili', 'haricots-blancs':'legumineuse',
+  avoine:'porridge flocons', muesli:'cereales petit dejeuner',
+  'pain-complet':'baguette tartine', pain:'baguette tartine', 'pain-mie':'toast sandwich',
+  biscotte:'tartine', tortilla:'wrap galette', bagel:'sandwich',
+  'chou-fleur':'chou', salade:'laitue roquette mache verte', 'petits-pois':'legume',
+  'haricots-verts':'legume vert', epinards:'legume vert', potimarron:'courge butternut',
+  avocat:'guacamole', olives:'olive',
+  'huile-olive':'huile matiere grasse', 'huile-colza':'huile matiere grasse',
+  amandes:'oleagineux fruits secs', noix:'oleagineux fruits secs',
+  noisettes:'oleagineux fruits secs', cajou:'oleagineux fruits secs',
+  cacahuetes:'oleagineux fruits secs arachide', bdc:'peanut butter cacahuete tartiner',
+  'graines-courge':'graines oleagineux', chia:'graines', sesame:'graines', pignons:'oleagineux',
+  tofu:'vegetal vegetarien vegan soja', tempeh:'vegetal vegetarien vegan soja',
+  seitan:'vegetal vegetarien vegan ble', 'proteine-soja':'vegetal vegan poudre',
+  edamame:'vegetal vegan soja feves', 'steak-soja':'vegetal vegetarien vegan galette',
+  falafel:'vegetal vegetarien pois chiches', houmous:'vegetal pois chiches tartinade',
+  whey:'proteine en poudre shaker shake',
+  'sauce-tomate':'coulis passata', 'sauce-soja':'soja asiatique', ketchup:'sauce',
+  moutarde:'sauce', mayonnaise:'sauce mayo', pesto:'sauce basilic',
+  'lait-coco':'coco asiatique curry', miel:'sucre', confiture:'sucre',
+  'chocolat-noir':'chocolat cacao',
+  sriracha:'sauce piquante piment asiatique', 'sirop-zero':'sirop sans sucre zero pancake',
+  edulcorant:'sucre sans sucre stevia erythritol sucralose', 'levure-maltee':'levure fromage vegan',
+  gelatine:'gelifiant agar', psyllium:'fibre tegument',
+  konjac:'shirataki nouilles zero calorie pates konjac', compote:'pomme dessert', dattes:'fruits secs'
+};
+ALIMENTS.forEach(function(a){
+  a.cle=frNorm(a.nom);
+  const grp=(a.g==='Œufs & laitiers') ? 'laitier laitage' : a.g;
+  a.mots=frNorm(a.nom+' '+grp+' '+(RP_SYN[a.id]||'')).replace(/[^a-z0-9]+/g,' ').trim().split(' ');
+});
+function rpChercher(q){
+  const n=frNorm(String(q||'').trim());
+  if(n.length<2) return [];
+  const mots=n.split(/[^a-z0-9]+/).filter(function(t){ return t.length>1; });
+  if(!mots.length) return [];
+  const trouves=[];
+  ALIMENTS.forEach(function(a){
+    const ok=mots.every(function(t){
+      const sing=(t.length>3? t.replace(/s$/,'') : t);
+      return a.mots.some(function(w){ return w.indexOf(t)===0 || w.indexOf(sing)===0 || t.indexOf(w)===0; });
+    });
+    if(!ok) return;
+    let score=5;
+    if(a.cle===n) score=0;
+    else if(a.cle.indexOf(n)===0) score=1;
+    else if(new RegExp('(^| )'+mots[0].replace(/s$/,'')).test(a.cle)) score=2;
+    else if(a.cle.indexOf(mots[0])>=0) score=3;
+    else score=4;                                  /* trouve par mot-cle seulement */
+    trouves.push({a:a, s:score, l:a.nom.length});
+  });
+  trouves.sort(function(x,y){ return x.s-y.s || x.l-y.l; });
+  return trouves.slice(0,14).map(function(x){ return x.a; });
+}
+function rpRendreResultats(){
+  const box=document.getElementById('rpRes');
+  const q=document.getElementById('rpQ').value;
+  const r=rpChercher(q);
+  if(!r.length){ box.innerHTML=''; box.classList.remove('open'); return; }
+  box.innerHTML=r.map(function(a){
+    const deja=RP.items.some(function(x){ return x.id===a.id; });
+    return '<button class="rp-sug'+(deja?' deja':'')+'" data-a="'+a.id+'"><span>'+a.nom+'</span><em>'+a.k+' kcal / 100 g</em></button>';
+  }).join('');
+  box.classList.add('open');
+  box.querySelectorAll('.rp-sug').forEach(function(b){
+    b.addEventListener('click',function(){
+      const id=b.dataset.a;
+      if(!RP.items.some(function(x){ return x.id===id; })){
+        const a=alimentPar(id);
+        RP.items.push({id:id, lock:false, q:a.def});
+      }
+      document.getElementById('rpQ').value='';
+      box.innerHTML=''; box.classList.remove('open');
+      rpSauver(); rpRendre();
+    });
+  });
+}
+
+
+/* ---------- ce que l'app complete fournit, et qui n'existe pas ici ---------- */
+function rpBoutonMaj(){}
+function consumed(){ return 0; }
+/* minuscules sans accents, pour que "oeuf" trouve "œuf" et "poelee" trouve "poêlée" */
+function frNorm(s){return s.toLowerCase().replace(/\u0153/g,'oe').replace(/\u00e6/g,'ae').normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+
+/* ---------- marqueurs de mesure (Google Analytics) ----------
+   Rien de personnel : on compte des gestes, pas des gens. */
+const MESURE={};
+function mesurer(nom, infos){
+  if(MESURE[nom]) return;              /* une seule fois par visite */
+  MESURE[nom]=1;
+  try{ if(typeof gtag==='function') gtag('event', nom, infos||{}); }catch(e){}
+}
+
+/* ---------- les boutons d'objectif ---------- */
+document.getElementById('rpModes').addEventListener('click', function(e){
+  const b=e.target.closest('.rp-mode'); if(!b) return;
+  RP.mode=b.dataset.m;
+  if(RP_MODES[RP.mode]) rpAppliquerMode();
+  mesurer('objectif_choisi', {objectif:RP.mode});
+  rpSauver(); rpRendre();
+});
+
+/* ---------- les calories ---------- */
+document.getElementById('rpMoins').addEventListener('click', function(){
+  RP.cible=Math.max(100, RP.cible-50); rpAppliquerMode(); rpSauver(); rpRendre();
+});
+document.getElementById('rpPlus').addEventListener('click', function(){
+  RP.cible=Math.min(3000, RP.cible+50); rpAppliquerMode(); rpSauver(); rpRendre();
+});
+document.getElementById('rpKcal').addEventListener('input', function(){
+  const v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
+  if(v>=100 && v<=3000){ RP.cible=v; rpAppliquerMode(); rpSauver(); rpRendre(); }
+});
+document.getElementById('rpKcal').addEventListener('blur', function(){
+  let v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
+  if(isNaN(v)) v=RP.cible;
+  RP.cible=Math.max(100, Math.min(3000, v));
+  this.value=RP.cible; rpAppliquerMode(); rpSauver(); rpRendre();
+});
+
+/* ---------- les trois macros ---------- */
+document.getElementById('rpProtIn').addEventListener('focus', function(){
+  const el=this; setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
+});
+document.getElementById('rpProtIn').addEventListener('input', function(){
+  rpPasserPerso();
+  const v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
+  if(v>=0 && v<=400){ RP.prot=v; rpSauver(); rpRendre(); }
+});
+document.getElementById('rpProtIn').addEventListener('blur', function(){
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  RP.prot = (t==='') ? null : Math.max(0, Math.min(400, parseInt(t,10)));
+  rpSauver(); rpRendre();
+});
+document.getElementById('rpGlucIn').addEventListener('focus', function(){
+  if(RP.gluc==null){ RP.gluc=rpGlucAuto(); this.value=RP.gluc; rpSauver(); rpRendre(); }
+  const el=this; setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
+});
+document.getElementById('rpGlucX').addEventListener('click', function(e){
+  e.preventDefault(); e.stopPropagation();
+  RP.gluc=null; rpPasserPerso(); rpSauver(); rpRendre();
+});
+document.getElementById('rpGlucIn').addEventListener('input', function(){
+  rpPasserPerso();
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  if(t===''){ RP.gluc=null; rpSauver(); rpRendre(); return; }
+  const v=parseInt(t,10);
+  if(v>=0 && v<=600){ RP.gluc=v; rpSauver(); rpRendre(); }
+});
+document.getElementById('rpGlucIn').addEventListener('blur', function(){
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  RP.gluc = (t==='') ? null : Math.max(0, Math.min(600, parseInt(t,10)));
+  rpSauver(); rpRendre();
+});
+document.getElementById('rpLipIn').addEventListener('focus', function(){
+  if(RP.lip==null){ RP.lip=rpLipAuto(); this.value=RP.lip; rpSauver(); rpRendre(); }
+  const el=this; setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
+});
+document.getElementById('rpLipX').addEventListener('click', function(e){
+  e.preventDefault(); e.stopPropagation();
+  RP.lip=null; rpPasserPerso(); rpSauver(); rpRendre();
+});
+document.getElementById('rpLipIn').addEventListener('input', function(){
+  rpPasserPerso();
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  if(t===''){ RP.lip=null; rpSauver(); rpRendre(); return; }
+  const v=parseInt(t,10);
+  if(v>=0 && v<=300){ RP.lip=v; rpSauver(); rpRendre(); }
+});
+document.getElementById('rpLipIn').addEventListener('blur', function(){
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  RP.lip = (t==='') ? null : Math.max(0, Math.min(300, parseInt(t,10)));
+  rpSauver(); rpRendre();
+});
+
+/* ---------- la recherche d'aliments ---------- */
+document.getElementById('rpQ').addEventListener('input', rpRendreResultats);
+
+/* ---------- vider ---------- */
+document.getElementById('rpVider').addEventListener('click', function(){
+  RP.items=[]; rpSauver(); rpRendre();
+  document.getElementById('rpQ').focus();
+});
+
+/* ---------- copier ses quantites ---------- */
+function rpTexte(){
+  const res=rpCalculer();
+  if(!res.items.length) return '';
+  const l=['Mon repas — '+res.kcal+' kcal · '+res.p+' g de protéines · '+res.c+' g de glucides · '+res.l+' g de lipides',''];
+  res.items.forEach(function(x){
+    const a=x.a;
+    if(a.unite==='piece')            l.push('• '+a.nom+' : '+x.q+' '+(x.q>1?'pièces':'pièce')+' ('+(x.q*a.pu)+' g)');
+    else if(Math.abs(a.cru-1)<0.05)  l.push('• '+a.nom+' : '+x.q+' g');
+    else                             l.push('• '+a.nom+' : '+rpCru(a,x.q)+' g crus (soit '+x.q+' g cuits)');
+  });
+  l.push('', 'Calculé sur graillelight.com/calculateur');
+  return l.join('\n');
+}
+document.getElementById('rpCopier').addEventListener('click', function(){
+  const t=rpTexte(); const b=this;
+  if(!t){ document.getElementById('rpQ').focus(); return; }
+  mesurer('quantites_copiees', {kcal:RP.cible});
+  const fini=function(ok){
+    const avant=b.textContent;
+    b.textContent = ok ? 'Copié !' : 'Copie impossible';
+    setTimeout(function(){ b.textContent=avant; }, 1800);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){ fini(true); }, function(){ fini(false); });
+  } else {
+    /* vieux navigateurs : on passe par un champ cache */
+    try{
+      const z=document.createElement('textarea');
+      z.value=t; z.setAttribute('readonly',''); z.style.position='fixed'; z.style.top='-1000px';
+      document.body.appendChild(z); z.select(); document.execCommand('copy');
+      document.body.removeChild(z); fini(true);
+    }catch(e){ fini(false); }
+  }
+});
+
+/* ---------- on compte l'usage reel, pas la simple visite ---------- */
+const rpRendreOriginal = rpRendre;
+rpRendre = function(){
+  rpRendreOriginal();
+  if(RP.items.length>=1) mesurer('calcul_commence');
+  if(RP.items.length>=2) mesurer('calcul_utilise', {aliments:RP.items.length});
+};
+
+/* ---------- demarrage ---------- */
+rpCharger();
+if(!RP.items.length && RP.mode==='perso'){
+  /* premiere visite : on montre a quoi ca ressemble plutot qu'un ecran vide */
+  RP.mode='seche'; RP.cible=750; rpAppliquerMode();
+}
+rpRendre();
+
+</script>
+</body>
+</html>
