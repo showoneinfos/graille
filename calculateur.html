@@ -87,7 +87,8 @@
   img{max-width:100%;height:auto}
   :focus-visible{outline:3px solid var(--green);outline-offset:2px;border-radius:6px}
 
-  .wrap{max-width:660px;margin:0 auto;padding:0 18px}
+  .wrap{max-width:660px;margin:0 auto;
+    padding:0 calc(18px + env(safe-area-inset-left)) 0 calc(18px + env(safe-area-inset-right))}
 
   /* champ de recherche (repris de l'application) */
   .searchbox{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);
@@ -98,7 +99,7 @@
   .searchbox input::-webkit-search-cancel-button{-webkit-appearance:none}
 
   /* ---------- barre du haut ---------- */
-  .top{background:var(--dark);padding:14px 0}
+  .top{background:var(--dark);padding:calc(14px + var(--haut)) 0 14px}
   .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .logo{font-size:17px;font-weight:900;letter-spacing:-.6px;color:#fff;text-decoration:none}
   .logo i{font-style:normal;color:var(--lime)}
@@ -185,7 +186,7 @@
     font-weight:800;font-size:15.5px;padding:14px 24px;border-radius:14px}
   .fin a.cta:hover{text-decoration:none;filter:brightness(1.07)}
 
-  footer{padding:26px 0 34px;text-align:center}
+  footer{padding:26px 0 calc(34px + env(safe-area-inset-bottom));text-align:center}
   footer p{font-size:13px;color:var(--ink3)}
   footer a{color:var(--ink2);font-weight:600}
 
