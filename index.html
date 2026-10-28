@@ -908,20 +908,37 @@
   .rp-val input:focus{outline:none;border-bottom-color:var(--green)}
   .rp-val span{display:block;font-size:12.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
     color:var(--ink2);margin-top:4px}
-  .rp-cibles{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0 8px}
-  .rp-cb{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
-    border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);cursor:text}
-  .rp-cb>span{flex:1;min-width:0;font-size:12px;font-weight:700;letter-spacing:.3px;
+  .rp-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 2px}
+  .rp-mode{padding:9px 4px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);
+    color:var(--ink2);font-size:12.5px;font-weight:700;line-height:1.2;letter-spacing:-.2px;
+    box-shadow:var(--shadow);transition:background .15s,border-color .15s,color .15s}
+  .rp-mode:hover{border-color:var(--green);color:var(--green)}
+  .rp-mode.on{background:var(--green);border-color:var(--green);color:#fff}
+  .rp-modes-aide{font-size:12px;color:var(--ink3);text-align:center;margin:7px 0 0}
+  .rp-cibles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:9px 0 8px}
+  .rp-cb{display:flex;flex-wrap:wrap;align-items:center;gap:4px;background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;padding:9px 10px;box-shadow:var(--shadow);cursor:text}
+  .rp-cb>span{flex:1 0 100%;min-width:0;font-size:11px;font-weight:700;letter-spacing:.3px;
     text-transform:uppercase;color:var(--ink2);white-space:nowrap}
-  .rp-cb input{width:3.6ch;flex:0 0 auto;border:none;background:none;outline:none;text-align:right;
+  .rp-cb input{width:3.6ch;flex:0 1 auto;border:none;background:none;outline:none;text-align:left;
     font-family:inherit;font-size:17px;font-weight:800;color:var(--green);
     font-variant-numeric:tabular-nums;-moz-appearance:textfield}
   .rp-cb input::-webkit-outer-spin-button,.rp-cb input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .rp-cb input::placeholder{color:var(--ink3);font-size:16px;font-weight:700}
   .rp-cb em{flex:0 0 auto;font-style:normal;font-size:13px;font-weight:700;color:var(--ink2)}
   .rp-cb.libre{border-style:dashed}
-  .rp-cb.libre em{display:none}
-  .rp-cb.libre input{width:5.4ch;color:var(--ink3)}
+  .rp-cb.libre input{color:var(--ink3)}
+  .rp-cb.libre em{color:var(--ink3)}
+  .rp-cb-x{flex:0 0 auto;width:22px;height:22px;margin:-2px -4px -2px 0;border-radius:50%;
+    font-size:15px;line-height:1;color:var(--ink3);background:var(--surface2)}
+  .rp-cb-x:hover{color:#fff;background:var(--danger)}
+  .rp-cb-x[hidden]{display:none}
+  .rp-cb-aide{font-size:12px;color:var(--ink3);text-align:center;margin:-2px 0 10px}
+  .rp-coh{display:inline-block;margin-left:6px;padding:4px 10px;border-radius:999px;
+    border:1.5px solid var(--green);background:var(--green-tint);color:var(--green-dark);
+    font-size:12.5px;font-weight:800;line-height:1.2}
+  .rp-coh:hover{background:var(--green);color:#fff}
   .rp-prot{font-size:13px;color:var(--ink2);font-weight:600;margin-bottom:10px;text-align:center}
   .rp-reste{display:block;width:100%;margin:0 0 16px;padding:11px 14px;border-radius:13px;
     border:1.5px solid var(--green);background:var(--green-tint);color:var(--green-dark);
@@ -1738,11 +1755,21 @@
       </div>
       <button class="rp-plus" id="rpPlus" type="button" aria-label="Plus de calories">+</button>
     </div>
+    <div class="rp-modes" id="rpModes" role="group" aria-label="Objectif">
+      <button type="button" class="rp-mode" data-m="regime">Régime</button>
+      <button type="button" class="rp-mode" data-m="seche">Sèche</button>
+      <button type="button" class="rp-mode" data-m="masse">Prise de masse</button>
+      <button type="button" class="rp-mode" data-m="perso">Perso</button>
+    </div>
     <div class="rp-cibles">
       <label class="rp-cb"><span>Protéines</span>
         <input id="rpProtIn" type="number" inputmode="numeric" min="0" max="400" step="5" aria-label="Protéines visées"><em>g</em></label>
       <label class="rp-cb" id="rpGlucCb"><span>Glucides</span>
-        <input id="rpGlucIn" type="number" inputmode="numeric" min="0" max="600" step="5" placeholder="libre" aria-label="Glucides visés"><em>g</em></label>
+        <input id="rpGlucIn" type="number" inputmode="numeric" min="0" max="600" step="5" aria-label="Glucides visés"><em>g</em>
+        <button class="rp-cb-x" id="rpGlucX" type="button" aria-label="Ne pas viser les glucides" hidden>×</button></label>
+      <label class="rp-cb" id="rpLipCb"><span>Lipides</span>
+        <input id="rpLipIn" type="number" inputmode="numeric" min="0" max="300" step="5" aria-label="Lipides visés"><em>g</em>
+        <button class="rp-cb-x" id="rpLipX" type="button" aria-label="Ne pas viser les lipides" hidden>×</button></label>
     </div>
     <p class="rp-prot" id="rpProtTxt"></p>
     <button class="rp-reste" id="rpReste" type="button" hidden></button>
@@ -4381,7 +4408,32 @@ const ALIMENTS = AL_RAW.map(function(r){
 function alimentPar(id){ for(let i=0;i<ALIMENTS.length;i++) if(ALIMENTS[i].id===id) return ALIMENTS[i]; return null; }
 
 /* ---------- etat ---------- */
-let RP = {cible:600, prot:null, gluc:null, items:[]};
+let RP = {cible:600, prot:null, gluc:null, lip:null, mode:'perso', items:[]};
+
+/* Les trois objectifs : part des calories qui va a chaque macro.
+   proteines et glucides a 4 kcal le gramme, lipides a 9. */
+const RP_MODES = {
+  regime: {nom:'Régime',        p:0.35, c:0.35, l:0.30,
+           aide:'Beaucoup de protéines pour garder le muscle pendant la perte.'},
+  seche:  {nom:'Sèche',         p:0.40, c:0.35, l:0.25,
+           aide:'Protéines au maximum, gras réduit : on perd le gras, pas le muscle.'},
+  masse:  {nom:'Prise de masse', p:0.30, c:0.45, l:0.25,
+           aide:'Glucides pour alimenter l\'entraînement, protéines hautes pour construire.'}
+};
+/* Applique l'objectif choisi aux trois cibles, a partir des calories visees. */
+function rpAppliquerMode(){
+  const m=RP_MODES[RP.mode];
+  if(!m) return;
+  RP.prot=Math.round(RP.cible*m.p/4);
+  RP.gluc=Math.round(RP.cible*m.c/4);
+  RP.lip =Math.round(RP.cible*m.l/9);
+}
+/* Des que l'utilisateur touche un chiffre a la main, on repasse en Perso
+   et on garde telles quelles les valeurs deja affichees. */
+function rpPasserPerso(){
+  if(RP.mode==='perso') return;
+  RP.mode='perso';
+}
 let rpJournalIdx = null;   /* repas de la journee en cours de modification */
 function rpSauver(){
   try{ localStorage.setItem('graille_repas', JSON.stringify(RP)); }catch(e){}
@@ -4392,6 +4444,8 @@ function rpCharger(){
     const s=JSON.parse(localStorage.getItem('graille_repas'));
     if(s && s.items) RP={cible:s.cible||600,
                           prot:(s.prot!=null?s.prot:null), gluc:(s.gluc!=null?s.gluc:null),
+                          lip:(s.lip!=null?s.lip:null),
+                          mode:(RP_MODES[s.mode]?s.mode:'perso'),
                           items:s.items.filter(function(x){ return alimentPar(x.id); })};
   }catch(e){}
 }
@@ -4408,6 +4462,21 @@ function rpGlucAuto(){
   const p=(typeof loadProfile==='function')?loadProfile():null;
   if(p && p.calories && p.gluc) return Math.round(p.gluc*RP.cible/p.calories);
   return Math.round(RP.cible*0.45/4);
+}
+/* null = l'utilisateur ne vise pas les lipides */
+function rpLipCible(){ return (RP.lip!=null) ? RP.lip : null; }
+function rpLipAuto(){
+  const p=(typeof loadProfile==='function')?loadProfile():null;
+  if(p && p.calories && p.lip) return Math.round(p.lip*RP.cible/p.calories);
+  /* ce qui reste une fois les proteines et les glucides servis */
+  const reste=RP.cible - rpProtCible()*4 - (RP.gluc!=null?RP.gluc:rpGlucAuto())*4;
+  return Math.max(0, Math.round(reste/9));
+}
+/* Les calories ne sont pas un 4e reglage : elles sortent des trois macros.
+   4 kcal par gramme de proteines et de glucides, 9 pour les lipides. */
+function rpKcalMacros(){
+  if(RP.gluc==null || RP.lip==null) return null;
+  return Math.round(rpProtCible()*4 + RP.gluc*4 + RP.lip*9);
 }
 function rpArrondi(a, g){
   if(a.unite==='piece') return Math.max(a.min, Math.min(a.max, Math.round(g/a.pu)));
@@ -4430,7 +4499,7 @@ function rpGrammes(a, q){ return a.unite==='piece' ? q*a.pu : q; }
    Les lipides ne se reglent pas : ils sont ce qui reste, par arithmetique.
    On part des portions normales et on deplace chaque aliment, chacun restant
    entre son mini et son maxi, jusqu'a minimiser l'ecart sur les trois cibles. */
-function rpResoudre(libres, K, P, C){
+function rpResoudre(libres, K, P, C, L){
   const bas =libres.map(function(x){ return rpGrammes(x.a,x.a.min)/100; });
   const haut=libres.map(function(x){ return rpGrammes(x.a,x.a.max)/100; });
   libres.forEach(function(x,i){
@@ -4441,18 +4510,20 @@ function rpResoudre(libres, K, P, C){
   const wK=1/((K>1?K:1)*(K>1?K:1));
   const wP=1/((P>1?P:1)*(P>1?P:1));
   const wC=(C==null)?0:1/((C>1?C:1)*(C>1?C:1));
+  const wL=(L==null)?0:1/((L>1?L:1)*(L>1?L:1));
 
   /* On ajuste un aliment a la fois, exactement, puis on recommence.
      Pour un seul aliment l'optimum se calcule directement. */
   for(let tour=0; tour<80; tour++){
     let bouge=0;
     for(let i=0;i<libres.length;i++){
-      let sk=0,sp=0,sc=0;
-      libres.forEach(function(y,j){ if(j===i) return; sk+=y.a.k*y.u; sp+=y.a.p*y.u; sc+=y.a.c*y.u; });
+      let sk=0,sp=0,sc=0,sl=0;
+      libres.forEach(function(y,j){ if(j===i) return; sk+=y.a.k*y.u; sp+=y.a.p*y.u; sc+=y.a.c*y.u; sl+=y.a.l*y.u; });
       const a=libres[i].a;
-      const den = wK*a.k*a.k + wP*a.p*a.p + wC*a.c*a.c;
+      const den = wK*a.k*a.k + wP*a.p*a.p + wC*a.c*a.c + wL*a.l*a.l;
       if(!(den>0)) continue;
-      const num = wK*a.k*(K-sk) + wP*a.p*(P-sp) + wC*a.c*((C==null)?0:(C-sc));
+      const num = wK*a.k*(K-sk) + wP*a.p*(P-sp) + wC*a.c*((C==null)?0:(C-sc))
+                + wL*a.l*((L==null)?0:(L-sl));
       let u=num/den;
       u=Math.max(bas[i], Math.min(haut[i], u));
       bouge=Math.max(bouge, Math.abs(u-libres[i].u));
@@ -4500,25 +4571,29 @@ function rpAjuster(items, kCible){
 function rpCalculer(){
   const protCible=rpProtCible();
   const glucCible=rpGlucCible();            /* null = on ne vise pas les glucides */
+  const lipCible=rpLipCible();              /* null = on ne vise pas les lipides */
   const items=RP.items.map(function(x){ return {id:x.id, lock:!!x.lock, q:x.q, a:alimentPar(x.id)}; })
                       .filter(function(x){ return x.a; });
-  if(!items.length) return {items:[], kcal:0, p:0, c:0, l:0, protCible:protCible, glucCible:glucCible};
+  if(!items.length) return {items:[], kcal:0, p:0, c:0, l:0,
+                            protCible:protCible, glucCible:glucCible, lipCible:lipCible};
 
-  let kLock=0, pLock=0, cLock=0;
+  let kLock=0, pLock=0, cLock=0, lLock=0;
   items.forEach(function(x){
-    if(x.lock){ const g=rpGrammes(x.a,x.q)/100; kLock+=x.a.k*g; pLock+=x.a.p*g; cLock+=x.a.c*g; }
+    if(x.lock){ const g=rpGrammes(x.a,x.q)/100;
+      kLock+=x.a.k*g; pLock+=x.a.p*g; cLock+=x.a.c*g; lLock+=x.a.l*g; }
   });
   const libres=items.filter(function(x){ return !x.lock; });
   const kRest=Math.max(0, RP.cible-kLock);
   const pRest=Math.max(0, protCible-pLock);
   const cRest=(glucCible==null)?null:Math.max(0, glucCible-cLock);
+  const lRest=(lipCible==null)?null:Math.max(0, lipCible-lLock);
 
   if(libres.length && kRest<=0){
     /* les aliments fixes mangent deja toute la cible : les autres au minimum */
     libres.forEach(function(x){ x.q=x.a.min; x.auMin=true; x.auMax=false; });
   }
   else if(libres.length && kRest>0){
-    rpResoudre(libres, kRest, pRest, cRest);
+    rpResoudre(libres, kRest, pRest, cRest, lRest);
     libres.forEach(function(x){ x.q=rpArrondi(x.a, x.g); });
     rpAjuster(items, RP.cible);
   }
@@ -4530,7 +4605,7 @@ function rpCalculer(){
     kcal+=x.a.k*g; p+=x.a.p*g; c+=x.a.c*g; l+=x.a.l*g;
   });
   return {items:items, kcal:Math.round(kcal), p:Math.round(p), c:Math.round(c), l:Math.round(l),
-          protCible:protCible, glucCible:glucCible,
+          protCible:protCible, glucCible:glucCible, lipCible:lipCible,
           kLock:Math.round(kLock), nbLibres:libres.length};
 }
 
@@ -4562,7 +4637,8 @@ function rpConseil(res, ecart){
   if(!res.nbLibres) return 'Tout est fixé, je ne peux rien ajuster : déverrouille un aliment et je recalcule.';
   const eP = res.p - res.protCible;
   const eC = (res.glucCible==null) ? 0 : (res.c - res.glucCible);
-  const tolK=25, tolP=5, tolC=8;
+  const eL = (res.lipCible==null)  ? 0 : (res.l - res.lipCible);
+  const tolK=25, tolP=5, tolC=8, tolL=4;
 
   const libres = res.items.filter(function(x){ return !x.lock; });
   const parRole = function(r){ return libres.filter(function(x){ return x.a.role===r; }); };
@@ -4570,16 +4646,20 @@ function rpConseil(res, ecart){
   const tousAuMin = function(l){ return l.length && l.every(function(x){ return x.auMin; }); };
   const prot = parRole('prot'), fec = parRole('fec'), gras = parRole('gras');
 
-  if(Math.abs(ecart)<=tolK && Math.abs(eP)<=tolP && Math.abs(eC)<=tolC){
-    return res.glucCible==null
-      ? 'Tu es sur ta cible de '+RP.cible+' kcal, protéines comprises.'
-      : 'Tu es sur tes trois cibles.';
+  if(Math.abs(ecart)<=tolK && Math.abs(eP)<=tolP && Math.abs(eC)<=tolC && Math.abs(eL)<=tolL){
+    const n=1+(res.glucCible!=null?1:0)+(res.lipCible!=null?1:0);
+    if(n===1) return 'Tu es sur ta cible de '+RP.cible+' kcal, protéines comprises.';
+    if(n===2) return 'Tu es sur tes trois cibles.';
+    return 'Tu es sur tes quatre cibles : calories, protéines, glucides et lipides.';
   }
 
   /* 1. les proteines d'abord : c'est ce qu'un sportif rate en premier */
   if(eP < -tolP){
     if(!prot.length) return 'Il manque <b>'+Math.abs(Math.round(eP))+' g de protéines</b> et aucun de tes aliments n\'en apporte vraiment. Ajoute du poulet, du fromage blanc, des œufs ou de la whey.';
     return 'Il manque <b>'+Math.abs(Math.round(eP))+' g de protéines</b> : '+prot.map(function(x){ return x.a.nom.toLowerCase(); }).join(' et ')+(prot.length>1?' sont':' est')+' déjà au maximum. Ajoute une autre source de protéines.';
+  }
+  if(res.lipCible!=null && eL < -tolL && !gras.length){
+    return 'Il manque <b>'+Math.abs(Math.round(eL))+' g de lipides</b> et tu n\'as aucune matière grasse dans ce repas. C\'est ce qui force tout le reste à monter. Ajoute de l\'huile d\'olive, des amandes, du beurre de cacahuète ou de l\'avocat.';
   }
   if(eP > tolP){
     if(tousAuMin(prot)) return '<b>'+Math.round(eP)+' g de protéines de trop</b>, et tes sources sont déjà au minimum. Remplace-en une par quelque chose de plus léger, ou monte ta cible.';
@@ -4593,6 +4673,16 @@ function rpConseil(res, ecart){
   }
   if(res.glucCible!=null && eC > tolC){
     return '<b>'+Math.round(eC)+' g de glucides de trop</b> : baisse ta cible de glucides, ou retire un féculent.';
+  }
+
+  /* 2 bis. les lipides, seulement s'ils sont vises */
+  if(res.lipCible!=null && eL < -tolL){
+    if(!gras.length) return 'Il manque <b>'+Math.abs(Math.round(eL))+' g de lipides</b> et tu n\'as aucune matière grasse. Ajoute de l\'huile d\'olive, des amandes, du beurre de cacahuète ou de l\'avocat.';
+    return 'Il manque <b>'+Math.abs(Math.round(eL))+' g de lipides</b> : '+gras.map(function(x){ return x.a.nom.toLowerCase(); }).join(' et ')+(gras.length>1?' sont':' est')+' déjà au maximum. Ajoute une autre matière grasse.';
+  }
+  if(res.lipCible!=null && eL > tolL){
+    if(tousAuMin(gras)) return '<b>'+Math.round(eL)+' g de lipides de trop</b>, et tes matières grasses sont déjà au minimum. Le gras vient alors des autres aliments : remplaces-en un par une version plus maigre.';
+    return '<b>'+Math.round(eL)+' g de lipides de trop</b> : baisse ta cible de lipides, ou retire une matière grasse.';
   }
 
   /* 3. les calories en dernier : si protéines et glucides sont bons,
@@ -4621,13 +4711,45 @@ function rpRendre(){
   if(kc && document.activeElement!==kc) kc.value=RP.cible;
   const pin=document.getElementById('rpProtIn');
   if(pin && document.activeElement!==pin) pin.value=rpProtCible();
-  const gin=document.getElementById('rpGlucIn'), gcb=document.getElementById('rpGlucCb');
-  if(gin && document.activeElement!==gin) gin.value=(RP.gluc!=null?RP.gluc:'');
+  const gin=document.getElementById('rpGlucIn'), gcb=document.getElementById('rpGlucCb'),
+        gx=document.getElementById('rpGlucX');
+  if(gin && document.activeElement!==gin) gin.value=(RP.gluc!=null?RP.gluc:rpGlucAuto());
   if(gcb) gcb.classList.toggle('libre', RP.gluc==null);
+  if(gx) gx.hidden=(RP.gluc==null);
+  const lin=document.getElementById('rpLipIn'), lcb=document.getElementById('rpLipCb'),
+        lx=document.getElementById('rpLipX');
+  if(lin && document.activeElement!==lin) lin.value=(RP.lip!=null?RP.lip:rpLipAuto());
+  if(lcb) lcb.classList.toggle('libre', RP.lip==null);
+  if(lx) lx.hidden=(RP.lip==null);
+  /* les quatre boutons d'objectif */
+  const mz=document.getElementById('rpModes');
+  if(mz) mz.querySelectorAll('.rp-mode').forEach(function(b){
+    b.classList.toggle('on', b.dataset.m===RP.mode);
+  });
   const pc=document.getElementById('rpProtTxt');
-  if(pc) pc.textContent = (RP.gluc==null)
-    ? 'Glucides et lipides tombent où ils tombent.'
-    : 'Il reste environ '+Math.max(0,Math.round((RP.cible-rpProtCible()*4-RP.gluc*4)/9))+' g de lipides.';
+  if(pc && RP_MODES[RP.mode]){
+    pc.innerHTML = RP_MODES[RP.mode].aide;
+  } else if(pc){
+    const km=rpKcalMacros();
+    if(km!=null){
+      /* les trois macros sont fixees : les calories en decoulent, on le dit */
+      pc.innerHTML = 'Tes trois macros font <b>'+km+' kcal</b>.'+
+        ((Math.abs(km-RP.cible)>10)
+          ? ' <button type="button" class="rp-coh" data-k="'+km+'">Viser '+km+' kcal</button>'
+          : ' C\'est bien ta cible.');
+    } else if(RP.gluc==null && RP.lip==null){
+      pc.innerHTML = 'Glucides et lipides libres — <b>touche un chiffre</b> pour le fixer.';
+    } else if(RP.gluc==null){
+      pc.innerHTML = 'Il reste environ <b>'+Math.max(0,Math.round((RP.cible-rpProtCible()*4-RP.lip*9)/4))+' g de glucides</b>.';
+    } else {
+      pc.innerHTML = 'Il reste environ <b>'+Math.max(0,Math.round((RP.cible-rpProtCible()*4-RP.gluc*4)/9))+' g de lipides</b>.';
+    }
+    const bc=pc.querySelector('.rp-coh');
+    if(bc) bc.addEventListener('click', function(){
+      RP.cible=Math.max(100, Math.min(3000, +this.dataset.k));
+      rpSauver(); rpRendre();
+    });
+  }
   rpMajReste();
   rpBoutonMaj();
 
@@ -4819,6 +4941,8 @@ function ouvrirRepasJournal(i){
   if(it && it.rp && it.rp.items && it.rp.items.length){
     RP={cible:it.rp.cible||600,
         prot:(it.rp.prot!=null?it.rp.prot:null), gluc:(it.rp.gluc!=null?it.rp.gluc:null),
+        lip:(it.rp.lip!=null?it.rp.lip:null),
+        mode:(RP_MODES[it.rp.mode]?it.rp.mode:'perso'),
         items:it.rp.items.filter(function(x){ return alimentPar(x.id); })};
     rpJournalIdx=i;
   }
@@ -4844,7 +4968,7 @@ function rpAjouterJournee(){
   const res=rpCalculer();
   if(!res.items.length) return;
   if(typeof loadProfile==='function' && !loadProfile()){ fermerRepas(); openOnboard(); return; }
-  const compo={cible:RP.cible, prot:RP.prot, gluc:RP.gluc,
+  const compo={cible:RP.cible, prot:RP.prot, gluc:RP.gluc, lip:RP.lip, mode:RP.mode,
                items:RP.items.map(function(x){ return {id:x.id, lock:!!x.lock, q:x.q}; })};
   if(rpJournalIdx!=null && JOURNAL.items[rpJournalIdx]){
     /* on remplace le repas au lieu d'en ajouter un deuxieme */
@@ -4868,15 +4992,26 @@ function rpAjouterJournee(){
 
 /* ---------- branchements ---------- */
 document.getElementById('repasClose').addEventListener('click', fermerRepas);
+/* objectif : remplit les trois macros d'un coup, a partir des calories visees */
+document.getElementById('rpModes').addEventListener('click', function(e){
+  const b=e.target.closest('.rp-mode'); if(!b) return;
+  RP.mode=b.dataset.m;
+  if(RP_MODES[RP.mode]) rpAppliquerMode();
+  rpSauver(); rpRendre();
+});
 document.getElementById('rpMoins').addEventListener('click', function(){
-  RP.cible=Math.max(100, RP.cible-50); rpSauver(); rpRendre();
+  RP.cible=Math.max(100, RP.cible-50); rpAppliquerMode(); rpSauver(); rpRendre();
 });
 document.getElementById('rpPlus').addEventListener('click', function(){
-  RP.cible=Math.min(3000, RP.cible+50); rpSauver(); rpRendre();
+  RP.cible=Math.min(3000, RP.cible+50); rpAppliquerMode(); rpSauver(); rpRendre();
 });
 document.getElementById('rpQ').addEventListener('input', rpRendreResultats);
 /* les deux cibles reglables : proteines, et glucides (champ vide = libres) */
+document.getElementById('rpProtIn').addEventListener('focus', function(){
+  const el=this; setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
+});
 document.getElementById('rpProtIn').addEventListener('input', function(){
+  rpPasserPerso();
   const v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
   if(v>=0 && v<=400){ RP.prot=v; rpSauver(); rpRendre(); }
 });
@@ -4885,7 +5020,17 @@ document.getElementById('rpProtIn').addEventListener('blur', function(){
   RP.prot = (t==='') ? null : Math.max(0, Math.min(400, parseInt(t,10)));
   rpSauver(); rpRendre();
 });
+document.getElementById('rpGlucIn').addEventListener('focus', function(){
+  /* un simple appui suffit : on passe de "non visé" à une vraie cible, deja selectionnee */
+  if(RP.gluc==null){ RP.gluc=rpGlucAuto(); this.value=RP.gluc; rpSauver(); rpRendre(); }
+  const el=this; setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
+});
+document.getElementById('rpGlucX').addEventListener('click', function(e){
+  e.preventDefault(); e.stopPropagation();
+  RP.gluc=null; rpSauver(); rpRendre();
+});
 document.getElementById('rpGlucIn').addEventListener('input', function(){
+  rpPasserPerso();
   const t=String(this.value).replace(/[^0-9]/g,'');
   if(t===''){ RP.gluc=null; rpSauver(); rpRendre(); return; }
   const v=parseInt(t,10);
@@ -4896,15 +5041,36 @@ document.getElementById('rpGlucIn').addEventListener('blur', function(){
   RP.gluc = (t==='') ? null : Math.max(0, Math.min(600, parseInt(t,10)));
   rpSauver(); rpRendre();
 });
+/* lipides : meme principe que les glucides */
+document.getElementById('rpLipIn').addEventListener('focus', function(){
+  if(RP.lip==null){ RP.lip=rpLipAuto(); this.value=RP.lip; rpSauver(); rpRendre(); }
+  const el=this; setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
+});
+document.getElementById('rpLipX').addEventListener('click', function(e){
+  e.preventDefault(); e.stopPropagation();
+  RP.lip=null; rpSauver(); rpRendre();
+});
+document.getElementById('rpLipIn').addEventListener('input', function(){
+  rpPasserPerso();
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  if(t===''){ RP.lip=null; rpSauver(); rpRendre(); return; }
+  const v=parseInt(t,10);
+  if(v>=0 && v<=300){ RP.lip=v; rpSauver(); rpRendre(); }
+});
+document.getElementById('rpLipIn').addEventListener('blur', function(){
+  const t=String(this.value).replace(/[^0-9]/g,'');
+  RP.lip = (t==='') ? null : Math.max(0, Math.min(300, parseInt(t,10)));
+  rpSauver(); rpRendre();
+});
 document.getElementById('rpKcal').addEventListener('input', function(){
   const v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
-  if(v>=100 && v<=3000){ RP.cible=v; rpSauver(); rpRendre(); }
+  if(v>=100 && v<=3000){ RP.cible=v; rpAppliquerMode(); rpSauver(); rpRendre(); }
 });
 document.getElementById('rpKcal').addEventListener('blur', function(){
   let v=parseInt(String(this.value).replace(/[^0-9]/g,''),10);
   if(isNaN(v)) v=RP.cible;
   RP.cible=Math.max(100, Math.min(3000, v));
-  this.value=RP.cible; rpSauver(); rpRendre();
+  this.value=RP.cible; rpAppliquerMode(); rpSauver(); rpRendre();
 });
 document.getElementById('rpVider').addEventListener('click', function(){
   RP.items=[]; rpSauver(); rpRendre();
